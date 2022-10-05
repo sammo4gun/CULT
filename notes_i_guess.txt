@@ -1,0 +1,13 @@
+HOPE DIES LAST:
+
+- You play as a dark entity
+Map view UI
+spread your influence through managing resources such as:
+- Followers (amount of ppl praying to you)
+- fanaticism (average? total?)
+- lore (stored in books and libraries and stuff)
+
+Fight entities like:
+- government
+- heroes
+- church??
