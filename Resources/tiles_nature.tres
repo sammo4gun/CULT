@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=37 format=2]
+[gd_resource type="TileSet" load_steps=38 format=2]
 
 [ext_resource path="res://Tiles/bridge_ew.png" type="Texture" id=1]
 [ext_resource path="res://Tiles/bridge_ns.png" type="Texture" id=2]
@@ -36,6 +36,7 @@
 [ext_resource path="res://Tiles/trees14.png" type="Texture" id=34]
 [ext_resource path="res://Tiles/trees15.png" type="Texture" id=35]
 [ext_resource path="res://Tiles/trees18.png" type="Texture" id=36]
+[ext_resource path="res://Tiles/water.png" type="Texture" id=37]
 
 [resource]
 0/name = "Basic1"
@@ -542,3 +543,17 @@
 35/shape_one_way_margin = 0.0
 35/shapes = [  ]
 35/z_index = 0
+36/name = "water.png 36"
+36/texture = ExtResource( 37 )
+36/tex_offset = Vector2( 0, 0 )
+36/modulate = Color( 1, 1, 1, 1 )
+36/region = Rect2( 0, 0, 64, 96 )
+36/tile_mode = 0
+36/occluder_offset = Vector2( 0, 0 )
+36/navigation_offset = Vector2( 0, 0 )
+36/shape_offset = Vector2( 0, 0 )
+36/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+36/shape_one_way = false
+36/shape_one_way_margin = 0.0
+36/shapes = [  ]
+36/z_index = 0

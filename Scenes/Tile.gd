@@ -3,7 +3,7 @@ extends Area2D
 # an empty tile. Can be extended for different tile types.
 
 # the TYPE of terrain, i.e. grass, dirt, water, whatever...
-var type = 0
+var type = 3
 
 # the LAYER of terrain, i.e. is it on a hill or not, or which layer of
 # hill.
@@ -21,14 +21,14 @@ func setSelected():
 	emit_signal("get_selected", self)
 
 func select():
+	# code for being selected
 	$Sprite.visible=true
 	
 func deselect():
+	# code for being deselected
 	$Sprite.visible=false
 
 # make this the selected node if it gets clicked.
-# TODO: Make sure only one tile can be selected at once, and that
-# the front tile is the one that is selected.
 func _on_Node2D_input_event(viewport, event, shape_idx):
 	if  event is InputEventMouseButton and event.pressed and event.button_index == BUTTON_LEFT:
 		setSelected() 
