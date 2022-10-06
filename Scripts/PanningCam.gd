@@ -1,7 +1,7 @@
 extends Camera2D
 
 const MIN_ZOOM: float = 0.1
-const MAX_ZOOM: float = 1.0
+const MAX_ZOOM: float = 5.0
 const ZOOM_INCREMENT: float = 0.1
 
 const ZOOM_RATE: float = 8.0
@@ -9,7 +9,10 @@ const ZOOM_RATE: float = 8.0
 var _target_zoom: float = 1.0
 
 func _ready():
-	pass
+	#set position to center of map
+	position = Vector2(
+		0, 
+		32 + (get_parent().SIZE/2)*32)
 
 func _physics_process(delta) -> void:
 	zoom = lerp(zoom, _target_zoom * Vector2.ONE, ZOOM_RATE * delta)
