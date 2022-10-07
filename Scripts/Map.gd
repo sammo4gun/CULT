@@ -34,9 +34,7 @@ func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.is_pressed():
 			if event.button_index == BUTTON_LEFT:
-				var n_selec = setSelected(get_global_mouse_position())
-				if n_selec:
-					emit_signal("selected_tile", n_selec)
+				emit_signal("selected_tile", setSelected(get_global_mouse_position()))
 
 # Splits maps into different layers as based on the "layers" var set
 # above.
@@ -65,6 +63,8 @@ func setSelected(pos):
 	for i in range(num_layers):
 		pos.y -= 56 - (16 * (num_layers-1-i))
 		selected_pos = ground.world_to_map(pos)
+		if not selected_pos in _layered_types[(num_layers-1-i)]:
+			return null
 		if _layered_types[(num_layers-1-i)][selected_pos] != -1:
 			#set selected tile to these coordinates
 			return [selected_pos, (num_layers-1-i)]

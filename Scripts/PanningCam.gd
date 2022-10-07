@@ -13,8 +13,8 @@ onready var ground_layer = get_node("/root/World/Map/Ground")
 func _ready():
 	#set position to center of map
 	position = ground_layer.map_to_world(Vector2(
-		get_parent().WIDTH/2,
-		get_parent().HEIGHT/2))
+		get_node("/root/World").WIDTH/2,
+		get_node("/root/World").HEIGHT/2))
 	position.y += 32
 
 func _physics_process(delta) -> void:

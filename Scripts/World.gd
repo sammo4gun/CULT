@@ -14,11 +14,13 @@ var _mtype = {}
 var _mheight = {}
 
 onready var selector = $Selector
+onready var GUI = $Camera2D/CanvasLayer/GUI
 
 func _ready():
 	randomize()
 	_altitude = buildMap(100, 5)
 	populateMap()
+	GUI.map_ready(WIDTH, HEIGHT, _altitude)
 	drawer.map_ready(WIDTH, HEIGHT, _mtype, _mheight)
 
 # Builds an empty map to render
@@ -42,7 +44,7 @@ func populateMap():
 			_mtype[coord] = 3
 			_mheight[coord] = 0
 			
-			if _altitude[coord] > 0.12:
+			if _altitude[coord] > 0.13:
 				_mtype[coord] = 0
 			if _altitude[coord] > 0.6:
 				_mtype[coord] = 1
@@ -50,5 +52,8 @@ func populateMap():
 			if _altitude[coord] > 0.8:
 				_mtype[coord] = 1
 				_mheight[coord] = 2
+
 func _on_tile_selected(tile):
-	selector.setSelected(tile)
+	if tile:
+		selector.setSelected(tile)
+	else: selector.deSelect()
