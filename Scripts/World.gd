@@ -1,40 +1,54 @@
 extends Node2D
 
-export var SIZE = 10
-
-var TILE = preload("res://Scenes/Tile.tscn")
+export var HEIGHT = 60
+export var WIDTH = 40
 
 onready var drawer = $Map
 
-var _map = []
+# statistics about the map
+var _altitude = {}
+var openSimplexNoise = OpenSimplexNoise.new()
 
-var selected_tile = null
+# generated map visible features
+var _mtype = {}
+var _mheight = {}
+
+onready var selector = $Selector
 
 func _ready():
-	buildMap()
+	randomize()
+	_altitude = buildMap(100, 5)
 	populateMap()
-	drawer.map_ready(_map)
+	drawer.map_ready(WIDTH, HEIGHT, _mtype, _mheight)
 
 # Builds an empty map to render
-func buildMap():
-	for i in range(SIZE):
-		_map.append([])
-		for j in range(SIZE):
-			_map[i].append(TILE.instance())
-			self.add_child(_map[i][j])
-			_map[i][j].setCoords(i,j)
-			_map[i][j].connect("get_selected", self, "on_tile_selected")
+func buildMap(per, oct):
+	openSimplexNoise.seed = randi()
+	openSimplexNoise.period = per
+	openSimplexNoise.octaves = oct
+	
+	var map = {}
+	
+	for x in range(WIDTH):
+		for y in range(HEIGHT):
+			# set hidden values for tiles
+			map[Vector2(x, y)] = 2*abs(openSimplexNoise.get_noise_2d(x,y))
+	return map
 
 func populateMap():
-	var sz = len(_map)
-	for i in range(sz):
-		for j in range(sz):
-			if j > 0 and j < sz-1 and i > 0 and i < sz-1:
-				_map[i][j].construct(0, 0, [])
-			#else: _map[i][j].construct(0, 0, [])
-
-func on_tile_selected(tile):
-	if selected_tile:
-		selected_tile.deselect()
-	selected_tile = tile
-	selected_tile.select()
+	for x in range(WIDTH):
+		for y in range(HEIGHT):
+			var coord = Vector2(x, y)
+			_mtype[coord] = 3
+			_mheight[coord] = 0
+			
+			if _altitude[coord] > 0.12:
+				_mtype[coord] = 0
+			if _altitude[coord] > 0.6:
+				_mtype[coord] = 1
+				_mheight[coord] = 1
+			if _altitude[coord] > 0.8:
+				_mtype[coord] = 1
+				_mheight[coord] = 2
+func _on_tile_selected(tile):
+	selector.setSelected(tile)

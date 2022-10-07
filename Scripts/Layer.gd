@@ -5,8 +5,7 @@ func _ready():
 
 # Buid the visible tiles based on information passed through this 
 # function:
-func drawMap(map):
-	var sz = len(map)
-	for i in range(sz):
-		for j in range(sz):
-			set_cell(i,j, map[i][j])
+func drawMap(w, h, map):
+	for x in range(w):
+		for y in range(h):
+			set_cell(x,y, map[Vector2(x,y)])

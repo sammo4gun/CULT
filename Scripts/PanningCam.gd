@@ -6,13 +6,16 @@ const ZOOM_INCREMENT: float = 0.1
 
 const ZOOM_RATE: float = 8.0
 
-var _target_zoom: float = 1.0
+var _target_zoom: float = 3.0
+
+onready var ground_layer = get_node("/root/World/Map/Ground")
 
 func _ready():
 	#set position to center of map
-	position = Vector2(
-		0, 
-		32 + (get_parent().SIZE/2)*32)
+	position = ground_layer.map_to_world(Vector2(
+		get_parent().WIDTH/2,
+		get_parent().HEIGHT/2))
+	position.y += 32
 
 func _physics_process(delta) -> void:
 	zoom = lerp(zoom, _target_zoom * Vector2.ONE, ZOOM_RATE * delta)
