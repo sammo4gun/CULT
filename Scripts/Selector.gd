@@ -15,10 +15,6 @@ func getSelected():
 func setSelected(tile):
 	selected_tile = tile[0]
 	
-	# now set location
-	# formula for correct location is world_to_map(), then
-	# y -= 48 + 16*level
-	
 	self.position = ground.map_to_world(selected_tile)
 	self.position.y += 48 - 16*tile[1]
 	self.visible = true
