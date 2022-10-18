@@ -11,7 +11,7 @@ func map_ready(w, h, alt):
 	altitude = alt
 
 func _on_Selector_new_selection(new_selected):
-	if new_selected:
-		number_label.text = str(altitude[new_selected])
+	if new_selected != null:
+		number_label.text = str(new_selected)
 	else:
 		number_label.text = ''

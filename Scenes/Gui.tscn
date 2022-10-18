@@ -52,7 +52,6 @@ margin_top = 1.41422
 margin_right = 10.2531
 margin_bottom = 1.41422
 rect_scale = Vector2( 0.910733, 0.93482 )
-text = "100"
 align = 2
 valign = 1
 percent_visible = -0.5

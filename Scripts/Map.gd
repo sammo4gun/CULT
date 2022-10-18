@@ -6,7 +6,9 @@ extends Node2D
 
 signal selected_tile
 
+#types = 0:grass, 1:dirt, 2: highlighted, 3: water, 4:forest
 var _types = []
+#heights = 0:ground, 1:hill, 2:mountain
 var _heights = []
 
 var _layered_types = {}
@@ -15,10 +17,8 @@ var HEIGHT
 var WIDTH
 
 onready var ground = $Ground
-onready var hill = $Hill
-onready var mountain = $Mountain
-
-onready var selector = get_node("/root/World/Selector")
+onready var hill = $"../YDrawer/Hill"
+onready var mountain = $"../YDrawer/Mountain"
 
 onready var _layers = {0: ground, 1: hill, 2: mountain}
 
@@ -39,18 +39,18 @@ func _unhandled_input(event):
 # Splits maps into different layers as based on the "layers" var set
 # above.
 func splitMap():
-	for area in _layers:
-		_layered_types[area] = {}
+	for lay in _layers:
+		_layered_types[lay] = {}
 		for x in range(WIDTH):
 			for y in range(HEIGHT):
 				var coord = Vector2(x,y)
-				if _heights[coord] == area:
-					_layered_types[area][coord] = _types[coord]
-				else: _layered_types[area][coord] = -1
+				if _heights[coord] == lay:
+					_layered_types[lay][coord] = _types[coord]
+				else: _layered_types[lay][coord] = -1
 
 func drawMap():
-	for area in _layers:
-		_layers[area].drawMap(WIDTH, HEIGHT, _layered_types[area])
+	for lay in _layers:
+		_layers[lay].drawMap(WIDTH, HEIGHT, _layered_types[lay])
 
 # returns the selected square and the layer it is on.
 # formula for correct location is world_to_map(), then
@@ -63,9 +63,9 @@ func setSelected(pos):
 	for i in range(num_layers):
 		pos.y -= 56 - (16 * (num_layers-1-i))
 		selected_pos = ground.world_to_map(pos)
-		if not selected_pos in _layered_types[(num_layers-1-i)]:
-			return null
-		if _layered_types[(num_layers-1-i)][selected_pos] != -1:
-			#set selected tile to these coordinates
-			return [selected_pos, (num_layers-1-i)]
+		if selected_pos in _layered_types[(num_layers-1-i)]:
+			if _layered_types[(num_layers-1-i)][selected_pos] != -1:
+				#set selected tile to these coordinates
+				return [selected_pos, (num_layers-1-i)]
 		pos.y += 56 - (16 * (num_layers-1-i))
+	return null

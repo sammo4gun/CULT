@@ -3,7 +3,6 @@ extends Node2D
 export var HEIGHT = 60
 export var WIDTH = 40
 
-onready var drawer = $Map
 
 # statistics about the map
 var _altitude = {}
@@ -16,17 +15,23 @@ var _mheight = {}
 
 onready var selector = $Selector
 onready var GUI = $Camera2D/CanvasLayer/GUI
+onready var drawer = $Map
+onready var town = $Town
 
 func _ready():
 	randomize()
-	_altitude = buildMap(100, 5)
-	_moisture = buildMap(50, 2)
-	populateMap()
+	_altitude = buildEnv(100, 5)
+	_moisture = buildEnv(50, 2)
+	terrainMap()
+	
+	#include code to produce civilization
+	town.build_town(WIDTH, HEIGHT, _mtype, _mheight)
+	
 	GUI.map_ready(WIDTH, HEIGHT, _altitude)
 	drawer.map_ready(WIDTH, HEIGHT, _mtype, _mheight)
 
 # Builds an empty map to render
-func buildMap(per, oct):
+func buildEnv(per, oct):
 	openSimplexNoise.seed = randi()
 	openSimplexNoise.period = per
 	openSimplexNoise.octaves = oct
@@ -39,7 +44,7 @@ func buildMap(per, oct):
 			map[Vector2(x, y)] = 2*abs(openSimplexNoise.get_noise_2d(x,y))
 	return map
 
-func populateMap():
+func terrainMap():
 	for x in range(WIDTH):
 		for y in range(HEIGHT):
 			var coord = Vector2(x, y)

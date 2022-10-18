@@ -6,9 +6,6 @@ signal new_selection
 
 onready var ground = get_node('/root/World/Map/Ground')
 
-func _ready():
-	pass
-
 func getSelected():
 	return selected_tile
 
@@ -16,7 +13,7 @@ func setSelected(tile):
 	selected_tile = tile[0]
 	
 	self.position = ground.map_to_world(selected_tile)
-	self.position.y += 48 - 16*tile[1]
+	self.position.y += 30 - 16*tile[1]
 	self.visible = true
 	emit_signal("new_selection", selected_tile)
 
