@@ -3,20 +3,23 @@ extends Node2D
 export var HEIGHT = 60
 export var WIDTH = 40
 
-
 # statistics about the map
 var _altitude = {}
 var _moisture = {}
 var openSimplexNoise = OpenSimplexNoise.new()
+var rng = RandomNumberGenerator.new()
 
 # generated map visible features
 var _mtype = {}
 var _mheight = {}
+var _mroads = {}
+var _mbuildings = {}
 
 onready var selector = $Selector
 onready var GUI = $Camera2D/CanvasLayer/GUI
 onready var drawer = $Map
 onready var town = $Town
+onready var pathfinding = $Pathfinder
 
 func _ready():
 	randomize()
@@ -24,11 +27,24 @@ func _ready():
 	_moisture = buildEnv(50, 2)
 	terrainMap()
 	
+	pathfinding.initialisePathfinding(WIDTH, HEIGHT, _mtype, _mheight)
+	
 	#include code to produce civilization
+	_mroads = buildEmpty()
+	_mbuildings = buildEmpty()
 	town.build_town(WIDTH, HEIGHT, _mtype, _mheight)
 	
-	GUI.map_ready(WIDTH, HEIGHT, _altitude)
-	drawer.map_ready(WIDTH, HEIGHT, _mtype, _mheight)
+	GUI.map_ready(_altitude, _mroads, _mbuildings)
+	drawer.map_ready(WIDTH, HEIGHT, \
+					_mtype, _mheight, \
+					_mroads, _mbuildings)
+
+func buildEmpty():
+	var map = {}
+	for x in range(WIDTH):
+		for y in range(HEIGHT):
+			map[Vector2(x,y)] = 0
+	return map
 
 # Builds an empty map to render
 func buildEnv(per, oct):
@@ -55,16 +71,35 @@ func terrainMap():
 			if _altitude[coord] > 0.13:
 				_mtype[coord] = 0
 				if _moisture[coord] > 0.9:
-					_mtype[coord] = 4
+					_mtype[coord] = 27+rng.randi_range(0,9)
+				elif _moisture[coord] > 0.7:
+					if rng.randf_range(0,1) > 0.7:
+						_mtype[coord] = 27+rng.randi_range(0,9)
+				else:
+					if rng.randf_range(0,1) > 0.95:
+						_mtype[coord] = 27+rng.randi_range(0,9)
 				
 			if _altitude[coord] > 0.6:
 				_mtype[coord] = 1
-				_mheight[coord] = 1
+				_mheight[coord] = 1	
 			if _altitude[coord] > 0.8:
 				_mtype[coord] = 1
 				_mheight[coord] = 2
+
+func is_road_tile(tile):
+	return _mroads[tile]
 
 func _on_tile_selected(tile):
 	if tile:
 		selector.setSelected(tile)
 	else: selector.deSelect()
+
+func _on_Town_construct_roads(path, buildings):
+	if len(path) > 1:
+		for tile in path:
+			if not tile in buildings:
+				#set roads to be a road
+				_mroads[tile] = 1
+
+func _on_Town_construct_building(building):
+	_mbuildings[building.location] = building.type

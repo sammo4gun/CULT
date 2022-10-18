@@ -8,7 +8,7 @@ const ZOOM_RATE: float = 8.0
 
 var _target_zoom: float = 3.0
 
-onready var ground_layer = get_node("/root/World/Map/Ground")
+onready var ground_layer = get_node("/root/World/YDrawer/Ground")
 
 func _ready():
 	#set position to center of map

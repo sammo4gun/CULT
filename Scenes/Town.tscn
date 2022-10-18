@@ -4,4 +4,4 @@
 
 [node name="Town" type="Node2D"]
 script = ExtResource( 1 )
-NUM_BUILDINGS = 10
+NUM_BUILDINGS = 20

@@ -4,7 +4,7 @@ var selected_tile = null
 
 signal new_selection
 
-onready var ground = get_node('/root/World/Map/Ground')
+onready var ground = get_node('/root/World/YDrawer/Ground')
 
 func getSelected():
 	return selected_tile
