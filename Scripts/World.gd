@@ -102,4 +102,5 @@ func _on_Town_construct_roads(path, buildings):
 				_mroads[tile] = 1
 
 func _on_Town_construct_building(building):
-	_mbuildings[building.location] = building.type
+	for loc in building.location:
+		_mbuildings[loc] = building.type

@@ -40,6 +40,18 @@ var ROADS_DICT = {
 	[1,1,0,1]: 15
 	}
 
+var SQUARE_DICT = {
+	[0,1,1,0]: 43,
+	[1,1,0,0]: 39,
+	[1,1,1,0]: 40,
+	[1,0,0,1]: 42,
+	[0,1,1,1]: 38,
+	[0,0,1,1]: 44,
+	[1,1,1,1]: 41,
+	[1,0,1,1]: 45,
+	[1,1,0,1]: 37
+	}
+
 onready var ground = $"../YDrawer/Ground"
 onready var hill = $"../YDrawer/Hill"
 onready var mountain = $"../YDrawer/Mountain"
@@ -87,7 +99,7 @@ func constructBuildings():
 				if (tile + dif) in _roads:
 					if _roads[tile + dif]:
 						_roads[tile + dif] = modify_road(_roads[tile + dif], i)
-						if not _buildings[tile] == 2: 
+						if _buildings[tile] == 1: 
 							break
 						else: d = i
 				i += 1
@@ -100,13 +112,28 @@ func constructBuildings():
 					_layered_types[0][tile] = 16 + (rng.randi_range(0,1)*2)
 				if i == 1:
 					_layered_types[0][tile] = 17
-			else:
+			if _buildings[tile] == 2:
 				if d == 2 or d == 3:
 					_layered_types[0][tile] = 20
 				if d == 0:
 					_layered_types[0][tile] = 22
 				if d == 1:
 					_layered_types[0][tile] = 21
+			if _buildings[tile] == 3:
+				_layered_types[0][tile] = town_square_tile(tile)
+
+func town_square_tile(tile):
+	var i = 0
+	var dirs = [0,0,0,0]
+	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+		if (tile + dif) in _roads:
+			if _roads[tile + dif]:
+				_roads[tile + dif] = modify_road(_roads[tile + dif], i)
+		if (tile + dif) in _buildings:
+			if _buildings[(tile + dif)] == 3:
+				dirs[i] = 1
+		i += 1
+	return SQUARE_DICT[dirs]
 
 func drawRoads():
 	for tile in _roads:

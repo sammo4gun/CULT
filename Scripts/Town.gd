@@ -4,10 +4,14 @@ signal construct_roads
 signal construct_building
 
 #Generation Variables
-
-export var EDGE_DIST = 10
 export var NUM_BUILDINGS = 5
-export var SDEV_DIST = 20
+export var MAX_SQUARE_SIZE = 4
+
+export var MAX_PATH_DIST = 30
+export var SDEV_RESIDENTIAL = 20
+export var SDEV_CENTER = 5
+export var EDGE_DIST = 10
+export var MAX_BUILD_TIME = 6
 
 var Building = preload("res://Scenes/Building.tscn")
 
@@ -21,6 +25,7 @@ var height
 
 var _center
 
+var _mroads = [] #list of locations that have roads
 var _mbuildings = {} #maps map locations to building IDs
 var _buildings = {} #maps building IDs to information
 
@@ -44,57 +49,112 @@ func get_nearest_road(loc):
 		return null
 	#var dist = th.distance_to(loc)
 	var dist = 999999
-	for x in range(width):
-		for y in range(height):
-			var coord = Vector2(x,y)
-			#if its a road...
-			if get_parent().is_road_tile(coord):
-				if loc.distance_to(coord) < dist:
-					th = coord
-					dist = loc.distance_to(coord)
+	for tile in _mroads:
+		if loc.distance_to(tile) < dist:
+			th = tile
+			dist = loc.distance_to(tile)
 	return(th)
 
-func canbuild(loc, w, h):
-	#check its within the map
-	if loc.x >= 0 and loc.x < w and loc.y >= 0  and loc.y < h \
+func canpath(loc):
+	var target = get_nearest_road(loc)
+	if target != null:
+		return pathfinder.findRoadPath(loc, target)
+	return [loc]
+
+func canbuild(loc):
+	#check its within the map & is buildable
+	if loc.x >= 0 and loc.x < width and loc.y >= 0  and loc.y < height \
 		and not loc in _mbuildings \
 		and map_heights[loc] == 0 and \
 		map_types[loc] != 3 and \
 		not get_parent().is_road_tile(loc):
-			var target = get_nearest_road(loc)
-			if target != null:
-				return pathfinder.findRoadPath(loc, target)
-			return [loc]
+			return true
 	return false
 
 func get_town_hall_loc():
 	for b in _buildings:
 		if _buildings[b].type == 2:
-			return _buildings[b].location
+			return _buildings[b].location[0]
 	return null
 
-func construct_building(i, type):
+func construct_building(i, type, center, sdev):
 	var x
 	var y
 	var loc
-	var t = 0
+	var time_start = OS.get_unix_time()
 	while true:
-		t += 1
 		rng.randomize()
-		x = round(rng.randfn(_center.x, SDEV_DIST))
-		y = round(rng.randfn(_center.y, SDEV_DIST))
+		x = round(rng.randfn(center.x, sdev))
+		y = round(rng.randfn(center.y, sdev))
 		loc = Vector2(x, y)
-		var p = canbuild(loc, width, height)
+		var p
+		if canbuild(loc): 
+			p = canpath(loc)
+		else:
+			p = false
 		if p:
-			_mbuildings[loc] = i
-			_buildings[i] = new_building(loc, type)
-			emit_signal("construct_roads", p, _mbuildings)
-			emit_signal("construct_building", _buildings[i])
-			break
-		if t >= 20:
+			if len(p) < MAX_PATH_DIST:
+				_mbuildings[loc] = i
+				_buildings[i] = new_building([loc], type)
+				for tile in p:
+					if not tile in _mroads and not tile in _mbuildings:
+						_mroads.append(tile)
+				emit_signal("construct_roads", p, _mbuildings)
+				emit_signal("construct_building", _buildings[i])
+				return true
+		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
 			print("Couldn't finish building: " + str(i))
-			return
+			return false
+
+# This is for special types of buildings, that require different 
+# shapes than just 1x1
+func construct_spec_building(i, type, center, sdev):
+	if type == "square":
+		var x
+		var y
+		var x_sz
+		var y_sz
+		var locs
+		var time_start = OS.get_unix_time()
+		#keep repeating until we find it... or time runs out
+		while true:
+			rng.randomize()
+			x = round(rng.randfn(center.x, sdev))
+			y = round(rng.randfn(center.y, sdev))
+			x_sz = rng.randi_range(2,MAX_SQUARE_SIZE)
+			y_sz = max(2, x_sz + rng.randi_range(-1,+1))
+			locs = []
+			for wid in range(x_sz):
+				for hi in range(y_sz):
+					locs.append(Vector2(x,y) + Vector2(wid, hi))
+			#check if all are buildable
 			
+			var cb = true
+			for loc in locs:
+				if not canbuild(loc):
+					cb = false
+			
+			#check if at least one is pathable
+			var path = false
+			if cb:
+				for loc in locs:
+					path = canpath(loc)
+					if path: break
+			
+			#can we build?
+			if path:
+				if len(path) < MAX_PATH_DIST:
+					for loc in locs: _mbuildings[loc] = i
+					_buildings[i] = new_building(locs, type)
+					for tile in path:
+						if not tile in _mroads and not tile in _mbuildings:
+							_mroads.append(tile)
+					emit_signal("construct_roads", path, _mbuildings)
+					emit_signal("construct_building", _buildings[i])
+					return true
+			if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
+				print("Couldn't finish building: " + str(i))
+				return false
 
 func build_town(w, h, mtypes, mheights):
 	width = w
@@ -102,22 +162,30 @@ func build_town(w, h, mtypes, mheights):
 	map_types = mtypes
 	map_heights = mheights
 	_center = pick_center(w,h)
-
+	
 	var loc
 	var x
 	var y
 	
+	var i = 0
+	
 	# build town center
 	
-	construct_building(0, 2)
+	construct_building(i, "center", _center, SDEV_CENTER)
+	i+=1
 	
 	# build town square
 	
+	construct_spec_building(i, "square", get_town_hall_loc(), SDEV_CENTER/2)
+	i+=1
+	
 	# build residential buildings
 	
-	for i in range(NUM_BUILDINGS):
-		i += 1
-		construct_building(i, 1)
+	for v in range(NUM_BUILDINGS):
+		if not construct_building(i, "residential", _center, SDEV_RESIDENTIAL):
+			print("FAILED TO BUILD")
+			break
+		i+=1
 	
 func get_building(location):
 	if not location in _mbuildings:
@@ -125,9 +193,9 @@ func get_building(location):
 	var i = _mbuildings[location]
 	return _buildings[i]
 
-func new_building(location, id):
+func new_building(location, ty):
 	var building = Building.instance()
 	building.build(location)
-	building.set_type(id)
+	building.set_type(ty)
 	drawer.add_child(building)
 	return building
