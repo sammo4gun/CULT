@@ -35,8 +35,10 @@ script = ExtResource( 9 )
 ROAD_NOISE = 3
 
 [node name="Town" parent="." instance=ExtResource( 3 )]
-NUM_BUILDINGS = 30
+NUM_RESIDENTIAL = 20
 MAX_SQUARE_SIZE = 3
+SDEV_RESIDENTIAL = 15
+MAX_BUILD_TIME = 10
 
 [node name="YDrawer" type="YSort" parent="."]
 

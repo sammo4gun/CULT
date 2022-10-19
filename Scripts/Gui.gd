@@ -14,10 +14,10 @@ func map_ready(alt, roads, builds):
 func display(selection):
 	var building = town.get_building(selection)
 	
-	number_label.text = str(selection)
-	
 	if building:
 		number_label.text = str(building.house_name)
+	else:
+		number_label.text = str(selection)
 	
 func rm_display():
 	number_label.text = ''

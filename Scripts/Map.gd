@@ -89,46 +89,67 @@ func constructRoads():
 				i += 1
 			_roads[tile] = dirs
 
+var MULTI_ROADS = {
+	1: false, 2: true, 3: true, 4: false
+}
+
+var RESIDENTIAL_TILES = {
+	2:19,
+	3:19,
+	0:16 + (rng.randi_range(0,1)*2),
+	1:17
+}
+
+var CENTER_TILES = {
+	2: 20,
+	3:20,
+	0:22,
+	1:21
+}
+
 func constructBuildings():
 	for tile in _buildings:
 		if _buildings[tile]:
 			# Set road type of adjacent roads
 			var i = 0
-			var d = 0
+			var d = -1
+			var connected = false
 			for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
-				if (tile + dif) in _roads:
-					if _roads[tile + dif]:
-						_roads[tile + dif] = modify_road(_roads[tile + dif], i)
-						if _buildings[tile] == 1: 
+				if (tile + dif) in _buildings:
+					if _buildings[(tile + dif)] == 3:
+						connected = true
+						d=i
+						if not MULTI_ROADS[_buildings[tile]]: 
 							break
-						else: d = i
 				i += 1
+			
+			i = 0
+			if (MULTI_ROADS[_buildings[tile]]) or \
+			   (not connected):
+				for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
+					if (tile + dif) in _roads:
+						if _roads[tile + dif]:
+								_roads[tile + dif] = modify_road(_roads[tile + dif], i)
+								connected=true
+								d=i
+								if not MULTI_ROADS[_buildings[tile]]: 
+									break
+					i += 1
 			# TODO: Set building type depending on whether or not
 			# there are adjacent roads.
 			if _buildings[tile] == 1:
-				if i == 2 or i == 3:
-					_layered_types[0][tile] = 19
-				if i == 0:
-					_layered_types[0][tile] = 16 + (rng.randi_range(0,1)*2)
-				if i == 1:
-					_layered_types[0][tile] = 17
+				_layered_types[0][tile] = RESIDENTIAL_TILES[d]
 			if _buildings[tile] == 2:
-				if d == 2 or d == 3:
-					_layered_types[0][tile] = 20
-				if d == 0:
-					_layered_types[0][tile] = 22
-				if d == 1:
-					_layered_types[0][tile] = 21
+				_layered_types[0][tile] = CENTER_TILES[d]
 			if _buildings[tile] == 3:
 				_layered_types[0][tile] = town_square_tile(tile)
+			if _buildings[tile] == 4:
+				_layered_types[0][tile] = RESIDENTIAL_TILES[d]
 
 func town_square_tile(tile):
 	var i = 0
 	var dirs = [0,0,0,0]
 	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
-		if (tile + dif) in _roads:
-			if _roads[tile + dif]:
-				_roads[tile + dif] = modify_road(_roads[tile + dif], i)
 		if (tile + dif) in _buildings:
 			if _buildings[(tile + dif)] == 3:
 				dirs[i] = 1

@@ -61,12 +61,17 @@ func findRoadPath(start, finish):
 						return path
 					new_pos = parents[new_pos]
 			if new_pos in map_types:
+				var house_in_way = false
+				if new_pos in buildings:
+					if not buildings[new_pos].is_type("square"):
+						house_in_way = true
 				if map_types[new_pos] != 3 and \
 					map_heights[new_pos] == 0 and \
-					not new_pos in buildings:
+					not house_in_way:
 					#compute g
 					var tg = g[promising] + rng.randi_range(1,ROAD_NOISE)
-					if map_types[new_pos] >= 27 and map_types[new_pos] <= 36: tg += 10
+					if map_types[new_pos] >= 27 and map_types[new_pos] <= 36: 
+						tg += 10
 					#compute h
 					var th = new_pos.distance_to(finish)
 					if new_pos in open or new_pos in closed:
