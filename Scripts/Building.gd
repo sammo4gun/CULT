@@ -1,8 +1,5 @@
 extends Node2D
 
-var town_center_tex = preload("res://center.png")
-var residential_tex = preload("res://building.png")
-
 var type = 1
 var location
 var house_name
@@ -34,7 +31,6 @@ func get_location():
 func set_type(id):
 	type = id
 	if id == 1:
-		$Sprite.texture = residential_tex
+		pass
 	if id == 2:
-		$Sprite.texture = town_center_tex
 		house_name = "Mayor " + house_name
