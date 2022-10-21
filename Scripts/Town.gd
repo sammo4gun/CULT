@@ -22,6 +22,7 @@ var map_heights
 var map_types
 var width
 var height
+var town_name
 
 #Storing variables
 
@@ -31,8 +32,14 @@ var _mroads = [] #list of locations that have roads
 var _mbuildings = {} #maps map locations to building IDs
 
 #Utility
-onready var drawer = $"../YDrawer"
-onready var pathfinder = $"../Pathfinder"
+var drawer
+var pathfinder
+var world
+
+func set_parents(dr, pf, wrld):
+	drawer = dr
+	pathfinder = pf
+	world = wrld
 
 func pick_center(w, h):
 	var c
@@ -64,7 +71,7 @@ func get_nearest_road(loc):
 func canpath(loc):
 	var target = get_nearest_road(loc)
 	if target != null:
-		return pathfinder.findRoadPath(loc, target)
+		return pathfinder.findRoadPath(loc, target, self, world._mbuildings)
 	return [loc]
 
 func canbuild(loc):
@@ -73,7 +80,7 @@ func canbuild(loc):
 		and not loc in _mbuildings \
 		and map_heights[loc] == 0 \
 		and map_types[loc] != 3 \
-		and not get_parent().is_road_tile(loc):
+		and not world.is_road_tile(loc):
 			return true
 	return false
 
@@ -103,6 +110,19 @@ func get_adjacents(tiles):
 					adjs.append(tile+dif)
 	return adjs
 
+func get_max_adjacents(tiles):
+	var adjs = []
+	if tiles == null:
+		return 0
+	for tile in tiles:
+		for dif in [Vector2(0,-1),Vector2(1,0),Vector2(0,1),Vector2(-1,0)]:
+			if (tile+dif).x >= 0 and (tile+dif).x < width and (tile+dif).y >=0 and (tile+dif).y <height:
+				if not (tile+dif) in tiles \
+				   and map_heights[(tile+dif)] == 0 \
+				   and map_types[(tile+dif)] != 3 :
+					adjs.append(tile+dif)
+	return adjs
+
 func random_location(center, sdev):
 	var x = int(round(rng.randfn(center.x, sdev))) % width
 	var y = int(round(rng.randfn(center.y, sdev))) % height
@@ -114,9 +134,11 @@ func construct_building(i, type, center, sdev):
 	rng.randomize()
 	var square_exists = get_town_square_loc()
 	var square_adjacents = false
+	var max_square_adjacents = false
 	if square_exists != null:
 		square_adjacents = get_adjacents(square_exists)
-		if len(square_adjacents) <= 3:
+		max_square_adjacents = get_max_adjacents(square_exists)
+		if float(len(square_adjacents))/float(len(max_square_adjacents)) <= 0.4:
 			square_adjacents = false
 	
 	var t = 0
@@ -203,6 +225,7 @@ func build_town(w, h, mtypes, mheights):
 	map_types = mtypes
 	map_heights = mheights
 	_center = pick_center(w,h)
+	town_name = "Town nr: " + str(rng.randi())
 	
 	var loc
 	var x
@@ -243,5 +266,6 @@ func new_building(location, ty):
 	var building = Building.instance()
 	building.build(location)
 	building.set_type(ty)
+	building.set_town(town_name)
 	drawer.add_child(building)
 	return building

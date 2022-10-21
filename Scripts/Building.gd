@@ -3,6 +3,7 @@ extends Node2D
 var type
 var location
 var house_name
+var town_name
 
 var TYPES = {
 	"residential": 1,
@@ -14,6 +15,9 @@ var TYPES = {
 
 func build(loc):
 	location = loc
+
+func set_town(town):
+	town_name = town
 
 func get_location():
 	return self.location

@@ -14,7 +14,7 @@ var map_heights
 
 var rng = RandomNumberGenerator.new()
 
-onready var town = get_node("../Town")
+onready var towns = $"../Towns"
 
 func initialisePathfinding(w, h, mtypes, mheights):
 	width = w
@@ -25,7 +25,7 @@ func initialisePathfinding(w, h, mtypes, mheights):
 # For now, lets say the higher portions of the map are simply not 
 # available.
 # Returns a list of the coords or false.
-func findRoadPath(start, finish):
+func findRoadPath(start, finish, town, obstacles):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}
@@ -34,8 +34,6 @@ func findRoadPath(start, finish):
 	var closed = []
 	
 	open.append(start)
-	
-	var buildings = town._mbuildings
 	var cur
 	while true:
 		if len(open) == 0: return false
@@ -61,13 +59,10 @@ func findRoadPath(start, finish):
 						return path
 					new_pos = parents[new_pos]
 			if new_pos in map_types:
-				var house_in_way = false
-				if new_pos in buildings:
-					if not buildings[new_pos].is_type("square"):
-						house_in_way = true
+				var build_restricted = check_adjacent_obs(new_pos, town, obstacles)
 				if map_types[new_pos] != 3 and \
 					map_heights[new_pos] == 0 and \
-					not house_in_way:
+					not build_restricted:
 					#compute g
 					var tg = g[promising] + rng.randi_range(1,ROAD_NOISE)
 					if map_types[new_pos] >= 27 and map_types[new_pos] <= 36: 
@@ -86,3 +81,13 @@ func findRoadPath(start, finish):
 						parents[new_pos] = promising
 						open.append(new_pos)
 			closed.append(promising)
+
+func check_adjacent_obs(loc, town, obstacles):
+	if loc in obstacles:
+		if obstacles[loc] in [1,2,4]:
+			return true
+		var has_town_road = towns.check_ownership(loc)
+		if has_town_road:
+			if not has_town_road == town:
+				return true
+	return false

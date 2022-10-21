@@ -55,6 +55,7 @@ var SQUARE_DICT = {
 onready var ground = $"../YDrawer/Ground"
 onready var hill = $"../YDrawer/Hill"
 onready var mountain = $"../YDrawer/Mountain"
+onready var towns = $"../Towns"
 
 onready var _layers = {0: ground, 1: hill, 2: mountain}
 
@@ -85,7 +86,8 @@ func constructRoads():
 			for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
 				if (tile + dif) in _roads:
 					if _roads[tile + dif]: 
-						dirs[i] = 1
+						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+							dirs[i] = 1
 				i += 1
 			_roads[tile] = dirs
 
@@ -112,7 +114,7 @@ func constructBuildings():
 		if _buildings[tile]:
 			# Set road type of adjacent roads
 			var i = 0
-			var d = -1
+			var d = 0
 			var connected = false
 			for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
 				if (tile + dif) in _buildings:

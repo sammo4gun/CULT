@@ -2,7 +2,7 @@ extends MarginContainer
 
 onready var number_label = $HBoxContainer/Bars/Bar/Count/Background/Number
 
-onready var town = $"../../../Town"
+onready var towns = $"../../../Towns"
 
 var altitude
 var buildings
@@ -12,10 +12,10 @@ func map_ready(alt, roads, builds):
 	buildings = builds
 
 func display(selection):
-	var building = town.get_building(selection)
+	var building = towns.get_building(selection)
 	
 	if building:
-		number_label.text = str(building.house_name)
+		number_label.text = str(building.town_name)
 	else:
 		number_label.text = str(selection)
 	

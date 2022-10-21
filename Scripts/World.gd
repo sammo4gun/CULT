@@ -2,12 +2,14 @@ extends Node2D
 
 export var HEIGHT = 60
 export var WIDTH = 40
+export var NUM_TOWNS = 3
 
 # statistics about the map
 var _altitude = {}
 var _moisture = {}
 var openSimplexNoise = OpenSimplexNoise.new()
 var rng = RandomNumberGenerator.new()
+var Town = preload("res://Scenes/Town.tscn")
 
 # generated map visible features
 var _mtype = {}
@@ -15,11 +17,13 @@ var _mheight = {}
 var _mroads = {}
 var _mbuildings = {}
 
+var towns_dict = {}
+
 onready var selector = $Selector
 onready var GUI = $Camera2D/CanvasLayer/GUI
 onready var drawer = $Map
-onready var town = $Town
 onready var pathfinding = $Pathfinder
+onready var towns = $Towns
 
 func _ready():
 	randomize()
@@ -32,12 +36,25 @@ func _ready():
 	#include code to produce civilization
 	_mroads = buildEmpty()
 	_mbuildings = buildEmpty()
-	town.build_town(WIDTH, HEIGHT, _mtype, _mheight)
+	
+	for i in NUM_TOWNS:
+		towns_dict["town" + str(i)] = make_town()
 	
 	GUI.map_ready(_altitude, _mroads, _mbuildings)
 	drawer.map_ready(WIDTH, HEIGHT, \
 					_mtype, _mheight, \
 					_mroads, _mbuildings)
+
+func make_town():
+	var town = Town.instance()
+	town.connect("construct_roads", self, "_on_Town_construct_roads")
+	town.connect("construct_building", self, "_on_Town_construct_building")
+	town.set_parents(drawer, pathfinding, self)
+	towns.add_child(town)
+	
+	town.NUM_RESIDENTIAL = 10
+	town.build_town(WIDTH, HEIGHT, _mtype, _mheight)
+	return town
 
 func buildEmpty():
 	var map = {}
