@@ -13,7 +13,7 @@ export var MAX_PATH_DIST = 30
 export var SDEV_RESIDENTIAL = 20
 export var SDEV_CENTER = 5
 export var EDGE_DIST = 10
-export var MAX_BUILD_TIME = 6
+export var MAX_BUILD_TIME = 10
 
 var Building = preload("res://Scenes/Building.tscn")
 

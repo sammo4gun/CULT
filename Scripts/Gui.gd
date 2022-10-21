@@ -15,7 +15,7 @@ func display(selection):
 	var building = towns.get_building(selection)
 	
 	if building:
-		number_label.text = str(building.town_name)
+		number_label.text = str(building.house_name)
 	else:
 		number_label.text = str(selection)
 	
