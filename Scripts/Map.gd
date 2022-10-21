@@ -119,10 +119,11 @@ func constructBuildings():
 			for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
 				if (tile + dif) in _buildings:
 					if _buildings[(tile + dif)] == 3:
-						connected = true
-						d=i
-						if not MULTI_ROADS[_buildings[tile]]: 
-							break
+						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+							connected = true
+							d=i
+							if not MULTI_ROADS[_buildings[tile]]: 
+								break
 				i += 1
 			
 			i = 0
@@ -131,6 +132,7 @@ func constructBuildings():
 				for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
 					if (tile + dif) in _roads:
 						if _roads[tile + dif]:
+							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 								_roads[tile + dif] = modify_road(_roads[tile + dif], i)
 								connected=true
 								d=i
@@ -154,8 +156,14 @@ func town_square_tile(tile):
 	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
 		if (tile + dif) in _buildings:
 			if _buildings[(tile + dif)] == 3:
-				dirs[i] = 1
+				if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+					dirs[i] = 1
 		i += 1
+	if not dirs in SQUARE_DICT:
+		print(dirs)
+		print(tile)
+		print()
+		return SQUARE_DICT[[1,1,0,0]]
 	return SQUARE_DICT[dirs]
 
 func drawRoads():

@@ -78,6 +78,7 @@ func canbuild(loc):
 	#check its within the map & is buildable
 	if loc.x >= 0 and loc.x < width and loc.y >= 0  and loc.y < height \
 		and not loc in _mbuildings \
+		and world._mbuildings[loc] == 0 \
 		and map_heights[loc] == 0 \
 		and map_types[loc] != 3 \
 		and not world.is_road_tile(loc):
