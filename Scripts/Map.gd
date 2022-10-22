@@ -62,10 +62,17 @@ onready var _layers = {0: ground, 1: hill, 2: mountain}
 func map_ready(w, h, types, heights, roads, buildings):
 	WIDTH = w
 	HEIGHT = h
-	_types = types
 	_heights = heights
-	_roads = roads
-	_buildings = buildings
+	_types = {}
+	for tile in types:
+		_types[tile] = types[tile]
+	_roads = {}
+	for tile in roads:
+		_roads[tile] = roads[tile]
+	_buildings = {}
+	for tile in buildings:
+		_buildings[tile] = buildings[tile]
+	randomTrees()
 	splitMap()
 	constructRoads()
 	constructBuildings()
@@ -170,6 +177,12 @@ func drawRoads():
 	for tile in _roads:
 		if _roads[tile]:
 			_layered_types[0][tile] = ROADS_DICT[_roads[tile]]
+
+# converts the value "4" to one of the correct tree values
+func randomTrees():
+	for tile in _types:
+		if _types[tile] == 5:
+			_types[tile] = 27+rng.randi_range(0,9)
 
 # Splits maps into different layers as based on the "layers" var set
 # above.

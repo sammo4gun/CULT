@@ -63,6 +63,24 @@ func buildEmpty():
 			map[Vector2(x,y)] = 0
 	return map
 
+# Returns what contents are of a tile. Does not work on tiles with
+# a building or road of any kind.
+func get_tile(location):
+	var nm = "null"
+	if _mtype[location] == 0:
+		nm = "Earth"
+	if _mtype[location] == 1:
+		nm = "Dirt"
+	if _mtype[location] == 2:
+		nm = "Highlight"
+	if _mtype[location] == 3:
+		nm = "Water"
+	if _mtype[location] == 4:
+		nm = "Grass"
+	if _mtype[location] == 5:
+		nm = "Trees"
+	return {"name": nm}
+
 # Builds an empty map to render
 func buildEnv(per, oct):
 	openSimplexNoise.seed = randi()
@@ -88,13 +106,13 @@ func terrainMap():
 			if _altitude[coord] > 0.13:
 				_mtype[coord] = 0
 				if _moisture[coord] > 0.9:
-					_mtype[coord] = 27+rng.randi_range(0,9)
+					_mtype[coord] = 5
 				elif _moisture[coord] > 0.7:
 					if rng.randf_range(0,1) > 0.7:
-						_mtype[coord] = 27+rng.randi_range(0,9)
+						_mtype[coord] = 5
 				else:
 					if rng.randf_range(0,1) > 0.95:
-						_mtype[coord] = 27+rng.randi_range(0,9)
+						_mtype[coord] = 5
 				
 			if _altitude[coord] > 0.6:
 				_mtype[coord] = 1
@@ -117,7 +135,9 @@ func _on_Town_construct_roads(path, buildings):
 			if not tile in buildings:
 				#set roads to be a road
 				_mroads[tile] = 1
+				_mtype[tile] = 2
 
 func _on_Town_construct_building(building):
 	for loc in building.location:
 		_mbuildings[loc] = building.type
+		_mtype[loc] = 2

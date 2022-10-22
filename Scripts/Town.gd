@@ -263,6 +263,9 @@ func get_building(location):
 		return false
 	return _mbuildings[location]
 
+func get_road(location):
+	return location in _mroads
+
 func new_building(location, ty):
 	var building = Building.instance()
 	building.build(location)
