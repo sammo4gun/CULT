@@ -35,11 +35,51 @@ var _mbuildings = {} #maps map locations to building IDs
 var drawer
 var pathfinder
 var world
+var name_generator
 
-func set_parents(dr, pf, wrld):
+func set_parents(dr, pf, wrld, nmg):
 	drawer = dr
 	pathfinder = pf
 	world = wrld
+	name_generator = nmg
+
+func build_town(w, h, mtypes, mheights):
+	width = w
+	height = h
+	map_types = mtypes
+	map_heights = mheights
+	_center = pick_center(w,h)
+	town_name = name_generator.town()
+	
+	var loc
+	var x
+	var y
+	
+	var i = 0
+	
+	# build town center
+	construct_building(i, "center", _center, SDEV_CENTER)
+	i+=1
+	
+	# build town square
+	construct_spec_building(i, "square", get_town_hall_loc(), SDEV_CENTER/2)
+	i+=1
+	
+	# build store buildings
+	
+	for v in range(NUM_STORES):
+		if not construct_building(i, "store", get_town_square_loc()[0], SDEV_CENTER/2):
+			print("FAILED TO BUILD")
+			break
+		i+=1
+	
+	# build residential buildings
+	
+	for v in range(NUM_RESIDENTIAL):
+		if not construct_building(i, "residential", _center, SDEV_RESIDENTIAL):
+			print("FAILED TO BUILD")
+			break
+		i+=1
 
 func pick_center(w, h):
 	var c
@@ -220,44 +260,6 @@ func construct_spec_building(i, type, center, sdev):
 				print("Couldn't finish building: " + str(i))
 				return false
 
-func build_town(w, h, mtypes, mheights):
-	width = w
-	height = h
-	map_types = mtypes
-	map_heights = mheights
-	_center = pick_center(w,h)
-	town_name = "Town nr: " + str(rng.randi())
-	
-	var loc
-	var x
-	var y
-	
-	var i = 0
-	
-	# build town center
-	construct_building(i, "center", _center, SDEV_CENTER)
-	i+=1
-	
-	# build town square
-	construct_spec_building(i, "square", get_town_hall_loc(), SDEV_CENTER/2)
-	i+=1
-	
-	# build store buildings
-	
-	for v in range(NUM_STORES):
-		if not construct_building(i, "store", get_town_square_loc()[0], SDEV_CENTER/2):
-			print("FAILED TO BUILD")
-			break
-		i+=1
-	
-	# build residential buildings
-	
-	for v in range(NUM_RESIDENTIAL):
-		if not construct_building(i, "residential", _center, SDEV_RESIDENTIAL):
-			print("FAILED TO BUILD")
-			break
-		i+=1
-		
 func get_building(location):
 	if not location in _mbuildings:
 		return false
@@ -268,7 +270,7 @@ func get_road(location):
 
 func new_building(location, ty):
 	var building = Building.instance()
-	building.build(location)
+	building.build(location, name_generator)
 	building.set_type(ty)
 	building.set_town(town_name)
 	drawer.add_child(building)

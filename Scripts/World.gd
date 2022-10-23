@@ -49,7 +49,7 @@ func make_town():
 	var town = Town.instance()
 	town.connect("construct_roads", self, "_on_Town_construct_roads")
 	town.connect("construct_building", self, "_on_Town_construct_building")
-	town.set_parents(drawer, pathfinding, self)
+	town.set_parents(drawer, pathfinding, self, $NameGenerator)
 	towns.add_child(town)
 	
 	town.NUM_RESIDENTIAL = 10

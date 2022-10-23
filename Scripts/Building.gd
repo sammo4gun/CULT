@@ -4,6 +4,7 @@ var type
 var location
 var house_name
 var town_name
+var name_generator
 
 var TYPES = {
 	"residential": 1,
@@ -13,8 +14,9 @@ var TYPES = {
 	"tavern": 5
 }
 
-func build(loc):
+func build(loc, nmg):
 	location = loc
+	name_generator = nmg
 
 func set_town(town):
 	town_name = town
@@ -31,10 +33,10 @@ func is_type(ty):
 func set_type(ty):
 	type = TYPES[ty]
 	if type == 1:
-		house_name = $NameGenerator.person() + " Residence"
+		house_name = name_generator.person() + " Residence"
 	if type == 2:
-		house_name = "Mayor " + $NameGenerator.person()
+		house_name = "Mayor " + name_generator.person()
 	if type == 3:
 		house_name = "Town Square"
 	if type == 4:
-		house_name = $NameGenerator.store() + " of " + $NameGenerator.person()
+		house_name = name_generator.store() + " of " + name_generator.person()
