@@ -11,9 +11,10 @@ onready var world = get_tree().root.get_child(0)
 var altitude
 var buildings
 var building
-var selected = null
+var selected_tile = null
+var selected_person = null
 
-func _process(delta):
+func _process(_delta):
 	$HBoxContainer/Button.rect_size.x = 40
 	$HBoxContainer/Button.rect_size.y = 40
 	rect_position.y = get_viewport().size.y/30
@@ -23,49 +24,60 @@ func _process(delta):
 	$Background.scale.x += (new_size/rect_size.x) / 2
 	rect_size.x = new_size
 
-func map_ready(alt, roads, builds):
+func map_ready(alt, builds):
 	altitude = alt
 	buildings = builds
 
-func display(selection):
-	selected = selection
-	location_label.text = str(selection)
-	building = towns.get_building(selection)
-	
-	var tile_stats = world.get_tile(selection)
-	name_label.text = str(tile_stats["name"])
-	
-	if building:
-		name_label.text = "Built ground of " + str(building.town_name)
-		building_label.text = str(building.house_name)
-		if len(building.inside) > 0:
-			contents_label.text = building.inside[0].string_name
-		else: contents_label.text = "Empty"
-	else:
-		building_label.text = "None"
-		contents_label.text = "None"
-		var road = towns.get_road(selection)
-		if road:
-			name_label.text = "Built ground of " + str(road)
-			building_label.text = "Road"
+func display():
+	if selected_tile != null:
+		location_label.text = str(selected_tile)
+		building = towns.get_building(selected_tile)
+		
+		var tile_stats = world.get_tile(selected_tile)
+		name_label.text = str(tile_stats["name"])
+		
+		if building:
+			name_label.text = "Built ground of " + str(building.town_name)
+			building_label.text = str(building.house_name)
+			if len(building.inside) > 0:
+				contents_label.text = building.inside[0].string_name
+			else: contents_label.text = "Empty"
+		else:
+			building_label.text = "None"
 			contents_label.text = "None"
-
-func display_person(person):
-	contents_label.text = person.string_name
+			var road = towns.get_road(selected_tile)
+			if road:
+				name_label.text = "Built ground of " + str(road)
+				building_label.text = "Road"
+				contents_label.text = "None"
+	elif selected_person != null:
+		name_label.text = ''
+		location_label.text = ''
+		building_label.text = ''
+		contents_label.text = selected_person.string_name
 
 func rm_display():
 	name_label.text = ''
-
-func _on_Selector_new_selection(new_selected):
-	if new_selected != null:
-		display(new_selected)
-	else:
-		selected = null
-		rm_display()
-
-func _on_Population_selected_person(person):
-	display_person(person)
-
+	location_label.text = ''
+	building_label.text = ''
+	contents_label.text = ''
 
 func _on_Towns_refresh():
-	if selected != null: display(selected)
+	display()
+
+# Selected a new person
+func _on_Selector_selected_person(person):
+	selected_tile = null
+	selected_person = person
+	display()
+
+# Selected a new square, or clicked outside the map
+func _on_Selector_selected_tile(new_selected):
+	if new_selected != null:
+		selected_tile = new_selected
+		selected_person = null
+		display()
+	else:
+		selected_tile = null
+		selected_person = null
+		rm_display()

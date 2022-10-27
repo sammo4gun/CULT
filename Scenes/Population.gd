@@ -1,7 +1,5 @@
 extends Node
 
-signal selected_person
-
 var Person = preload("res://Scenes/Person.tscn")
 
 var pop = []
@@ -26,12 +24,3 @@ func name_exists(nm):
 		if person.person_name == nm:
 			return true
 	return false
-
-func print_pop():
-	for town in towns:
-		for person in pop:
-			if person.town == town:
-				print(town.town_name + ": " + person.string_name)
-
-func display_person(person):
-	emit_signal("selected_person", person)

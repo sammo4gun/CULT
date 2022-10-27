@@ -22,22 +22,7 @@ var TYPES = {
 	"tavern": 5
 }
 
-var time_start = 0
-var chance = 0.0
-
-func _process(delta):
-	if time_start > 0 and len(inside) > 0:
-		if OS.get_unix_time()-time_start > 1:
-			time_start = OS.get_unix_time()
-			if town.rng.randf_range(0,1) < chance:
-				# Send whoever is inside on a little walk
-				inside[0].square_and_back()
-				chance = 0.0
-			else: 
-				chance += 0.05
-
 func build(twn, loc, nmg):
-	time_start = OS.get_unix_time()
 	town = twn
 	town_name = twn.town_name
 	location = loc

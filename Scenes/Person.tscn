@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scripts/Person.gd" type="Script" id=1]
 [ext_resource path="res://Sprites/person.png" type="Texture" id=2]
 [ext_resource path="res://Sprites/thought_bubble.png" type="Texture" id=3]
 [ext_resource path="res://Sprites/happy.png" type="Texture" id=4]
 [ext_resource path="res://Sprites/surprise.png" type="Texture" id=5]
+[ext_resource path="res://Sprites/selector.png" type="Texture" id=6]
 
 [sub_resource type="CapsuleShape2D" id=1]
 radius = 9.45628
@@ -43,6 +44,12 @@ visible = false
 position = Vector2( -0.140305, 1.12246 )
 scale = Vector2( 0.0353927, 0.0328013 )
 texture = ExtResource( 5 )
+
+[node name="Selector" type="Sprite" parent="."]
+visible = false
+position = Vector2( -0.574249, 8.81851 )
+scale = Vector2( 0.259228, 0.259228 )
+texture = ExtResource( 6 )
 
 [connection signal="mouse_entered" from="Area2D" to="." method="_on_Area2D_mouse_entered"]
 [connection signal="mouse_exited" from="Area2D" to="." method="_on_Area2D_mouse_exited"]

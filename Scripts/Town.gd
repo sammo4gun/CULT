@@ -51,11 +51,10 @@ func build_town(w, h, mtypes, mheights):
 	map_types = mtypes
 	map_heights = mheights
 	_center = pick_center(w,h)
-	town_name = name_generator.town()
-	
-	var loc
-	var x
-	var y
+	while true:
+		town_name = name_generator.town()
+		if not world.towns.town_exists(town_name):
+			break
 	
 	var i = 0
 	
@@ -73,7 +72,7 @@ func build_town(w, h, mtypes, mheights):
 	
 	# build store buildings
 	
-	for v in range(NUM_STORES):
+	for _i in range(NUM_STORES):
 		current_location = construct_building(i, "store", get_town_square_loc()[0], SDEV_CENTER/2) 
 		if current_location == null:
 			print("FAILED TO BUILD")
@@ -83,7 +82,7 @@ func build_town(w, h, mtypes, mheights):
 	
 	# build residential buildings
 	
-	for v in range(NUM_RESIDENTIAL):
+	for _i in range(NUM_RESIDENTIAL):
 		current_location = construct_building(i, "residential", _center, SDEV_RESIDENTIAL)
 		if current_location == null:
 			print("FAILED TO BUILD")
@@ -192,9 +191,7 @@ func construct_building(i, type, center, sdev):
 		if float(len(square_adjacents))/float(len(max_square_adjacents)) <= 0.4:
 			square_adjacents = false
 	
-	var t = 0
 	while true:
-		t+=1
 		rng.randomize()
 		var rand = rng.randf_range(0,1)
 		if square_adjacents and rand <= CHANCE_BY_SQUARE:

@@ -4,6 +4,7 @@ export var SPEED = 60
 
 signal movement_arrived
 
+onready var selector = $Selector
 onready var bubble = $Thoughts
 onready var feelings = {"happy": $Happy, "surprise": $Surprise}
 
@@ -29,12 +30,52 @@ var house
 # DIRECT STATE VARIABLES
 var location
 var in_building
+var on_square
+
+var activity = "square"
 
 var moving_to = null
 var target_step = null
 var prevloc = Vector2(0,0)
 
-func _physics_process(delta):
+var time_start = 0
+var chance = 0.0
+
+var open = true
+func _process(delta):
+	if OS.get_unix_time() - time_start > 15:
+		time_start = OS.get_unix_time()
+		if activity == "square": 
+			activity = "home"
+		else: 
+			activity = "square"
+	
+	if open:
+		match activity:
+			"home":
+				# At home or want to go home.
+				if in_building:
+					pass
+				if on_square:
+					open = false
+					go(house.location)
+			"square":
+				# At home and feel like going to the square
+				if in_building:
+					if OS.get_unix_time()-time_start > 1:
+						time_start = OS.get_unix_time()
+						if town.rng.randf_range(0,1) < chance:
+							# Send whoever is inside on a little walk
+							open = false
+							go(town.get_town_square_loc())
+							chance = 0.0
+						else: 
+							chance += 0.05
+				# On the square and having fun
+				if on_square:
+					open = false
+					square_activity()
+	
 	if target_step != null and moving_to == null:
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45
@@ -53,6 +94,7 @@ func _physics_process(delta):
 			emit_signal("movement_arrived")
 	
 func create(wrld, pop, twn, hse):
+	time_start = OS.get_unix_time()
 	world = wrld
 	population = pop
 	town = twn
@@ -79,13 +121,14 @@ func get_name():
 			break
 
 func display_emotion(feeling):
-	bubble.visible = true
-	feelings[feeling].visible = true
-	
-	yield(get_tree().create_timer(world.rng.randf_range(0.3,0.6)), "timeout")
-	
-	bubble.visible = false
-	feelings[feeling].visible = false
+	if bubble.visible != true:
+		bubble.visible = true
+		feelings[feeling].visible = true
+		
+		yield(get_tree().create_timer(world.rng.randf_range(0.3,0.6)), "timeout")
+		
+		bubble.visible = false
+		feelings[feeling].visible = false
 
 func enter_building():
 	assert(world._mbuildings[location] != 0)
@@ -105,6 +148,8 @@ func follow_path(path):
 	assert(path[0] == location)
 	if in_building:
 		leave_building()
+	if on_square:
+		on_square = false
 	
 	for step in path:
 		# instead of ugly jump, set it to be a smooth transition from current location to the next step.
@@ -115,12 +160,13 @@ func follow_path(path):
 	if world.towns.get_building(location):
 		if world.towns.get_building(location).can_enter:
 			enter_building()
+		else: on_square = true
 	
 	return true
 
 func square_enjoyer():
 	assert(world.towns.get_building(location).type == 3)
-	yield(get_tree().create_timer(.5), "timeout")
+	yield(get_tree().create_timer(1.0), "timeout")
 	
 	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), null, Vector2(0,0)]
 	var step
@@ -139,21 +185,26 @@ func square_enjoyer():
 		if world.rng.randf_range(0,1) > 0.5:
 			display_emotion("happy")
 		#yield(tile_enjoyer(1.5), "completed")
-		yield(get_tree().create_timer(1.5), "timeout")
+		yield(get_tree().create_timer(1.0), "timeout")
 	
 	return true
 
-func square_and_back():
-	var path = pathfinding.walkRoadPath(location, town.get_town_square_loc(), town._mroads)
-	
+func go(target):
+	var path = pathfinding.walkRoadPath(location, target, town._mroads)
 	yield(follow_path(path), "completed")
-	
-	# have a fun time at the square!
+	open = true
+
+# only call this if on a square
+func square_activity():
 	yield(square_enjoyer(), "completed")
+	open = true
+
+func on_selected():
+	display_emotion("surprise")
+	selector.visible = true
 	
-	path = pathfinding.walkRoadPath(location, house.location, town._mroads)
-	
-	follow_path(path)
+func on_deselected():
+	selector.visible = false
 
 var mouse_on = false
 
@@ -161,8 +212,7 @@ func _input(event):
 	if mouse_on:
 		if event is InputEventMouseButton:
 			if event.button_index == BUTTON_LEFT and event.pressed:
-				display_emotion("surprise")
-				population.display_person(self)
+				world.selected_person(self)
 				get_tree().set_input_as_handled()
 
 func _on_Area2D_mouse_entered():

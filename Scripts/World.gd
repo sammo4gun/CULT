@@ -42,7 +42,7 @@ func _ready():
 	for i in NUM_TOWNS:
 		towns_dict["town" + str(i)] = make_town()
 	
-	GUI.map_ready(_altitude, _mroads, _mbuildings)
+	GUI.map_ready(_altitude, _mbuildings)
 	drawer.map_ready(WIDTH, HEIGHT, \
 					_mtype, _mheight, \
 					_mroads, _mbuildings)
@@ -130,7 +130,10 @@ func _on_tile_selected(tile):
 	if tile:
 		selector.setSelected(tile)
 	else: selector.deSelect()
-
+	
+func selected_person(person):
+	selector.selectPerson(person)
+	
 func _on_Town_construct_roads(path, buildings):
 	if len(path) > 1:
 		for tile in path:
