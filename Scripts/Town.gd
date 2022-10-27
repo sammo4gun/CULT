@@ -259,7 +259,9 @@ func construct_spec_building(i, type, center, sdev):
 			if path:
 				if len(path) < MAX_PATH_DIST:
 					var new_build = new_building(locs, type)
-					for loc in locs: _mbuildings[loc] = new_build
+					for loc in locs: 
+						_mbuildings[loc] = new_build
+						_mroads.append(loc)
 					for tile in path:
 						if not tile in _mroads and not tile in _mbuildings:
 							_mroads.append(tile)

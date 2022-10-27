@@ -123,6 +123,7 @@ func walkRoadPath(start, finish, roads):
 				while true:
 					path.append(new_pos)
 					if new_pos == start:
+						path.invert()
 						return path
 					new_pos = parents[new_pos]
 			if new_pos in roads:

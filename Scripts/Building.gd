@@ -5,7 +5,13 @@ var location
 var house_name
 var town_name
 var name_generator
+var can_enter = true
+
+# who live here
 var inhabitants = []
+
+# who are currently here
+var inside = []
 
 var TYPES = {
 	"residential": 1,
@@ -39,6 +45,7 @@ func set_type(ty):
 		house_name = "Mayors House"
 	if type == 3:
 		house_name = "Town Square"
+		can_enter = false
 	if type == 4:
 		house_name = name_generator.store()
 
@@ -46,8 +53,15 @@ func set_inhabitant(person, is_owner):
 	if is_owner:
 		house_name += ": " + person.string_name
 	inhabitants.append(person)
+	inside.append(person)
+
+func enter(person):
+	self.inside.append(person)
+
+func leave(person):
+	self.inside.erase(person)
 
 func on_selected():
-	if len(inhabitants) > 0:
+	if len(inside) > 0:
 		# Send an inhabitant on a lil walk
-		inhabitants[0].square_and_back()
+		inside[0].square_and_back()
