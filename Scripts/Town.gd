@@ -36,12 +36,14 @@ var drawer
 var pathfinder
 var world
 var name_generator
+var population
 
-func set_parents(dr, pf, wrld, nmg):
+func set_parents(dr, pf, wrld, nmg, pop):
 	drawer = dr
 	pathfinder = pf
 	world = wrld
 	name_generator = nmg
+	population = pop
 
 func build_town(w, h, mtypes, mheights):
 	width = w
@@ -57,9 +59,13 @@ func build_town(w, h, mtypes, mheights):
 	
 	var i = 0
 	
+	var current_location
+	
 	# build town center
-	construct_building(i, "center", _center, SDEV_CENTER)
+	current_location = construct_building(i, "center", _center, SDEV_CENTER)
 	i+=1
+	
+	create_resident(population, self, _mbuildings[current_location])
 	
 	# build town square
 	construct_spec_building(i, "square", get_town_hall_loc(), SDEV_CENTER/2)
@@ -68,17 +74,21 @@ func build_town(w, h, mtypes, mheights):
 	# build store buildings
 	
 	for v in range(NUM_STORES):
-		if not construct_building(i, "store", get_town_square_loc()[0], SDEV_CENTER/2):
+		current_location = construct_building(i, "store", get_town_square_loc()[0], SDEV_CENTER/2) 
+		if current_location == null:
 			print("FAILED TO BUILD")
 			break
+		create_resident(population, self, _mbuildings[current_location])
 		i+=1
 	
 	# build residential buildings
 	
 	for v in range(NUM_RESIDENTIAL):
-		if not construct_building(i, "residential", _center, SDEV_RESIDENTIAL):
+		current_location = construct_building(i, "residential", _center, SDEV_RESIDENTIAL)
+		if current_location == null:
 			print("FAILED TO BUILD")
 			break
+		create_resident(population, self, _mbuildings[current_location])
 		i+=1
 
 func pick_center(w, h):
@@ -205,10 +215,10 @@ func construct_building(i, type, center, sdev):
 						_mroads.append(tile)
 				emit_signal("construct_roads", p, _mbuildings)
 				emit_signal("construct_building", new_build)
-				return true
+				return loc
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
 			print("Couldn't finish building: " + str(i))
-			return false
+			return null
 
 # This is for special types of buildings, that require different 
 # shapes than just 1x1
@@ -259,6 +269,9 @@ func construct_spec_building(i, type, center, sdev):
 			if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
 				print("Couldn't finish building: " + str(i))
 				return false
+
+func create_resident(pop, town, house):
+	pop.make_person(town, house)
 
 func get_building(location):
 	if not location in _mbuildings:

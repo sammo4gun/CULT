@@ -91,3 +91,56 @@ func check_adjacent_obs(loc, town, obstacles):
 			if not has_town_road == town:
 				return true
 	return false
+
+func walkRoadPath(start, finish, roads):
+	var g = {start: 0}
+	var h = {start: 0}
+	var parents = {}
+	
+	var open = []
+	var closed = []
+	
+	open.append(start)
+	var cur
+	while true:
+		if len(open) == 0: return false
+		
+		var minimum = 999999
+		var promising = null
+		for val in open:
+			cur = h[val] + g[val]
+			if cur < minimum:
+				promising = val
+				minimum = cur
+		open.erase(promising)
+		
+		for vec in [Vector2(-1,0),Vector2(1,0), Vector2(0,1), Vector2(0,-1)]:
+			var new_pos = promising + vec
+			if new_pos in finish:
+				var path = []
+				path.append(new_pos)
+				new_pos = promising
+				while true:
+					path.append(new_pos)
+					if new_pos == start:
+						return path
+					new_pos = parents[new_pos]
+			if new_pos in roads:
+				#compute g
+				var tg = g[promising] + rng.randi_range(1,ROAD_NOISE)
+				if map_types[new_pos] >= 27 and map_types[new_pos] <= 36: 
+					tg += 10
+				#compute h
+				var th = new_pos.distance_to(finish[0])
+				if new_pos in open or new_pos in closed:
+					if g[new_pos] + h[new_pos] > tg+th:
+						g[new_pos] = tg
+						h[new_pos] = th
+						parents[new_pos] = promising
+						open.append(new_pos)
+				else:
+					g[new_pos] = tg
+					h[new_pos] = th
+					parents[new_pos] = promising
+					open.append(new_pos)
+			closed.append(promising)

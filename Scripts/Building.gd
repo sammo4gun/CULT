@@ -5,6 +5,7 @@ var location
 var house_name
 var town_name
 var name_generator
+var inhabitants = []
 
 var TYPES = {
 	"residential": 1,
@@ -33,10 +34,20 @@ func is_type(ty):
 func set_type(ty):
 	type = TYPES[ty]
 	if type == 1:
-		house_name = name_generator.person() + " Residence"
+		house_name = "Residence"
 	if type == 2:
-		house_name = "Mayor " + name_generator.person()
+		house_name = "Mayors House"
 	if type == 3:
 		house_name = "Town Square"
 	if type == 4:
-		house_name = name_generator.store() + " of " + name_generator.person()
+		house_name = name_generator.store()
+
+func set_inhabitant(person, is_owner):
+	if is_owner:
+		house_name += ": " + person.string_name
+	inhabitants.append(person)
+
+func on_selected():
+	if len(inhabitants) > 0:
+		# Send an inhabitant on a lil walk
+		inhabitants[0].square_and_back()
