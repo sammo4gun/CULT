@@ -84,4 +84,6 @@ visible = false
 scale = Vector2( 0.6, 0.6 )
 
 [connection signal="selected_tile" from="Map" to="." method="_on_tile_selected"]
+[connection signal="selected_person" from="Population" to="Camera2D/CanvasLayer/GUI" method="_on_Population_selected_person"]
+[connection signal="refresh" from="Towns" to="Camera2D/CanvasLayer/GUI" method="_on_Towns_refresh"]
 [connection signal="new_selection" from="Selector" to="Camera2D/CanvasLayer/GUI" method="_on_Selector_new_selection"]

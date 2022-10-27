@@ -17,10 +17,10 @@ func _ready():
 		get_node("/root/World").HEIGHT/2))
 	position.y += 32
 
-func _physics_process(delta) -> void:
+func _physics_process(delta):
 	zoom = lerp(zoom, _target_zoom * Vector2.ONE, ZOOM_RATE * delta)
 
-func _unhandled_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent):
 	if event is InputEventMouseMotion:
 		if event.button_mask == BUTTON_MASK_MIDDLE:
 			position -= event.relative * zoom

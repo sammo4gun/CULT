@@ -1,8 +1,11 @@
 extends Node2D
 
-export var SPEED = 100
+export var SPEED = 60
 
 signal movement_arrived
+
+onready var bubble = $Thoughts
+onready var feelings = {"happy": $Happy, "surprise": $Surprise}
 
 var namegenerator
 var population
@@ -32,21 +35,21 @@ var target_step = null
 var prevloc = Vector2(0,0)
 
 func _physics_process(delta):
-	if prevloc != location:
-		position = ground.map_to_world(location)
-		position.y += 45
-		prevloc = location
-	
 	if target_step != null and moving_to == null:
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45
+		if world.towns.get_building(target_step):
+			if world.towns.get_building(target_step).type == 3:
+				var target_y = town.rng.randi_range(moving_to.y - 8, moving_to.y + 12)
+				var target_x = town.rng.randi_range(moving_to.x - 10, moving_to.x + 10)
+				moving_to = Vector2(target_x, target_y)
 	
 	if moving_to != null:
 		position = position.move_toward(moving_to, delta*SPEED)
 		if position == moving_to:
 			location = target_step
-			moving_to = null
 			target_step = null
+			moving_to = null
 			emit_signal("movement_arrived")
 	
 func create(wrld, pop, twn, hse):
@@ -60,6 +63,9 @@ func create(wrld, pop, twn, hse):
 	ground = pop.ground
 	location = house.location[0]
 	get_name()
+	position = ground.map_to_world(location)
+	position.y += 45
+	prevloc = location
 
 func get_name():
 	var potname
@@ -72,16 +78,27 @@ func get_name():
 			string_name = string_name.trim_suffix(" ")
 			break
 
+func display_emotion(feeling):
+	bubble.visible = true
+	feelings[feeling].visible = true
+	
+	yield(get_tree().create_timer(world.rng.randf_range(0.3,0.6)), "timeout")
+	
+	bubble.visible = false
+	feelings[feeling].visible = false
+
 func enter_building():
 	assert(world._mbuildings[location] != 0)
 	in_building = world.towns.get_building(location)
 	in_building.enter(self)
+	$Area2D/CollisionShape2D.disabled=true
 	visible = false
 
 func leave_building():
 	assert(world._mbuildings[location] != 0)
 	in_building.leave(self)
 	in_building = false
+	$Area2D/CollisionShape2D.disabled=false
 	visible = true
 
 func follow_path(path):
@@ -95,8 +112,9 @@ func follow_path(path):
 			target_step = step
 			yield(self, "movement_arrived")
 	
-	if world.towns.get_building(location).can_enter:
-		enter_building()
+	if world.towns.get_building(location):
+		if world.towns.get_building(location).can_enter:
+			enter_building()
 	
 	return true
 
@@ -117,7 +135,12 @@ func square_enjoyer():
 				var target = location + step
 				target_step = target
 				yield(self, "movement_arrived")
-		yield(get_tree().create_timer(.5), "timeout")
+		
+		if world.rng.randf_range(0,1) > 0.5:
+			display_emotion("happy")
+		#yield(tile_enjoyer(1.5), "completed")
+		yield(get_tree().create_timer(1.5), "timeout")
+	
 	return true
 
 func square_and_back():
@@ -131,3 +154,19 @@ func square_and_back():
 	path = pathfinding.walkRoadPath(location, house.location, town._mroads)
 	
 	follow_path(path)
+
+var mouse_on = false
+
+func _input(event):
+	if mouse_on:
+		if event is InputEventMouseButton:
+			if event.button_index == BUTTON_LEFT and event.pressed:
+				display_emotion("surprise")
+				population.display_person(self)
+				get_tree().set_input_as_handled()
+
+func _on_Area2D_mouse_entered():
+	mouse_on = true
+
+func _on_Area2D_mouse_exited():
+	mouse_on = false

@@ -285,8 +285,7 @@ func get_road(location):
 
 func new_building(location, ty):
 	var building = Building.instance()
-	building.build(location, name_generator)
+	building.build(self, location, name_generator)
 	building.set_type(ty)
-	building.set_town(town_name)
 	drawer.add_child(building)
 	return building

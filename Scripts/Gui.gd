@@ -10,6 +10,8 @@ onready var world = get_tree().root.get_child(0)
 
 var altitude
 var buildings
+var building
+var selected = null
 
 func _process(delta):
 	$HBoxContainer/Button.rect_size.x = 40
@@ -26,26 +28,30 @@ func map_ready(alt, roads, builds):
 	buildings = builds
 
 func display(selection):
+	selected = selection
 	location_label.text = str(selection)
-	var building = towns.get_building(selection)
+	building = towns.get_building(selection)
 	
 	var tile_stats = world.get_tile(selection)
 	name_label.text = str(tile_stats["name"])
 	
 	if building:
-		building.on_selected()
 		name_label.text = "Built ground of " + str(building.town_name)
 		building_label.text = str(building.house_name)
-		contents_label.text = "TBA"
+		if len(building.inside) > 0:
+			contents_label.text = building.inside[0].string_name
+		else: contents_label.text = "Empty"
 	else:
 		building_label.text = "None"
-		contents_label.text = "TBA"
+		contents_label.text = "None"
 		var road = towns.get_road(selection)
 		if road:
 			name_label.text = "Built ground of " + str(road)
 			building_label.text = "Road"
-			contents_label.text = "TBA"
-	
+			contents_label.text = "None"
+
+func display_person(person):
+	contents_label.text = person.string_name
 
 func rm_display():
 	name_label.text = ''
@@ -54,8 +60,12 @@ func _on_Selector_new_selection(new_selected):
 	if new_selected != null:
 		display(new_selected)
 	else:
+		selected = null
 		rm_display()
 
+func _on_Population_selected_person(person):
+	display_person(person)
 
-func _on_Details_pressed():
-	name_label.text = ("button.")
+
+func _on_Towns_refresh():
+	if selected != null: display(selected)

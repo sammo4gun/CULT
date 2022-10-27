@@ -1,5 +1,7 @@
 extends Node
 
+signal refresh
+
 func get_building(location):
 	for town in get_children():
 		if town.get_building(location):
@@ -31,3 +33,6 @@ func check_ownership(location):
 		if location in town._mbuildings:
 			return town
 	return false
+
+func ping_gui():
+	emit_signal("refresh")

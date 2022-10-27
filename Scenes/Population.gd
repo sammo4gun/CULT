@@ -1,5 +1,7 @@
 extends Node
 
+signal selected_person
+
 var Person = preload("res://Scenes/Person.tscn")
 
 var pop = []
@@ -30,3 +32,6 @@ func print_pop():
 		for person in pop:
 			if person.town == town:
 				print(town.town_name + ": " + person.string_name)
+
+func display_person(person):
+	emit_signal("selected_person", person)

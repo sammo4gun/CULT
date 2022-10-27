@@ -4,6 +4,7 @@ var type
 var location
 var house_name
 var town_name
+var town
 var name_generator
 var can_enter = true
 
@@ -21,12 +22,26 @@ var TYPES = {
 	"tavern": 5
 }
 
-func build(loc, nmg):
+var time_start = 0
+var chance = 0.0
+
+func _process(delta):
+	if time_start > 0 and len(inside) > 0:
+		if OS.get_unix_time()-time_start > 1:
+			time_start = OS.get_unix_time()
+			if town.rng.randf_range(0,1) < chance:
+				# Send whoever is inside on a little walk
+				inside[0].square_and_back()
+				chance = 0.0
+			else: 
+				chance += 0.05
+
+func build(twn, loc, nmg):
+	time_start = OS.get_unix_time()
+	town = twn
+	town_name = twn.town_name
 	location = loc
 	name_generator = nmg
-
-func set_town(town):
-	town_name = town
 
 func get_location():
 	return self.location
@@ -55,13 +70,18 @@ func set_inhabitant(person, is_owner):
 	inhabitants.append(person)
 	inside.append(person)
 
+var selected = false
+
 func enter(person):
 	self.inside.append(person)
+	if selected: town.get_parent().ping_gui()
 
 func leave(person):
 	self.inside.erase(person)
+	if selected: town.get_parent().ping_gui()
 
 func on_selected():
-	if len(inside) > 0:
-		# Send an inhabitant on a lil walk
-		inside[0].square_and_back()
+	selected = true
+
+func on_deselected():
+	selected = false
