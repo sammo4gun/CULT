@@ -27,12 +27,18 @@ var house
 # Friends
 # Job/Role
 
+# 3. One-time calc variables
+var square_path #path from home to square
+var square_dist
+
 # DIRECT STATE VARIABLES
 var location
 var in_building
 var on_square
 
 var activity = "home"
+
+#UTILITY
 
 var moving_to = null
 var target_step = null
@@ -105,7 +111,7 @@ func _process(delta):
 				moving_to = Vector2(target_x, target_y)
 	
 	if moving_to != null:
-		position = position.move_toward(moving_to, delta*SPEED)
+		position = position.move_toward(moving_to, delta*SPEED * world.speed_factor)
 		if position == moving_to:
 			location = target_step
 			target_step = null
@@ -118,15 +124,28 @@ func create(wrld, pop, twn, hse):
 	population = pop
 	town = twn
 	house = hse
-	in_building = house
 	namegenerator = wrld.namegenerator
 	pathfinding = wrld.pathfinding
 	ground = pop.ground
+	
+	in_building = house
 	location = house.location[0]
 	get_name()
 	position = ground.map_to_world(location)
 	position.y += 45
 	prevloc = location
+	
+	make_thoughts()
+
+func make_thoughts():
+	# As the character starts at home, this calculates their path from home to
+	# work to save processing time.
+	if town.get_town_square_loc():
+		square_path = get_path_to(town.get_town_square_loc())
+		square_dist = len(square_path)
+	else: 
+		square_path = []
+		square_dist = 0
 
 func get_name():
 	var potname
@@ -144,7 +163,7 @@ func display_emotion(feeling):
 		bubble.visible = true
 		feelings[feeling].visible = true
 		
-		yield(get_tree().create_timer(world.rng.randf_range(0.3,0.6)), "timeout")
+		yield(get_tree().create_timer(timer_length(0.3,0.6)), "timeout")
 		
 		bubble.visible = false
 		feelings[feeling].visible = false
@@ -185,7 +204,7 @@ func follow_path(path):
 
 func square_enjoyer():
 	assert(world.towns.get_building(location).type == 3)
-	yield(get_tree().create_timer(1.0), "timeout")
+	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
 	
 	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
 	var step
@@ -201,28 +220,40 @@ func square_enjoyer():
 	if world.rng.randf_range(0,1) > 0.5:
 		display_emotion("happy")
 	
-	yield(get_tree().create_timer(world.rng.randf_range(0.5,1.0)), "timeout")
+	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
 	
 	return true
+
+func timer_length(mini, maxi):
+	if maxi:
+		return world.rng.randf_range(mini, maxi)/world.speed_factor
+	return mini/world.speed_factor
 
 func go(target):
 	var path = pathfinding.walkRoadPath(location, target, town._mroads)
 	yield(follow_path(path), "completed")
 	open = true
 
+func get_path_to(target):
+	return pathfinding.walkRoadPath(location, target, town._mroads)
+
+func go_path(path):
+	yield(follow_path(path), "completed")
+	open = true
+
 func awaken():
-	yield(get_tree().create_timer(world.rng.randf_range(0.5,3.0)), "timeout")
+	yield(get_tree().create_timer(timer_length(0.5,3.0)), "timeout")
 	# give a certain amount of time to wake up / do other end-of-night stuff
 	open = true
 
 func asleep():
-	yield(get_tree().create_timer(world.rng.randf_range(0.5,3.0)), "timeout")
+	yield(get_tree().create_timer(timer_length(1.0,6.0)), "timeout")
 	# give a certain amount of time to go to sleep / do other end-of-evening stuff
 	open = true
 	
 
 func prepare_to_leave():
-	yield(get_tree().create_timer(world.rng.randf_range(0.5,3.0)), "timeout")
+	yield(get_tree().create_timer(timer_length(0.5,3.0)), "timeout")
 	# give a certain amount of time to prepare for leaving to the square
 	open = true
 
@@ -232,6 +263,7 @@ func square_activity():
 	open = true
 
 func on_selected():
+	print(square_dist)
 	display_emotion("surprise")
 	selector.visible = true
 	

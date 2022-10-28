@@ -1,10 +1,14 @@
 extends Node2D
 
+onready var lights = $HouseLights
+
 var type
 var location
 var house_name
+
 var town_name
 var town
+
 var name_generator
 var can_enter = true
 
@@ -25,11 +29,12 @@ var TYPES = {
 	"tavern": 5
 }
 
-func build(twn, loc, nmg):
+func build(twn, loc, nmg, pos):
 	town = twn
 	town_name = twn.town_name
 	location = loc
 	name_generator = nmg
+	position = pos
 
 func get_location():
 	return self.location
@@ -68,13 +73,14 @@ func leave(person):
 	self.inside.erase(person)
 	if selected: town.get_parent().ping_gui()
 
-
 func turn_lights_on():
 	lights_on = true
+	lights.visible = true
 	town.update_building(self)
 
 func turn_lights_off():
 	lights_on = false
+	lights.visible = false
 	town.update_building(self)
 
 var LIGHT_MAP = {

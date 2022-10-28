@@ -98,6 +98,11 @@ func constructRoads():
 				i += 1
 			_roads[tile] = dirs
 
+func get_pos(location):
+	var pos = ground.map_to_world(location)
+	pos.y += 48
+	return pos
+
 var MULTI_ROADS = {
 	1: false, 2: true, 3: true, 4: false
 }

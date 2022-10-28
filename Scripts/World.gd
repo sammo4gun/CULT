@@ -3,6 +3,7 @@ extends Node2D
 export var HEIGHT = 60
 export var WIDTH = 40
 export var NUM_TOWNS = 3
+var speed_factor = 1
 
 # statistics about the map
 var _altitude = {}
@@ -85,18 +86,13 @@ func buildEmpty():
 # a building or road of any kind.
 func get_tile(location):
 	var nm = "null"
-	if _mtype[location] == 0:
-		nm = "Earth"
-	if _mtype[location] == 1:
-		nm = "Dirt"
-	if _mtype[location] == 2:
-		nm = "Highlight"
-	if _mtype[location] == 3:
-		nm = "Water"
-	if _mtype[location] == 4:
-		nm = "Grass"
-	if _mtype[location] == 5:
-		nm = "Trees"
+	match _mtype[location]:
+		0: nm = "Earth"
+		1: nm = "Dirt"
+		2: nm = "Highlight"
+		3: nm = "Water"
+		4: nm = "Grass"
+		5: nm = "Trees"
 	return {"name": nm}
 
 # Builds an empty map to render
@@ -171,4 +167,5 @@ var sp_factors = [1,2,4,0.25,0.5]
 func _on_GUI_button():
 	sp += 1
 	sp = sp % 5
+	speed_factor = sp_factors[sp]
 	daynightcycle.adjust_cycle(1.0/sp_factors[sp])

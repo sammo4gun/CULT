@@ -48,7 +48,7 @@ tracks/0/keys = {
 script = ExtResource( 8 )
 HEIGHT = 100
 WIDTH = 100
-NUM_TOWNS = 2
+NUM_TOWNS = 1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2( 509.583, 297.677 )

@@ -205,7 +205,7 @@ func construct_building(i, type, center, sdev):
 			p = false
 		if p:
 			if len(p) < MAX_PATH_DIST:
-				var new_build = new_building([loc], type)
+				var new_build = new_building([loc], type, p)
 				_mbuildings[loc] = new_build
 				for tile in p:
 					if not tile in _mroads and not tile in _mbuildings:
@@ -255,7 +255,7 @@ func construct_spec_building(i, type, center, sdev):
 			#can we build?
 			if path:
 				if len(path) < MAX_PATH_DIST:
-					var new_build = new_building(locs, type)
+					var new_build = new_building(locs, type, path)
 					for loc in locs: 
 						_mbuildings[loc] = new_build
 						_mroads.append(loc)
@@ -280,9 +280,9 @@ func get_building(location):
 func get_road(location):
 	return location in _mroads
 
-func new_building(location, ty):
+func new_building(location, ty, road_path):
 	var building = Building.instance()
-	building.build(self, location, name_generator)
+	building.build(self, location, name_generator, world.towns.get_pos(location))
 	building.set_type(ty)
 	drawer.add_child(building)
 	return building

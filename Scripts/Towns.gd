@@ -36,6 +36,9 @@ func check_ownership(location):
 			return town
 	return false
 
+func get_pos(location):
+	return map.get_pos(location[0])
+
 func ping_gui():
 	emit_signal("refresh")
 	
