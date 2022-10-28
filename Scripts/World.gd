@@ -26,6 +26,7 @@ onready var pathfinding = $Pathfinder
 onready var towns = $Towns
 onready var population = $Population
 onready var namegenerator = $NameGenerator
+onready var daynightcycle = $Day_Night
 
 func _ready():
 	randomize()
@@ -46,6 +47,9 @@ func _ready():
 	drawer.map_ready(WIDTH, HEIGHT, \
 					_mtype, _mheight, \
 					_mroads, _mbuildings)
+	
+	daynightcycle.start_cycle(2)
+	GUI.start_time()
 
 func make_town():
 	var town = Town.instance()
@@ -126,6 +130,9 @@ func terrainMap():
 func is_road_tile(tile):
 	return _mroads[tile]
 
+func get_time():
+	return daynightcycle.get_time()
+
 func _on_tile_selected(tile):
 	if tile:
 		selector.setSelected(tile)
@@ -133,7 +140,7 @@ func _on_tile_selected(tile):
 	
 func selected_person(person):
 	selector.selectPerson(person)
-	
+
 func _on_Town_construct_roads(path, buildings):
 	if len(path) > 1:
 		for tile in path:

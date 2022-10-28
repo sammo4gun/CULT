@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Scenes/Selector.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/Gui.tscn" type="PackedScene" id=2]
@@ -11,6 +11,38 @@
 [ext_resource path="res://Scenes/Pathfinder.gd" type="Script" id=9]
 [ext_resource path="res://Scripts/NameGenerator.gd" type="Script" id=10]
 [ext_resource path="res://Scenes/Population.gd" type="Script" id=11]
+[ext_resource path="res://Scripts/Day_Night.gd" type="Script" id=12]
+
+[sub_resource type="Animation" id=1]
+resource_name = "Day_night_cycle"
+length = 24.0
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 5, 7, 9, 17, 19, 21, 23, 24 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.294118, 0.294118, 0.294118, 1 ), Color( 0.427451, 0.4, 0.333333, 1 ), Color( 0.807843, 0.745098, 0.584314, 1 ), Color( 0.929412, 0.929412, 0.929412, 1 ), Color( 0.870588, 0.87451, 0.878431, 1 ), Color( 0.588235, 0.654902, 0.721569, 1 ), Color( 0.384314, 0.537255, 0.686275, 1 ), Color( 0.345098, 0.376471, 0.407843, 1 ), Color( 0.294118, 0.294118, 0.294118, 1 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.34902, 0.34902, 0.34902, 1 ) ]
+}
 
 [node name="World" type="Node2D"]
 script = ExtResource( 8 )
@@ -31,6 +63,14 @@ margin_top = -5.0
 margin_right = 795.0
 margin_bottom = 78.0
 rect_scale = Vector2( 1.2, 1.2 )
+
+[node name="Day_Night" type="CanvasModulate" parent="."]
+color = Color( 0.34902, 0.34902, 0.34902, 1 )
+script = ExtResource( 12 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Day_Night"]
+anims/Day_night_cycle = SubResource( 1 )
+anims/RESET = SubResource( 2 )
 
 [node name="Map" type="Node2D" parent="."]
 script = ExtResource( 5 )

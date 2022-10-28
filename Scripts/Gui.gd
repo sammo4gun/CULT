@@ -5,6 +5,9 @@ onready var location_label = $HBoxContainer/Bars/Bar1/Location/Background/Number
 onready var building_label = $HBoxContainer/Bars/Bar2/Building/Background/Number
 onready var contents_label = $HBoxContainer/Bars/Bar2/Contents/Background/Number
 
+onready var hour_label = $HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background/Hour
+onready var minute_label = $HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background/Minute
+
 onready var towns = $"../../../Towns"
 onready var world = get_tree().root.get_child(0)
 
@@ -13,6 +16,8 @@ var buildings
 var building
 var selected_tile = null
 var selected_person = null
+
+var time_started = false
 
 func _process(_delta):
 	$HBoxContainer/Button.rect_size.x = 40
@@ -23,6 +28,20 @@ func _process(_delta):
 	$Background.position.x += (new_size - rect_size.x) / 2
 	$Background.scale.x += (new_size/rect_size.x) / 2
 	rect_size.x = new_size
+	
+	if time_started:
+		set_time(world.get_time())
+
+func start_time():
+	time_started = true
+
+func set_time(time):
+	hour_label.text = str(time["hour"])
+	if len(hour_label.text) < 2:
+		hour_label.text = '0' + hour_label.text
+	minute_label.text = str(time["minute"])
+	if len(minute_label.text) < 2:
+		minute_label.text = '0' + minute_label.text
 
 func map_ready(alt, builds):
 	altitude = alt
@@ -81,3 +100,6 @@ func _on_Selector_selected_tile(new_selected):
 		selected_tile = null
 		selected_person = null
 		rm_display()
+
+func _on_Button_pressed():
+	print("Butt")

@@ -32,7 +32,7 @@ var location
 var in_building
 var on_square
 
-var activity = "square"
+var activity = "home"
 
 var moving_to = null
 var target_step = null
@@ -42,15 +42,13 @@ var time_start = 0
 var chance = 0.0
 
 var open = true
+var world_time
 func _process(delta):
-	if OS.get_unix_time() - time_start > 15:
-		time_start = OS.get_unix_time()
-		if activity == "square": 
-			activity = "home"
-		else: 
-			activity = "square"
-	
 	if open:
+		world_time = world.get_time()
+		if world_time['hour'] < 6 or world_time['hour'] > 18:
+			activity = 'home'
+		else: activity = 'square'
 		match activity:
 			"home":
 				# At home or want to go home.
@@ -134,12 +132,14 @@ func enter_building():
 	assert(world._mbuildings[location] != 0)
 	in_building = world.towns.get_building(location)
 	in_building.enter(self)
+	in_building.turn_lights_on()
 	$Area2D/CollisionShape2D.disabled=true
 	visible = false
 
 func leave_building():
 	assert(world._mbuildings[location] != 0)
 	in_building.leave(self)
+	in_building.turn_lights_off()
 	in_building = false
 	$Area2D/CollisionShape2D.disabled=false
 	visible = true

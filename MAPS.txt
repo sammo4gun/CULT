@@ -25,3 +25,59 @@ _mheights: {	0: ground
 		2: mountain
 }
 
+		LAYERMAP:
+NATURE:
+0 Nothing
+1 Grass
+2 Highlighted
+3 water
+4 "forest" (ugly)
+
+ROADS:
+5 SE
+6 EW
+7 NE
+8 NS
+9 NES
+10 NW
+11 SEW
+12 SW
+13 NESW
+14 NSW
+15 NEW
+
+HOUSE:
+16 houseE
+17 houseS
+18 houseE
+19 houseN/W
+
+CENTER:
+20 centerN/W
+21 centerS
+22 centerE
+
+TREES
+23-32: trees
+
+SQUARES:
+33 ENW
+34 ESW
+35 NE
+36 NES
+37 NESW
+38 NW
+39 SE
+40 SW
+41 SWN
+
+NIGHT CENTER:
+42 centerN/W
+43 centerS
+44 centerE
+
+NIGHT HOUSE:
+45 houseE
+46 houseS
+47 houseE
+48 houseN/W

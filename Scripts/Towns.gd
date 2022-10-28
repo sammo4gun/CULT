@@ -2,6 +2,8 @@ extends Node
 
 signal refresh
 
+onready var map = $"../Map"
+
 func get_building(location):
 	for town in get_children():
 		if town.get_building(location):
@@ -36,3 +38,6 @@ func check_ownership(location):
 
 func ping_gui():
 	emit_signal("refresh")
+	
+func set_light(location, value):
+	map.toggle_light(location, value)

@@ -41,15 +41,15 @@ var ROADS_DICT = {
 	}
 
 var SQUARE_DICT = {
-	[0,1,1,0]: 43,
-	[1,1,0,0]: 39,
-	[1,1,1,0]: 40,
-	[1,0,0,1]: 42,
-	[0,1,1,1]: 38,
-	[0,0,1,1]: 44,
-	[1,1,1,1]: 41,
-	[1,0,1,1]: 45,
-	[1,1,0,1]: 37
+	[0,1,1,0]: 39,
+	[1,1,0,0]: 35,
+	[1,1,1,0]: 36,
+	[1,0,0,1]: 38,
+	[0,1,1,1]: 34,
+	[0,0,1,1]: 40,
+	[1,1,1,1]: 37,
+	[1,0,1,1]: 41,
+	[1,1,0,1]: 33
 	}
 
 onready var ground = $"../YDrawer/Ground"
@@ -103,17 +103,17 @@ var MULTI_ROADS = {
 }
 
 var RESIDENTIAL_TILES = {
-	2:19,
-	3:19,
-	0:16 + (rng.randi_range(0,1)*2),
-	1:17
+	2: 19,
+	3: 19,
+	0: 16 + (rng.randi_range(0,1)*2),
+	1: 17
 }
 
 var CENTER_TILES = {
 	2: 20,
-	3:20,
-	0:22,
-	1:21
+	3: 20,
+	0: 22,
+	1: 21
 }
 
 func constructBuildings():
@@ -149,13 +149,16 @@ func constructBuildings():
 			# TODO: Set building type depending on whether or not
 			# there are adjacent roads.
 			if _buildings[tile] == 1:
-				_layered_types[0][tile] = RESIDENTIAL_TILES[d]
+				towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
+				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 			if _buildings[tile] == 2:
-				_layered_types[0][tile] = CENTER_TILES[d]
+				towns.get_building(tile).set_sprite(CENTER_TILES[d])
+				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 			if _buildings[tile] == 3:
 				_layered_types[0][tile] = town_square_tile(tile)
 			if _buildings[tile] == 4:
-				_layered_types[0][tile] = RESIDENTIAL_TILES[d]
+				towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
+				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 
 func town_square_tile(tile):
 	var i = 0
@@ -182,7 +185,7 @@ func drawRoads():
 func randomTrees():
 	for tile in _types:
 		if _types[tile] == 5:
-			_types[tile] = 27+rng.randi_range(0,9)
+			_types[tile] = 23+rng.randi_range(0,9)
 
 # Splits maps into different layers as based on the "layers" var set
 # above.
@@ -222,3 +225,6 @@ func modify_road(dirs, i):
 	if dirs[(i+3)%4] == 0:
 		dirs[(i+3)%4] = 1
 	return dirs
+
+func toggle_light(location, value):
+	ground.set_cell(location.x, location.y, value)
