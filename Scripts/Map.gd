@@ -226,5 +226,5 @@ func modify_road(dirs, i):
 		dirs[(i+3)%4] = 1
 	return dirs
 
-func toggle_light(location, value):
+func update_building(location, value):
 	ground.set_cell(location.x, location.y, value)

@@ -42,37 +42,58 @@ var time_start = 0
 var chance = 0.0
 
 var open = true
-var world_time
+var world_time = 0
+# night, dawn, day, dusk
+var day_time = "night"
+
+func _hour_update(hour):
+	world_time = hour
+	if world_time < 6 or world_time > 21:
+		day_time = "night"
+	elif world_time < 8:
+		day_time = "dawn"
+	elif world_time < 18:
+		day_time = "day"
+	elif world_time < 21:
+		day_time = "dusk"
+
 func _process(delta):
 	if open:
-		world_time = world.get_time()
-		if world_time['hour'] < 6 or world_time['hour'] > 18:
-			activity = 'home'
-		else: activity = 'square'
 		match activity:
 			"home":
 				# At home or want to go home.
 				if in_building:
-					pass
+					if not in_building.lights_on and day_time != "day":
+						in_building.turn_lights_on()
+					if day_time == "night":
+						open = false
+						asleep()
+						activity = "sleep"
+					if day_time == "day":
+						open = false
+						prepare_to_leave()
+						activity = "square"
 				if on_square:
 					open = false
 					go(house.location)
+			"sleep":
+				if in_building.lights_on: in_building.turn_lights_off()
+				if day_time != "night": 
+					open = false
+					awaken()
+					activity = "home"
 			"square":
-				# At home and feel like going to the square
+				# At home and preparing to go to the square
 				if in_building:
-					if OS.get_unix_time()-time_start > 1:
-						time_start = OS.get_unix_time()
-						if town.rng.randf_range(0,1) < chance:
-							# Send whoever is inside on a little walk
-							open = false
-							go(town.get_town_square_loc())
-							chance = 0.0
-						else: 
-							chance += 0.05
+					if in_building.lights_on: in_building.turn_lights_off()
+					open = false
+					go(town.get_town_square_loc())
 				# On the square and having fun
 				if on_square:
-					open = false
-					square_activity()
+					if day_time == "day":
+						open = false
+						square_activity()
+					else: activity = "home"
 	
 	if target_step != null and moving_to == null:
 		moving_to = ground.map_to_world(target_step)
@@ -132,14 +153,12 @@ func enter_building():
 	assert(world._mbuildings[location] != 0)
 	in_building = world.towns.get_building(location)
 	in_building.enter(self)
-	in_building.turn_lights_on()
 	$Area2D/CollisionShape2D.disabled=true
 	visible = false
 
 func leave_building():
 	assert(world._mbuildings[location] != 0)
 	in_building.leave(self)
-	in_building.turn_lights_off()
 	in_building = false
 	$Area2D/CollisionShape2D.disabled=false
 	visible = true
@@ -168,30 +187,43 @@ func square_enjoyer():
 	assert(world.towns.get_building(location).type == 3)
 	yield(get_tree().create_timer(1.0), "timeout")
 	
-	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), null, Vector2(0,0)]
+	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
 	var step
 	var building
-	while true:
-		step = choices[world.rng.randi_range(0,5)]
-		if step == null:
-			break
-		building = world.towns.get_building(location + step)
-		if building:
-			if building.type == 3:
-				var target = location + step
-				target_step = target
-				yield(self, "movement_arrived")
-		
-		if world.rng.randf_range(0,1) > 0.5:
-			display_emotion("happy")
-		#yield(tile_enjoyer(1.5), "completed")
-		yield(get_tree().create_timer(1.0), "timeout")
+	step = choices[world.rng.randi_range(0,4)]
+	building = world.towns.get_building(location + step)
+	if building:
+		if building.type == 3:
+			var target = location + step
+			target_step = target
+			yield(self, "movement_arrived")
+	
+	if world.rng.randf_range(0,1) > 0.5:
+		display_emotion("happy")
+	
+	yield(get_tree().create_timer(world.rng.randf_range(0.5,1.0)), "timeout")
 	
 	return true
 
 func go(target):
 	var path = pathfinding.walkRoadPath(location, target, town._mroads)
 	yield(follow_path(path), "completed")
+	open = true
+
+func awaken():
+	yield(get_tree().create_timer(world.rng.randf_range(0.5,3.0)), "timeout")
+	# give a certain amount of time to wake up / do other end-of-night stuff
+	open = true
+
+func asleep():
+	yield(get_tree().create_timer(world.rng.randf_range(0.5,3.0)), "timeout")
+	# give a certain amount of time to go to sleep / do other end-of-evening stuff
+	open = true
+	
+
+func prepare_to_leave():
+	yield(get_tree().create_timer(world.rng.randf_range(0.5,3.0)), "timeout")
+	# give a certain amount of time to prepare for leaving to the square
 	open = true
 
 # only call this if on a square

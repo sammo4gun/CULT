@@ -71,11 +71,11 @@ func leave(person):
 
 func turn_lights_on():
 	lights_on = true
-	town.light_on(self)
+	town.update_building(self)
 
 func turn_lights_off():
 	lights_on = false
-	town.light_off(self)
+	town.update_building(self)
 
 var LIGHT_MAP = {
 	16: 45,

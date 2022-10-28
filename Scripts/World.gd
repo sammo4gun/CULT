@@ -19,6 +19,9 @@ var _mbuildings = {}
 
 var towns_dict = {}
 
+var time = null
+var new_time
+
 onready var selector = $Selector
 onready var GUI = $Camera2D/CanvasLayer/GUI
 onready var drawer = $Map
@@ -48,8 +51,17 @@ func _ready():
 					_mtype, _mheight, \
 					_mroads, _mbuildings)
 	
-	daynightcycle.start_cycle(2)
+	daynightcycle.start_cycle(5)
 	GUI.start_time()
+	time = get_time()["hour"]
+
+var starttime = OS.get_unix_time()
+func _process(_delta):
+	if time != null:
+		new_time = get_time()['hour']
+		if new_time!= time:
+			time = new_time
+			population._hour_update(time)
 
 func make_town():
 	var town = Town.instance()
@@ -153,3 +165,10 @@ func _on_Town_construct_building(building):
 	for loc in building.location:
 		_mbuildings[loc] = building.type
 		_mtype[loc] = 2
+
+var sp = 0
+var sp_factors = [1,2,4,0.25,0.5]
+func _on_GUI_button():
+	sp += 1
+	sp = sp % 5
+	daynightcycle.adjust_cycle(1.0/sp_factors[sp])

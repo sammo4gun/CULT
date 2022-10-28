@@ -10,6 +10,10 @@ onready var ydrawer = $"../YDrawer"
 onready var ground = $"../YDrawer/Ground"
 onready var world = $".."
 
+func _hour_update(hour):
+	for person in pop:
+		person._hour_update(hour)
+
 func make_person(town, house):
 	var pers = Person.instance()
 	pers.create(world, self, town, house)

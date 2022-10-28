@@ -287,8 +287,5 @@ func new_building(location, ty):
 	drawer.add_child(building)
 	return building
 
-func light_on(building):
-	world.towns.set_light(building.location[0], building.get_sprite())
-
-func light_off(building):
-	world.towns.set_light(building.location[0], building.get_sprite())
+func update_building(building):
+	world.towns.update_building(building.location[0], building.get_sprite())

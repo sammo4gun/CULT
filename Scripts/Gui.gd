@@ -1,5 +1,7 @@
 extends MarginContainer
 
+signal button
+
 onready var name_label = $HBoxContainer/Bars/Bar1/Name/Background/Number
 onready var location_label = $HBoxContainer/Bars/Bar1/Location/Background/Number
 onready var building_label = $HBoxContainer/Bars/Bar2/Building/Background/Number
@@ -102,4 +104,4 @@ func _on_Selector_selected_tile(new_selected):
 		rm_display()
 
 func _on_Button_pressed():
-	print("Butt")
+	emit_signal("button")

@@ -123,6 +123,7 @@ script = ExtResource( 7 )
 visible = false
 scale = Vector2( 0.6, 0.6 )
 
+[connection signal="button" from="Camera2D/CanvasLayer/GUI" to="." method="_on_GUI_button"]
 [connection signal="selected_tile" from="Map" to="." method="_on_tile_selected"]
 [connection signal="refresh" from="Towns" to="Camera2D/CanvasLayer/GUI" method="_on_Towns_refresh"]
 [connection signal="selected_person" from="Selector" to="Camera2D/CanvasLayer/GUI" method="_on_Selector_selected_person"]

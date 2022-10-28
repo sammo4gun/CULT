@@ -39,5 +39,5 @@ func check_ownership(location):
 func ping_gui():
 	emit_signal("refresh")
 	
-func set_light(location, value):
-	map.toggle_light(location, value)
+func update_building(location, value):
+	map.update_building(location, value)
