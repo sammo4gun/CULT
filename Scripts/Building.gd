@@ -12,6 +12,9 @@ var town
 var name_generator
 var can_enter = true
 
+# owners of the building
+var owners = []
+
 # who live here
 var inhabitants = []
 
@@ -26,7 +29,7 @@ var TYPES = {
 	"center": 2,
 	"square": 3,
 	"store": 4,
-	"tavern": 5
+	"farm": 5
 }
 
 func build(twn, loc, nmg, pos):
@@ -39,26 +42,36 @@ func build(twn, loc, nmg, pos):
 func get_location():
 	return self.location
 
+func get_id():
+	return TYPES[type]
+
+func get_type():
+	return type
+
 func is_type(ty):
-	if ty in TYPES:
-		if TYPES[ty] == type:
-			return true
+	if type == ty: return true
 	return false
 
 func set_type(ty):
-	type = TYPES[ty]
-	if type == 1:
-		house_name = "Residence"
-	if type == 2:
-		house_name = "Mayors House"
-	if type == 3:
-		house_name = "Town Square"
-		can_enter = false
-	if type == 4:
-		house_name = name_generator.store()
+	type = ty
+	match type:
+		"residential": house_name = "Residence"
+		"center": house_name = "Mayors House"
+		"square":
+			house_name = "Town Square"
+			can_enter = false
+		"store": house_name = name_generator.store()
+		"farm": house_name = "Farm"
+
+func add_owner(person):
+	if not person in owners: 
+		owners.append(person)
+		if len(owners) == 1:
+			house_name += ": " + person.string_name
 
 func set_inhabitant(person, is_owner):
 	if is_owner:
+		owners.append(person)
 		house_name += ": " + person.string_name
 	inhabitants.append(person)
 	inside.append(person)

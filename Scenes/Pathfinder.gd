@@ -84,7 +84,7 @@ func findRoadPath(start, finish, town, obstacles):
 
 func check_adjacent_obs(loc, town, obstacles):
 	if loc in obstacles:
-		if obstacles[loc] in [1,2,4]:
+		if obstacles[loc] in [1,2,4,5]:
 			return true
 		var has_town_road = towns.check_ownership(loc)
 		if has_town_road:
@@ -128,9 +128,7 @@ func walkRoadPath(start, finish, roads):
 					new_pos = parents[new_pos]
 			if new_pos in roads:
 				#compute g
-				var tg = g[promising] + rng.randi_range(1,ROAD_NOISE)
-				if map_types[new_pos] >= 27 and map_types[new_pos] <= 36: 
-					tg += 10
+				var tg = g[promising]
 				#compute h
 				var th = new_pos.distance_to(finish[0])
 				if new_pos in open or new_pos in closed:

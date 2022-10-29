@@ -1,5 +1,7 @@
 extends Node
 
+signal chosen_profession
+
 var Person = preload("res://Scenes/Person.tscn")
 
 var pop = []
@@ -28,3 +30,6 @@ func name_exists(nm):
 		if person.person_name == nm:
 			return true
 	return false
+
+func chosen_profession(person, profession):
+	emit_signal("chosen_profession", person, profession)

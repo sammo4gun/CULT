@@ -44,3 +44,12 @@ func ping_gui():
 	
 func update_building(location, value):
 	map.update_building(location, value)
+
+func _on_Population_chosen_profession(person, prof):
+	match prof:
+		"farmer": 
+			person.town.build_farm(person)
+		"shopkeep":
+			pass
+		"mayor":
+			pass

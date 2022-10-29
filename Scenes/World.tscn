@@ -48,7 +48,6 @@ tracks/0/keys = {
 script = ExtResource( 8 )
 HEIGHT = 100
 WIDTH = 100
-NUM_TOWNS = 1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2( 509.583, 297.677 )
@@ -125,6 +124,7 @@ scale = Vector2( 0.6, 0.6 )
 
 [connection signal="button" from="Camera2D/CanvasLayer/GUI" to="." method="_on_GUI_button"]
 [connection signal="selected_tile" from="Map" to="." method="_on_tile_selected"]
+[connection signal="chosen_profession" from="Population" to="Towns" method="_on_Population_chosen_profession"]
 [connection signal="refresh" from="Towns" to="Camera2D/CanvasLayer/GUI" method="_on_Towns_refresh"]
 [connection signal="selected_person" from="Selector" to="Camera2D/CanvasLayer/GUI" method="_on_Selector_selected_person"]
 [connection signal="selected_tile" from="Selector" to="Camera2D/CanvasLayer/GUI" method="_on_Selector_selected_tile"]

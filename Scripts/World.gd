@@ -159,7 +159,7 @@ func _on_Town_construct_roads(path, buildings):
 
 func _on_Town_construct_building(building):
 	for loc in building.location:
-		_mbuildings[loc] = building.type
+		_mbuildings[loc] = building.get_id()
 		_mtype[loc] = 2
 
 var sp = 0

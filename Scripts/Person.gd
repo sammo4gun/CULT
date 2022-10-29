@@ -25,11 +25,12 @@ var string_name = ""
 var town
 var house
 # Friends
-# Job/Role
+var profession
+var owned_properties = {}
 
 # 3. One-time calc variables
 var square_path #path from home to square
-var square_dist
+var wake_up_time
 
 # DIRECT STATE VARIABLES
 var location
@@ -75,7 +76,7 @@ func _process(delta):
 						open = false
 						asleep()
 						activity = "sleep"
-					if day_time == "day":
+					if world_time >= wake_up_time and world_time <= 20 - (7 - wake_up_time):
 						open = false
 						prepare_to_leave()
 						activity = "square"
@@ -84,7 +85,11 @@ func _process(delta):
 					go(house.location)
 			"sleep":
 				if in_building.lights_on: in_building.turn_lights_off()
-				if day_time != "night": 
+				if day_time in ['day', 'dawn']: 
+					open = false
+					awaken()
+					activity = "home"
+				if world_time >= wake_up_time and world_time <= 20 - (7 - wake_up_time):
 					open = false
 					awaken()
 					activity = "home"
@@ -93,10 +98,13 @@ func _process(delta):
 				if in_building:
 					if in_building.lights_on: in_building.turn_lights_off()
 					open = false
-					go(town.get_town_square_loc())
+					if square_path:
+						go_path(square_path)
+					else: go(town.get_town_square_loc())
 				# On the square and having fun
 				if on_square:
-					if day_time == "day":
+					var square_time = 20 - (7 - wake_up_time)
+					if world_time <= square_time:
 						open = false
 						square_activity()
 					else: activity = "home"
@@ -105,7 +113,7 @@ func _process(delta):
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45
 		if world.towns.get_building(target_step):
-			if world.towns.get_building(target_step).type == 3:
+			if world.towns.get_building(target_step).type in ["square", 'farm']:
 				var target_y = town.rng.randi_range(moving_to.y - 8, moving_to.y + 12)
 				var target_x = town.rng.randi_range(moving_to.x - 10, moving_to.x + 10)
 				moving_to = Vector2(target_x, target_y)
@@ -142,10 +150,27 @@ func make_thoughts():
 	# work to save processing time.
 	if town.get_town_square_loc():
 		square_path = get_path_to(town.get_town_square_loc())
-		square_dist = len(square_path)
+		var square_dist = len(square_path)
+		wake_up_time = 7 - int(square_dist / 10)
 	else: 
-		square_path = []
-		square_dist = 0
+		square_path = [	]
+		wake_up_time = 7
+	
+	if house.type == "center":
+		profession = "mayor"
+	elif house.type == "store":
+		profession = "shopkeep"
+	elif world.rng.randf_range(0,1) > 0.5: 
+		profession = "farmer"
+	population.chosen_profession(self, profession)
+
+func add_property(building):
+	var type = building.get_type()
+	if type in owned_properties:
+		owned_properties[type].append(building)
+	else: 
+		owned_properties[type] = [building]
+	building.add_owner(self)
 
 func get_name():
 	var potname
@@ -203,7 +228,7 @@ func follow_path(path):
 	return true
 
 func square_enjoyer():
-	assert(world.towns.get_building(location).type == 3)
+	assert(world.towns.get_building(location).type == "square")
 	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
 	
 	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
@@ -212,7 +237,7 @@ func square_enjoyer():
 	step = choices[world.rng.randi_range(0,4)]
 	building = world.towns.get_building(location + step)
 	if building:
-		if building.type == 3:
+		if building.type == "square":
 			var target = location + step
 			target_step = target
 			yield(self, "movement_arrived")
@@ -263,7 +288,6 @@ func square_activity():
 	open = true
 
 func on_selected():
-	print(square_dist)
 	display_emotion("surprise")
 	selector.visible = true
 	

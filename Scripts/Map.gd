@@ -104,7 +104,7 @@ func get_pos(location):
 	return pos
 
 var MULTI_ROADS = {
-	1: false, 2: true, 3: true, 4: false
+	1: false, 2: true, 3: true, 4: false, 5: false
 }
 
 var RESIDENTIAL_TILES = {
@@ -160,17 +160,19 @@ func constructBuildings():
 				towns.get_building(tile).set_sprite(CENTER_TILES[d])
 				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 			if _buildings[tile] == 3:
-				_layered_types[0][tile] = town_square_tile(tile)
+				_layered_types[0][tile] = square_tile(tile, 3)
 			if _buildings[tile] == 4:
 				towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
 				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
+			if _buildings[tile] == 5:
+				_layered_types[0][tile] = square_tile(tile, 5)
 
-func town_square_tile(tile):
+func square_tile(tile, type):
 	var i = 0
 	var dirs = [0,0,0,0]
 	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
 		if (tile + dif) in _buildings:
-			if _buildings[(tile + dif)] == 3:
+			if _buildings[(tile + dif)] == type:
 				if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 					dirs[i] = 1
 		i += 1
