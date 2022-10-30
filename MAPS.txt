@@ -81,3 +81,15 @@ NIGHT HOUSE:
 46 houseS
 47 houseE
 48 houseN/W
+
+FARM
+66 farmSWN
+67 farmENW
+68 farmESW
+69 farmNE
+70 farmNES
+71 farmNESW
+72 farmNW
+73 farmSE
+74 farmSW
+75 farmSWN

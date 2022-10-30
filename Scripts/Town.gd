@@ -62,7 +62,6 @@ func build_town(w, h, mtypes, mheights):
 	
 	var current_location
 	
-	print('starting....')
 	# build town square
 	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, false, MAX_SQUARE_SIZE)
 	
@@ -90,7 +89,7 @@ func build_town(w, h, mtypes, mheights):
 			break
 		create_resident(population, self, _mbuildings[current_location])
 	
-	print(clean_roads())
+	clean_roads()
 
 func build_farm(person, nr):
 	for _i in nr:

@@ -54,6 +54,18 @@ var SQUARE_DICT = {
 	[1,1,0,1]: 33
 	}
 
+var FARM_DICT = {
+	[0,1,1,0]: 73,
+	[1,1,0,0]: 69,
+	[1,1,1,0]: 70,
+	[1,0,0,1]: 72,
+	[0,1,1,1]: 68,
+	[0,0,1,1]: 74,
+	[1,1,1,1]: 71,
+	[1,0,1,1]: 66,
+	[1,1,0,1]: 67
+	}
+
 onready var ground = $"../YDrawer/Ground"
 onready var hill = $"../YDrawer/Hill"
 onready var mountain = $"../YDrawer/Mountain"
@@ -170,14 +182,14 @@ func constructBuildings():
 				towns.get_building(tile).set_sprite(CENTER_TILES[d])
 				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 			if _buildings[tile] == 3:
-				_layered_types[0][tile] = square_tile(tile, 3)
+				_layered_types[0][tile] = square_tile(tile, 3, SQUARE_DICT)
 			if _buildings[tile] == 4:
 				towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
 				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 			if _buildings[tile] == 5:
-				_layered_types[0][tile] = square_tile(tile, 5)
+				_layered_types[0][tile] = square_tile(tile, 5, FARM_DICT)
 
-func square_tile(tile, type):
+func square_tile(tile, type, dict):
 	var i = 0
 	var dirs = [0,0,0,0]
 	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
@@ -186,9 +198,9 @@ func square_tile(tile, type):
 				if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 					dirs[i] = 1
 		i += 1
-	if not dirs in SQUARE_DICT:
-		return SQUARE_DICT[[1,1,0,0]]
-	return SQUARE_DICT[dirs]
+	if not dirs in dict:
+		return dict[[1,1,0,0]]
+	return dict[dirs]
 
 func drawRoads():
 	for path in _roads:
