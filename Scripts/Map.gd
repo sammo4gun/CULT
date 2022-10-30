@@ -11,7 +11,8 @@ var _types = {}
 #heights = 0:ground, 1:hill, 2:mountain
 var _heights = {}
 
-var _roads = {}
+var _roads = []
+var _roads_dirs = {}
 
 var _buildings = {}
 
@@ -23,6 +24,7 @@ var WIDTH
 var rng = RandomNumberGenerator.new()
 
 var ROADS_DICT = {
+	[0,0,0,0]: 8, #should never happen
 	[1,0,0,0]: 8, #8
 	[0,1,0,0]: 6, #6
 	[0,0,1,0]: 8, #8
@@ -66,9 +68,11 @@ func map_ready(w, h, types, heights, roads, buildings):
 	_types = {}
 	for tile in types:
 		_types[tile] = types[tile]
-	_roads = {}
-	for tile in roads:
-		_roads[tile] = roads[tile]
+	_roads = []
+	for path in roads:
+		_roads.append(path)
+		for tile in path:
+			_roads_dirs[tile] = []
 	_buildings = {}
 	for tile in buildings:
 		_buildings[tile] = buildings[tile]
@@ -86,17 +90,17 @@ func _unhandled_input(event):
 				emit_signal("selected_tile", setSelected(get_global_mouse_position()))
 
 func constructRoads():
-	for tile in _roads:
-		if _roads[tile]:
+	for path in _roads:
+		for tile in path:
 			var dirs = [0,0,0,0]
 			var i = 0
 			for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
-				if (tile + dif) in _roads:
-					if _roads[tile + dif]: 
-						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-							dirs[i] = 1
+				if (tile + dif) in path or \
+				   (get_road_tile(tile+dif) == 1 and path[tile] == 1):
+					if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+						dirs[i] = 1
 				i += 1
-			_roads[tile] = dirs
+			_roads_dirs[tile] = dirs
 
 func get_pos(location):
 	var pos = ground.map_to_world(location)
@@ -104,7 +108,11 @@ func get_pos(location):
 	return pos
 
 var MULTI_ROADS = {
-	1: false, 2: true, 3: true, 4: false, 5: false
+	1: false, 2: true, 3: true, 4: false, 5: true
+}
+
+var BUILDING_LAYERS = {
+	1: [1,2], 2: [1], 3: [1], 4: [1], 5: [2]
 }
 
 var RESIDENTIAL_TILES = {
@@ -125,6 +133,7 @@ func constructBuildings():
 	for tile in _buildings:
 		if _buildings[tile]:
 			# Set road type of adjacent roads
+			var tiles_to_connect = [] + BUILDING_LAYERS[_buildings[tile]]
 			var i = 0
 			var d = 0
 			var connected = false
@@ -142,13 +151,14 @@ func constructBuildings():
 			if (MULTI_ROADS[_buildings[tile]]) or \
 			   (not connected):
 				for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
-					if (tile + dif) in _roads:
-						if _roads[tile + dif]:
-							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-								_roads[tile + dif] = modify_road(_roads[tile + dif], i)
-								connected=true
-								d=i
-								if not MULTI_ROADS[_buildings[tile]]: 
+					if get_road_tile(tile+dif) in tiles_to_connect:
+						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+							_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
+							connected=true
+							d=i
+							if not MULTI_ROADS[_buildings[tile]]: 
+								tiles_to_connect.erase(get_road_tile(tile+dif))
+								if tiles_to_connect == []:
 									break
 					i += 1
 			# TODO: Set building type depending on whether or not
@@ -177,16 +187,16 @@ func square_tile(tile, type):
 					dirs[i] = 1
 		i += 1
 	if not dirs in SQUARE_DICT:
-		print(dirs)
-		print(tile)
-		print()
 		return SQUARE_DICT[[1,1,0,0]]
 	return SQUARE_DICT[dirs]
 
 func drawRoads():
-	for tile in _roads:
-		if _roads[tile]:
-			_layered_types[0][tile] = ROADS_DICT[_roads[tile]]
+	for path in _roads:
+		for tile in path:
+			if path[tile] == 1:
+				_layered_types[0][tile] = ROADS_DICT[_roads_dirs[tile]]
+			if path[tile] == 2:
+				_layered_types[0][tile] = ROADS_DICT[_roads_dirs[tile]]
 
 # converts the value "4" to one of the correct tree values
 func randomTrees():
@@ -227,6 +237,12 @@ func setSelected(pos):
 				return [selected_pos, (num_layers-1-i)]
 		pos.y += 56 - (16 * (num_layers-1-i))
 	return null
+
+func get_road_tile(tile):
+	for path in _roads:
+		if tile in path:
+			return path[tile]
+	return 0
 
 func modify_road(dirs, i):
 	if dirs[(i+3)%4] == 0:

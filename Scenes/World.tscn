@@ -23,7 +23,7 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 5, 7, 9, 17, 19, 21, 23, 24 ),
+"times": PoolRealArray( 0, 6.5, 8.5, 10.5, 17, 19, 21, 23, 24 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
 "update": 0,
 "values": [ Color( 0.294118, 0.294118, 0.294118, 1 ), Color( 0.427451, 0.4, 0.333333, 1 ), Color( 0.807843, 0.745098, 0.584314, 1 ), Color( 0.929412, 0.929412, 0.929412, 1 ), Color( 0.870588, 0.87451, 0.878431, 1 ), Color( 0.588235, 0.654902, 0.721569, 1 ), Color( 0.384314, 0.537255, 0.686275, 1 ), Color( 0.345098, 0.376471, 0.407843, 1 ), Color( 0.294118, 0.294118, 0.294118, 1 ) ]
@@ -48,6 +48,7 @@ tracks/0/keys = {
 script = ExtResource( 8 )
 HEIGHT = 100
 WIDTH = 100
+NUM_TOWNS = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2( 509.583, 297.677 )

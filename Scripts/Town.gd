@@ -28,8 +28,11 @@ var town_name
 
 var _center
 
-var _mroads = [] #list of locations that have roads
-var _mbuildings = {} #maps map locations to building IDs
+var _mroads = {} #maps map locations to road types
+# 1 = normal road
+# 2 = "personal" road or dirt path
+# 3 = big road ?
+var _mbuildings = {} #maps map locations to buildings
 
 #Utility
 var drawer
@@ -56,17 +59,13 @@ func build_town(w, h, mtypes, mheights):
 		if not world.towns.town_exists(town_name):
 			break
 	
-	var i = 0
-	
 	var current_location
 		
 	# build town square
-	construct_square(i, _center, SDEV_CENTER/2)
-	i+=1
+	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, false)
 	
 	# build town center
-	current_location = construct_building(i, "center", get_town_square_loc()[0], SDEV_CENTER)
-	i+=1
+	current_location = construct_building("center", get_town_square_loc()[0], SDEV_CENTER, ['road1', 'square'], 1)
 	
 	create_resident(population, self, _mbuildings[current_location])
 
@@ -74,22 +73,35 @@ func build_town(w, h, mtypes, mheights):
 	# build store buildings
 	
 	for _i in range(NUM_STORES):
-		current_location = construct_building(i, "store", get_town_square_loc()[0], SDEV_CENTER/2) 
+		current_location = construct_building("store", get_town_square_loc()[0], SDEV_CENTER/2, ['road1', 'square'], 1) 
 		if current_location == null:
 			print("FAILED TO BUILD")
 			break
 		create_resident(population, self, _mbuildings[current_location])
-		i+=1
 	
 	# build residential buildings
 	
 	for _i in range(NUM_RESIDENTIAL):
-		current_location = construct_building(i, "residential", _center, SDEV_RESIDENTIAL)
+		current_location = construct_building("residential", _center, SDEV_RESIDENTIAL, ['road1', 'square'], 1)
 		if current_location == null:
 			print("FAILED TO BUILD")
 			break
 		create_resident(population, self, _mbuildings[current_location])
-		i+=1
+	
+	print(clean_roads())
+
+func build_farm(person):
+	var farmers_house = person.house.location[0]
+	var new_farm = construct_multi_building( \
+				   person.house.location[0], \
+				   SDEV_CENTER/2, \
+				   'farm', \
+				   false, \
+				   [farmers_house], \
+				   2, \
+				   true)
+	if new_farm:
+		person.add_property(new_farm)
 
 func pick_center(w, h):
 	var c
@@ -115,16 +127,17 @@ func get_nearest_town_square(loc):
 			dist = cdist
 	return [th, dist]
 
-func get_nearest_road(loc):
+func get_nearest_road(loc, types):
 	#var dist = th.distance_to(loc)
 	var dist = 999999
 	var cdist
 	var th = null
 	for tile in _mroads:
-		cdist = loc.distance_to(tile)
-		if cdist < dist:
-			th = tile
-			dist = cdist
+		if _mroads[tile] in types:
+			cdist = loc.distance_to(tile)
+			if cdist < dist:
+				th = tile
+				dist = cdist
 	return [th, dist] 
 
 func get_nearest(loc, ls):
@@ -140,19 +153,47 @@ func get_nearest(loc, ls):
 		if cur[1] < closest_distance:
 			closest_distance = cur[1]
 			closest_tile = cur[0]
-	if "road" in ls:
-		cur = get_nearest_road(loc)
+	if "road1" in ls:
+		cur = get_nearest_road(loc, [1])
+		if cur[1] < closest_distance:
+			closest_distance = cur[1]
+			closest_tile = cur[0]
+	if "road2" in ls:
+		cur = get_nearest_road(loc, [2])
 		if cur[1] < closest_distance:
 			closest_distance = cur[1]
 			closest_tile = cur[0]
 	return closest_tile
 
-func canpath_to(loc, target):
+func canwalk_to(loc, target, roads):
+	return pathfinder.walkRoadPath(loc, target, roads)
+	
+func get_connected_buildings(loc, roads):
+	var connections = 0
+	for place in _mbuildings:
+		if canwalk_to(loc, [place], roads):
+			connections += 1
+	return connections
+
+func clean_roads():
+	var max_connections = get_connected_buildings(get_town_square_loc()[0], _mroads)
+	var temp_roads = {}
+	for rd in _mroads:
+		temp_roads[rd] = _mroads[rd]
+	var erasable_roads = []
+	for rd in _mroads:
+		temp_roads.erase(rd)
+		if not get_connected_buildings(get_town_square_loc()[0], temp_roads) < max_connections:
+			if _mroads[rd] == 1 and not rd in _mbuildings: erasable_roads.append(rd)
+		temp_roads[rd] = _mroads[rd]
+	return erasable_roads
+
+func canpath_to(loc, target, type):
 	if target != null:
-		return pathfinder.findRoadPath(loc, target, self, world._mbuildings)
+		return pathfinder.findRoadPath(loc, target, self, world._mbuildings, type, world._mroads)
 	return [loc]
 
-func canbuild(loc):
+func canbuild(loc, check_adj):
 	#check its within the map & is buildable
 	if loc.x >= 0 and loc.x < width and loc.y >= 0  and loc.y < height \
 		and not loc in _mbuildings \
@@ -161,7 +202,12 @@ func canbuild(loc):
 		and map_types[loc] != 3 \
 		and not loc in _mroads \
 		and not world.is_road_tile(loc):
-			return true
+			if not check_adj: return true
+			else: 
+				for dif in [Vector2(0,-1),Vector2(1,0),Vector2(0,1),Vector2(-1,0)]:
+					if not canbuild(loc+dif, false):
+						return false
+				return true
 	return false
 
 func get_town_hall_loc():
@@ -208,13 +254,7 @@ func random_location(center, sdev):
 	var y = int(round(rng.randfn(center.y, sdev))) % height
 	return Vector2(x, y)
 
-func build_farm(person):
-	var farmers_house = person.house
-	var new_farm = construct_farm(farmers_house.location[0], 2)
-	if new_farm:
-		person.add_property(new_farm)
-
-func construct_building(i, type, center, sdev):
+func construct_building(type, center, sdev, connect, road_type):
 	var loc
 	var time_start = OS.get_unix_time()
 	rng.randomize()
@@ -235,9 +275,9 @@ func construct_building(i, type, center, sdev):
 		else:
 			loc = random_location(center, sdev)
 		var p
-		if canbuild(loc): 
-			var tar = get_nearest(loc, ["road", "square"])
-			p = canpath_to(loc,tar)
+		if canbuild(loc, false): 
+			var tar = get_nearest(loc, connect)
+			p = canpath_to(loc, tar, road_type)
 		else:
 			p = false
 		if p:
@@ -246,17 +286,17 @@ func construct_building(i, type, center, sdev):
 				_mbuildings[loc] = new_build
 				for tile in p:
 					if not tile in _mroads and not tile in _mbuildings:
-						_mroads.append(tile)
-				emit_signal("construct_roads", p, _mbuildings)
+						_mroads[tile] = road_type
+				emit_signal("construct_roads", p, _mbuildings, road_type)
 				emit_signal("construct_building", new_build)
 				return loc
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
-			print("Couldn't finish building: " + str(i))
+			print("Couldn't finish building")
 			return null
 
 # This is for special types of buildings, that require different 
 # shapes than just 1x1
-func construct_square(i, center, sdev):
+func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, no_adj):
 	var x
 	var y
 	var x_sz
@@ -278,83 +318,34 @@ func construct_square(i, center, sdev):
 		
 		var cb = true
 		for loc in locs:
-			if not canbuild(loc):
+			if not canbuild(loc, no_adj):
 				cb = false
 		
 		#check if at least one is pathable
 		var path = false
 		if cb:
 			for loc in locs:
-				var tar = get_nearest(loc, ['road', 'square'])
-				path = canpath_to(loc,tar)
+				var tar = get_nearest(loc, paths_to)
+				path = canpath_to(loc, tar, road_type)
 				if path: break
 		
 		#can we build?
 		if path:
 			if len(path) < MAX_PATH_DIST:
-				var new_build = new_building(locs, "square")
+				var new_build = new_building(locs, type)
 				for loc in locs: 
 					_mbuildings[loc] = new_build
-					_mroads.append(loc)
+					if is_road: 
+						_mroads[loc] = road_type
 				for tile in path:
 					if not tile in _mroads and not tile in _mbuildings:
-						_mroads.append(tile)
-				emit_signal("construct_roads", path, _mbuildings)
-				emit_signal("construct_building", new_build)
-				return true
-		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
-			print("Couldn't finish building: " + str(i))
-			return false
-
-func construct_farm(center, sdev):
-	var x
-	var y
-	var x_sz
-	var y_sz
-	var locs
-	var time_start = OS.get_unix_time()
-	#keep repeating until we find it... or time runs out
-	while true:
-		rng.randomize()
-		x = round(rng.randfn(center.x, sdev))
-		y = round(rng.randfn(center.y, sdev))
-		x_sz = rng.randi_range(2,MAX_SQUARE_SIZE)
-		y_sz = max(2, x_sz + rng.randi_range(-1,+1))
-		locs = []
-		for wid in range(x_sz):
-			for hi in range(y_sz):
-				locs.append(Vector2(x,y) + Vector2(wid, hi))
-		#check if all are buildable
-		
-		var cb = true
-		for loc in locs:
-			if not canbuild(loc):
-				cb = false
-		
-		#check if at least one is pathable
-		var path = false
-		if cb:
-			for loc in locs:
-				var tar = get_nearest(loc, ['road'])
-				path = canpath_to(loc, tar)
-				if path: break
-		
-		#can we build?
-		if path:
-			if len(path) < MAX_PATH_DIST:
-				var new_build = new_building(locs, "farm")
-				for loc in locs: 
-					_mbuildings[loc] = new_build
-				for tile in path:
-					if not tile in _mroads and not tile in _mbuildings:
-						_mroads.append(tile)
-				emit_signal("construct_roads", path, _mbuildings)
+						_mroads[tile] = road_type
+				emit_signal("construct_roads", path, _mbuildings, road_type)
 				emit_signal("construct_building", new_build)
 				return new_build
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
-			print("Couldn't finish farm")
+			print("Couldn't finish building")
 			return false
-
 
 func create_resident(pop, town, house):
 	pop.make_person(town, house)
@@ -365,7 +356,9 @@ func get_building(location):
 	return _mbuildings[location]
 
 func get_road(location):
-	return location in _mroads
+	if location in _mroads:
+		return _mroads[location]
+	return false
 
 func new_building(location, ty):
 	var building = Building.instance()

@@ -15,7 +15,7 @@ var Town = preload("res://Scenes/Town.tscn")
 # generated map visible features
 var _mtype = {}
 var _mheight = {}
-var _mroads = {}
+var _mroads = [] # list of dictionaries of tiles with roads
 var _mbuildings = {}
 
 var towns_dict = {}
@@ -41,11 +41,13 @@ func _ready():
 	pathfinding.initialisePathfinding(WIDTH, HEIGHT, _mtype, _mheight)
 	
 	#include code to produce civilization
-	_mroads = buildEmpty()
+	#_mroads = buildEmpty()
 	_mbuildings = buildEmpty()
 	
 	for i in NUM_TOWNS:
 		towns_dict["town" + str(i)] = make_town()
+	
+	# clean up roads by removing roads that don't connect buildings
 	
 	GUI.map_ready(_altitude, _mbuildings)
 	drawer.map_ready(WIDTH, HEIGHT, \
@@ -136,7 +138,10 @@ func terrainMap():
 				_mheight[coord] = 2
 
 func is_road_tile(tile):
-	return _mroads[tile]
+	for path in _mroads:
+		if tile in path:
+			return true
+	return false
 
 func get_time():
 	return daynightcycle.get_time()
@@ -149,13 +154,14 @@ func _on_tile_selected(tile):
 func selected_person(person):
 	selector.selectPerson(person)
 
-func _on_Town_construct_roads(path, buildings):
+func _on_Town_construct_roads(path, buildings, type):
 	if len(path) > 1:
+		var p = {}
 		for tile in path:
-			if not tile in buildings:
-				#set roads to be a road
-				_mroads[tile] = 1
+			if not tile in buildings and not is_road_tile(tile):
+				p[tile] = type
 				_mtype[tile] = 2
+		_mroads.append(p)
 
 func _on_Town_construct_building(building):
 	for loc in building.location:

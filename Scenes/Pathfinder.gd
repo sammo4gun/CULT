@@ -25,7 +25,7 @@ func initialisePathfinding(w, h, mtypes, mheights):
 # For now, lets say the higher portions of the map are simply not 
 # available.
 # Returns a list of the coords or false.
-func findRoadPath(start, finish, town, obstacles):
+func findRoadPath(start, finish, town, buildings, road_type, roads):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}
@@ -59,7 +59,7 @@ func findRoadPath(start, finish, town, obstacles):
 						return path
 					new_pos = parents[new_pos]
 			if new_pos in map_types:
-				var build_restricted = check_adjacent_obs(new_pos, town, obstacles)
+				var build_restricted = check_adjacent_obs(new_pos, town, buildings, road_type, roads)
 				if map_types[new_pos] != 3 and \
 					map_heights[new_pos] == 0 and \
 					not build_restricted:
@@ -82,14 +82,18 @@ func findRoadPath(start, finish, town, obstacles):
 						open.append(new_pos)
 			closed.append(promising)
 
-func check_adjacent_obs(loc, town, obstacles):
-	if loc in obstacles:
-		if obstacles[loc] in [1,2,4,5]:
+func check_adjacent_obs(loc, town, buildings, road_type, roads):
+	if loc in buildings:
+		if buildings[loc] in [1,2,4,5]:
 			return true
 		var has_town_road = towns.check_ownership(loc)
 		if has_town_road:
 			if not has_town_road == town:
 				return true
+		for path in roads:
+			if loc in path:
+				if path[loc] != road_type:
+					return true
 	return false
 
 func walkRoadPath(start, finish, roads):

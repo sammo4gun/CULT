@@ -160,7 +160,7 @@ func make_thoughts():
 		profession = "mayor"
 	elif house.type == "store":
 		profession = "shopkeep"
-	elif world.rng.randf_range(0,1) > 0.5: 
+	elif len(square_path) > 3 and world.rng.randf_range(0,1) > 0.5: 
 		profession = "farmer"
 	population.chosen_profession(self, profession)
 
