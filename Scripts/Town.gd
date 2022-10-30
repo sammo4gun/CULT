@@ -2,6 +2,7 @@ extends Node2D
 
 signal construct_roads
 signal construct_building
+signal destroy_roads
 
 #Generation Variables
 export var NUM_RESIDENTIAL = 5
@@ -60,9 +61,10 @@ func build_town(w, h, mtypes, mheights):
 			break
 	
 	var current_location
-		
+	
+	print('starting....')
 	# build town square
-	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, false)
+	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, false, MAX_SQUARE_SIZE)
 	
 	# build town center
 	current_location = construct_building("center", get_town_square_loc()[0], SDEV_CENTER, ['road1', 'square'], 1)
@@ -90,18 +92,20 @@ func build_town(w, h, mtypes, mheights):
 	
 	print(clean_roads())
 
-func build_farm(person):
-	var farmers_house = person.house.location[0]
-	var new_farm = construct_multi_building( \
-				   person.house.location[0], \
-				   SDEV_CENTER/2, \
-				   'farm', \
-				   false, \
-				   [farmers_house], \
-				   2, \
-				   true)
-	if new_farm:
-		person.add_property(new_farm)
+func build_farm(person, nr):
+	for _i in nr:
+		var farmers_house = person.house.location[0]
+		var new_farm = construct_multi_building( \
+					   person.house.location[0], \
+					   SDEV_CENTER/2, \
+					   'farm', \
+					   false, \
+					   [farmers_house], \
+					   2, \
+					   true,
+					   5)
+		if new_farm:
+			person.add_property(new_farm)
 
 func pick_center(w, h):
 	var c
@@ -165,27 +169,59 @@ func get_nearest(loc, ls):
 			closest_tile = cur[0]
 	return closest_tile
 
-func canwalk_to(loc, target, roads):
-	return pathfinder.walkRoadPath(loc, target, roads)
+func canwalk_to(loc, target, roads, type):
+	return pathfinder.walkRoadPath(loc, target, roads, type)
 	
-func get_connected_buildings(loc, roads):
+func get_connected_buildings(loc, roads, road_type):
 	var connections = 0
+	if not loc in roads: return 0
+	elif not roads[loc] in road_type: return 0
 	for place in _mbuildings:
-		if canwalk_to(loc, [place], roads):
+		if canwalk_to(loc, [place], roads, road_type):
 			connections += 1
 	return connections
 
+func get_connected_squares(loc, roads, road_type, done):
+	var all_connected = [loc]
+	var open = [loc]
+	var closed = []
+	var current
+	while len(open) > 0:
+		current = open[0]
+		for dif in [Vector2(0,-1),Vector2(1,0),Vector2(0,1),Vector2(-1,0)]:
+			if (current + dif) in roads and not (current+dif) in closed:
+				if roads[current+dif] == road_type:
+					all_connected.append(current+dif)
+					open.append(current+dif)
+			closed.append(current)
+			open.erase(current)
+	return all_connected
+
 func clean_roads():
-	var max_connections = get_connected_buildings(get_town_square_loc()[0], _mroads)
-	var temp_roads = {}
-	for rd in _mroads:
-		temp_roads[rd] = _mroads[rd]
 	var erasable_roads = []
-	for rd in _mroads:
-		temp_roads.erase(rd)
-		if not get_connected_buildings(get_town_square_loc()[0], temp_roads) < max_connections:
-			if _mroads[rd] == 1 and not rd in _mbuildings: erasable_roads.append(rd)
-		temp_roads[rd] = _mroads[rd]
+	for type in [1,2]:
+		var roads_to_go = []
+		var temp_roads = {}
+		for rd in _mroads:
+			if _mroads[rd] == type:
+				temp_roads[rd] = _mroads[rd]
+				roads_to_go.append(rd)
+		#var i = 0
+		while len(roads_to_go) > 0:
+			var building_connections = get_connected_buildings(roads_to_go[0], _mroads, [type])
+			var square_connections = get_connected_squares(roads_to_go[0], _mroads, type, [])
+			for square in square_connections:
+				roads_to_go.erase(square)
+			for rd in square_connections:
+				temp_roads.erase(rd)
+				if not get_connected_buildings(square_connections[0], temp_roads, [type]) < building_connections:
+					if _mroads[rd] == type and not rd in _mbuildings: erasable_roads.append(rd)
+				temp_roads[rd] = _mroads[rd]
+	
+	emit_signal("destroy_roads", erasable_roads)
+	for tile in erasable_roads:
+		_mroads.erase(tile)
+	
 	return erasable_roads
 
 func canpath_to(loc, target, type):
@@ -296,7 +332,7 @@ func construct_building(type, center, sdev, connect, road_type):
 
 # This is for special types of buildings, that require different 
 # shapes than just 1x1
-func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, no_adj):
+func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, no_adj, size):
 	var x
 	var y
 	var x_sz
@@ -308,7 +344,7 @@ func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, 
 		rng.randomize()
 		x = round(rng.randfn(center.x, sdev))
 		y = round(rng.randfn(center.y, sdev))
-		x_sz = rng.randi_range(2,MAX_SQUARE_SIZE)
+		x_sz = rng.randi_range(2,size)
 		y_sz = max(2, x_sz + rng.randi_range(-1,+1))
 		locs = []
 		for wid in range(x_sz):
@@ -323,11 +359,17 @@ func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, 
 		
 		#check if at least one is pathable
 		var path = false
+		var tar
+		var tpath
 		if cb:
 			for loc in locs:
-				var tar = get_nearest(loc, paths_to)
-				path = canpath_to(loc, tar, road_type)
-				if path: break
+				tar = get_nearest(loc, paths_to)
+				if not path: path = canpath_to(loc, tar, road_type)
+				else:
+					tpath = canpath_to(loc,tar,road_type)
+					if tpath:
+						if len(tpath) < len(path):
+							path = tpath
 		
 		#can we build?
 		if path:

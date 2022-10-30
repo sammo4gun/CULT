@@ -92,11 +92,13 @@ func check_adjacent_obs(loc, town, buildings, road_type, roads):
 				return true
 		for path in roads:
 			if loc in path:
+				if road_type == 2:
+					return true
 				if path[loc] != road_type:
 					return true
 	return false
 
-func walkRoadPath(start, finish, roads):
+func walkRoadPath(start, finish, roads, road_types):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}
@@ -131,19 +133,20 @@ func walkRoadPath(start, finish, roads):
 						return path
 					new_pos = parents[new_pos]
 			if new_pos in roads:
-				#compute g
-				var tg = g[promising]
-				#compute h
-				var th = new_pos.distance_to(finish[0])
-				if new_pos in open or new_pos in closed:
-					if g[new_pos] + h[new_pos] > tg+th:
+				if roads[new_pos] in road_types:
+					#compute g
+					var tg = g[promising]
+					#compute h
+					var th = new_pos.distance_to(finish[0])
+					if new_pos in open or new_pos in closed:
+						if g[new_pos] + h[new_pos] > tg+th:
+							g[new_pos] = tg
+							h[new_pos] = th
+							parents[new_pos] = promising
+							open.append(new_pos)
+					else:
 						g[new_pos] = tg
 						h[new_pos] = th
 						parents[new_pos] = promising
 						open.append(new_pos)
-				else:
-					g[new_pos] = tg
-					h[new_pos] = th
-					parents[new_pos] = promising
-					open.append(new_pos)
 			closed.append(promising)

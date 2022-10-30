@@ -70,6 +70,7 @@ func make_town():
 	var town = Town.instance()
 	town.connect("construct_roads", self, "_on_Town_construct_roads")
 	town.connect("construct_building", self, "_on_Town_construct_building")
+	town.connect("destroy_roads", self, "_on_Town_destroy_roads")
 	town.set_parents(drawer, pathfinding, self, namegenerator, population)
 	towns.add_child(town)
 	
@@ -167,6 +168,13 @@ func _on_Town_construct_building(building):
 	for loc in building.location:
 		_mbuildings[loc] = building.get_id()
 		_mtype[loc] = 2
+
+func _on_Town_destroy_roads(roads):
+	for tile in roads:
+		for path in _mroads:
+			if tile in path:
+				path.erase(tile)
+				_mtype[tile] = 0
 
 var sp = 0
 var sp_factors = [1,2,4,0.25,0.5]

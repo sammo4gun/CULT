@@ -48,7 +48,10 @@ func update_building(location, value):
 func _on_Population_chosen_profession(person, prof):
 	match prof:
 		"farmer": 
-			person.town.build_farm(person)
+			#if get_parent().rng.randf_range(0,1) < 0.8: 
+			person.town.build_farm(person, 1)
+			#else: 
+			#	person.town.build_farm(person, 2)
 		"shopkeep":
 			pass
 		"mayor":

@@ -255,12 +255,12 @@ func timer_length(mini, maxi):
 	return mini/world.speed_factor
 
 func go(target):
-	var path = pathfinding.walkRoadPath(location, target, town._mroads)
+	var path = pathfinding.walkRoadPath(location, target, town._mroads, [1,2])
 	yield(follow_path(path), "completed")
 	open = true
 
 func get_path_to(target):
-	return pathfinding.walkRoadPath(location, target, town._mroads)
+	return pathfinding.walkRoadPath(location, target, town._mroads, [1,2])
 
 func go_path(path):
 	yield(follow_path(path), "completed")
