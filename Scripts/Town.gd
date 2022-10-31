@@ -63,7 +63,7 @@ func build_town(w, h, mtypes, mheights):
 	var current_location
 	
 	# build town square
-	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, false, MAX_SQUARE_SIZE)
+	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, true, MAX_SQUARE_SIZE)
 	
 	# build town center
 	current_location = construct_building("center", get_town_square_loc()[0], SDEV_CENTER, ['road1', 'square'], 1)
@@ -169,18 +169,28 @@ func get_nearest(loc, ls):
 	return closest_tile
 
 func canwalk_to(loc, target, roads, type):
-	return pathfinder.walkRoadPath(loc, target, roads, type)
+	return pathfinder.walkRoadPath(loc, target, world._mbuildings, roads, type, true)
 	
+var BUILD_TO_ROAD = {
+	"residential": [1,2],
+	"center": [1,2],
+	"square": [1],
+	"store": [1,2],
+	"farm": [2]
+}
+
 func get_connected_buildings(loc, roads, road_type):
 	var connections = 0
 	if not loc in roads: return 0
 	elif not roads[loc] in road_type: return 0
 	for place in _mbuildings:
-		if canwalk_to(loc, [place], roads, road_type):
-			connections += 1
+		for type in road_type:
+			if type in BUILD_TO_ROAD[_mbuildings[place].type]:
+				if canwalk_to(loc, [place], roads, road_type):
+					connections += 1
 	return connections
 
-func get_connected_squares(loc, roads, road_type, done):
+func get_connected_squares(loc, roads, road_type):
 	var all_connected = [loc]
 	var open = [loc]
 	var closed = []
@@ -197,7 +207,7 @@ func get_connected_squares(loc, roads, road_type, done):
 	return all_connected
 
 func clean_roads():
-	var erasable_roads = []
+	var all_roads_erased = []
 	for type in [1,2]:
 		var roads_to_go = []
 		var temp_roads = {}
@@ -208,20 +218,21 @@ func clean_roads():
 		#var i = 0
 		while len(roads_to_go) > 0:
 			var building_connections = get_connected_buildings(roads_to_go[0], _mroads, [type])
-			var square_connections = get_connected_squares(roads_to_go[0], _mroads, type, [])
+			var square_connections = get_connected_squares(roads_to_go[0], _mroads, type)
 			for square in square_connections:
 				roads_to_go.erase(square)
 			for rd in square_connections:
-				temp_roads.erase(rd)
-				if not get_connected_buildings(square_connections[0], temp_roads, [type]) < building_connections:
-					if _mroads[rd] == type and not rd in _mbuildings: erasable_roads.append(rd)
-				temp_roads[rd] = _mroads[rd]
-	
-	emit_signal("destroy_roads", erasable_roads)
-	for tile in erasable_roads:
-		_mroads.erase(tile)
-	
-	return erasable_roads
+				if rd in _mroads:
+					temp_roads.erase(rd)
+					if not get_connected_buildings(square_connections[0], temp_roads, [type]) < building_connections:
+						if _mroads[rd] == type and not rd in _mbuildings: 
+							all_roads_erased.append(rd)
+							emit_signal("destroy_roads", [rd])
+							_mroads.erase(rd)
+						else: temp_roads[rd] = _mroads[rd]
+					else: temp_roads[rd] = _mroads[rd]
+		
+	return all_roads_erased
 
 func canpath_to(loc, target, type):
 	if target != null:

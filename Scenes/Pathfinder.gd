@@ -98,7 +98,19 @@ func check_adjacent_obs(loc, town, buildings, road_type, roads):
 					return true
 	return false
 
-func walkRoadPath(start, finish, roads, road_types):
+func is_walkable(loc, buildings, roads, must_roads, road_types):
+	if must_roads:
+		if loc in roads:
+			if roads[loc] in road_types:
+				return true
+	elif loc in buildings:
+		if buildings[loc] in [1,2,4]:
+			return false
+		if map_types[loc] != 3 and map_heights[loc] == 0:
+			return true
+	return false
+
+func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}
@@ -132,21 +144,24 @@ func walkRoadPath(start, finish, roads, road_types):
 						path.invert()
 						return path
 					new_pos = parents[new_pos]
-			if new_pos in roads:
-				if roads[new_pos] in road_types:
-					#compute g
-					var tg = g[promising]
-					#compute h
-					var th = new_pos.distance_to(finish[0])
-					if new_pos in open or new_pos in closed:
-						if g[new_pos] + h[new_pos] > tg+th:
-							g[new_pos] = tg
-							h[new_pos] = th
-							parents[new_pos] = promising
-							open.append(new_pos)
-					else:
+			if is_walkable(new_pos, buildings, roads, must_roads, road_types):
+				#compute g
+				var tg = g[promising]
+				if new_pos in roads:
+					tg += 1
+				else: tg += 10
+				
+				#compute h
+				var th = new_pos.distance_to(finish[0])
+				if new_pos in open or new_pos in closed:
+					if g[new_pos] + h[new_pos] > tg+th:
 						g[new_pos] = tg
 						h[new_pos] = th
 						parents[new_pos] = promising
 						open.append(new_pos)
+				else:
+					g[new_pos] = tg
+					h[new_pos] = th
+					parents[new_pos] = promising
+					open.append(new_pos)
 			closed.append(promising)

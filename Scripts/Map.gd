@@ -175,19 +175,20 @@ func constructBuildings():
 					i += 1
 			# TODO: Set building type depending on whether or not
 			# there are adjacent roads.
-			if _buildings[tile] == 1:
-				towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
-				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
-			if _buildings[tile] == 2:
-				towns.get_building(tile).set_sprite(CENTER_TILES[d])
-				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
-			if _buildings[tile] == 3:
-				_layered_types[0][tile] = square_tile(tile, 3, SQUARE_DICT)
-			if _buildings[tile] == 4:
-				towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
-				_layered_types[0][tile] = towns.get_building(tile).get_sprite()
-			if _buildings[tile] == 5:
-				_layered_types[0][tile] = square_tile(tile, 5, FARM_DICT)
+			match _buildings[tile]:
+				1:
+					towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
+					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
+				2:
+					towns.get_building(tile).set_sprite(CENTER_TILES[d])
+					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
+				3:
+					_layered_types[0][tile] = square_tile(tile, 3, SQUARE_DICT)
+				4:
+					towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
+					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
+				5:
+					_layered_types[0][tile] = square_tile(tile, 5, FARM_DICT)
 
 func square_tile(tile, type, dict):
 	var i = 0
