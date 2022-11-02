@@ -7,7 +7,8 @@ var building = null
 signal selected_tile
 signal selected_person
 
-onready var ground = get_node('/root/World/YDrawer/Ground')
+onready var ground = $"../YDrawer/Ground"
+onready var towns = $"../Towns"
 
 func getSelected():
 	return selected_tile

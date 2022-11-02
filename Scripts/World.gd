@@ -5,6 +5,14 @@ export var WIDTH = 40
 export var NUM_TOWNS = 3
 var speed_factor = 1
 
+var SPEEDS = {
+	0: 1.5,
+	1: 2,
+	2: 1,
+	4: 2,
+	5: 2.5
+}
+
 # statistics about the map
 var _altitude = {}
 var _moisture = {}
@@ -22,6 +30,7 @@ var towns_dict = {}
 
 var time = null
 var new_time
+var day = 1
 
 onready var selector = $Selector
 onready var GUI = $Camera2D/CanvasLayer/GUI
@@ -65,6 +74,8 @@ func _process(_delta):
 		if new_time!= time:
 			time = new_time
 			population._hour_update(time)
+			if new_time == 0:
+				day += 1
 
 func make_town():
 	var town = Town.instance()

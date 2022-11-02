@@ -5,6 +5,7 @@ onready var lights = $HouseLights
 var type
 var location
 var house_name
+var map_connected = false
 
 var town_name
 var town
@@ -57,11 +58,13 @@ func set_type(ty):
 	match type:
 		"residential": house_name = "Residence"
 		"center": house_name = "Mayors House"
-		"square":
+		"square": 
 			house_name = "Town Square"
 			can_enter = false
 		"store": house_name = name_generator.store()
-		"farm": house_name = "Farm"
+		"farm": 
+			house_name = "Farm"
+			can_enter = false
 
 func add_owner(person):
 	if not person in owners: 

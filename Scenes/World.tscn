@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Scenes/Selector.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/Gui.tscn" type="PackedScene" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://Scripts/NameGenerator.gd" type="Script" id=10]
 [ext_resource path="res://Scenes/Population.gd" type="Script" id=11]
 [ext_resource path="res://Scripts/Day_Night.gd" type="Script" id=12]
+[ext_resource path="res://Scripts/Behaviours.gd" type="Script" id=13]
 
 [sub_resource type="Animation" id=1]
 resource_name = "Day_night_cycle"
@@ -26,7 +27,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 6.5, 8.5, 10.5, 17, 19, 21, 23, 24 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
 "update": 0,
-"values": [ Color( 0.294118, 0.294118, 0.294118, 1 ), Color( 0.427451, 0.4, 0.333333, 1 ), Color( 0.807843, 0.745098, 0.584314, 1 ), Color( 0.929412, 0.929412, 0.929412, 1 ), Color( 0.870588, 0.87451, 0.878431, 1 ), Color( 0.588235, 0.654902, 0.721569, 1 ), Color( 0.384314, 0.537255, 0.686275, 1 ), Color( 0.345098, 0.376471, 0.407843, 1 ), Color( 0.294118, 0.294118, 0.294118, 1 ) ]
+"values": [ Color( 0.294118, 0.294118, 0.294118, 1 ), Color( 0.427451, 0.4, 0.333333, 1 ), Color( 0.807843, 0.596078, 0.584314, 1 ), Color( 0.929412, 0.929412, 0.929412, 1 ), Color( 0.870588, 0.87451, 0.878431, 1 ), Color( 0.588235, 0.654902, 0.721569, 1 ), Color( 0.384314, 0.537255, 0.686275, 1 ), Color( 0.345098, 0.376471, 0.407843, 1 ), Color( 0.294118, 0.294118, 0.294118, 1 ) ]
 }
 
 [sub_resource type="Animation" id=2]
@@ -48,7 +49,7 @@ tracks/0/keys = {
 script = ExtResource( 8 )
 HEIGHT = 100
 WIDTH = 100
-NUM_TOWNS = 2
+NUM_TOWNS = 1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2( 509.583, 297.677 )
@@ -80,6 +81,9 @@ script = ExtResource( 10 )
 
 [node name="Population" type="Node" parent="."]
 script = ExtResource( 11 )
+
+[node name="Behaviours" type="Node" parent="Population"]
+script = ExtResource( 13 )
 
 [node name="Towns" type="Node" parent="."]
 script = ExtResource( 3 )

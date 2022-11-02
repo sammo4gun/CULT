@@ -149,6 +149,9 @@ func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
 				var tg = g[promising]
 				if new_pos in roads:
 					tg += 1
+					if promising in roads:
+						if roads[promising] != roads[new_pos]:
+							tg += 5
 				else: tg += 10
 				
 				#compute h

@@ -29,6 +29,7 @@ var town_name
 
 var _center
 
+var _owners = {}
 var _mroads = {} #maps map locations to road types
 # 1 = normal road
 # 2 = "personal" road or dirt path
@@ -63,7 +64,15 @@ func build_town(w, h, mtypes, mheights):
 	var current_location
 	
 	# build town square
-	construct_multi_building(_center, SDEV_CENTER/2, 'square', true, ['road1', 'square'], 1, true, MAX_SQUARE_SIZE)
+	construct_multi_building(_center, \
+							 SDEV_CENTER/2, \
+							 'square', \
+							 true, \
+							 ['road1', 'square'], \
+							 1, \
+							 true, \
+							 MAX_SQUARE_SIZE,
+							 self)
 	
 	# build town center
 	current_location = construct_building("center", get_town_square_loc()[0], SDEV_CENTER, ['road1', 'square'], 1)
@@ -102,9 +111,11 @@ func build_farm(person, nr):
 					   [farmers_house], \
 					   2, \
 					   true,
-					   5)
+					   5,
+					   person)
 		if new_farm:
 			person.add_property(new_farm)
+			person.set_work()
 
 func pick_center(w, h):
 	var c
@@ -143,13 +154,25 @@ func get_nearest_road(loc, types):
 				dist = cdist
 	return [th, dist] 
 
+func get_nearest_building_path(loc, v):
+	var closest_dist = loc.distance_to(v)
+	var closest_tile = v
+	for tile in _mroads:
+		if _mroads[tile] == 2:
+			if v in get_connected_squares(tile, _mroads, 2):
+				if closest_dist > tile.distance_to(loc):
+					closest_tile = tile
+	return closest_tile
+
 func get_nearest(loc, ls):
 	var closest_distance = 999999
 	var closest_tile = null
 	var cur
 	for v in ls:
 		if typeof(v) == 5: #if it is a vector2 (i.e. location)
-			closest_tile = v
+			if v in _mbuildings:
+				closest_tile = get_nearest_building_path(loc, v)
+			else: closest_tile = v
 			closest_distance = loc.distance_to(v)
 	if "square" in ls:
 		cur = get_nearest_town_square(loc)
@@ -179,18 +202,23 @@ var BUILD_TO_ROAD = {
 	"farm": [2]
 }
 
-func get_connected_buildings(loc, roads, road_type):
+func get_connected_buildings(loc, roads, road_type, owner_only = false):
 	var connections = 0
-	if not loc in roads: return 0
-	elif not roads[loc] in road_type: return 0
+	var done_buildings = []
+	if not loc in _mbuildings:
+		if not loc in roads: return 0
+		elif not roads[loc] in road_type: return 0
 	for place in _mbuildings:
-		for type in road_type:
-			if type in BUILD_TO_ROAD[_mbuildings[place].type]:
-				if canwalk_to(loc, [place], roads, road_type):
-					connections += 1
+		if not owner_only or get_tile_owner(loc) == get_tile_owner(place):
+			for type in road_type:
+				if type in BUILD_TO_ROAD[_mbuildings[place].type]:
+					if canwalk_to(loc, [place], roads, road_type):
+						if not _mbuildings[place] in done_buildings:
+							done_buildings.append(_mbuildings[place])
+							connections += 1
 	return connections
 
-func get_connected_squares(loc, roads, road_type):
+func get_connected_squares(loc, roads, road_type, owner_only = false):
 	var all_connected = [loc]
 	var open = [loc]
 	var closed = []
@@ -200,8 +228,9 @@ func get_connected_squares(loc, roads, road_type):
 		for dif in [Vector2(0,-1),Vector2(1,0),Vector2(0,1),Vector2(-1,0)]:
 			if (current + dif) in roads and not (current+dif) in closed:
 				if roads[current+dif] == road_type:
-					all_connected.append(current+dif)
-					open.append(current+dif)
+					if not owner_only or get_tile_owner(current) == get_tile_owner(current+dif):
+						all_connected.append(current+dif)
+						open.append(current+dif)
 			closed.append(current)
 			open.erase(current)
 	return all_connected
@@ -231,7 +260,30 @@ func clean_roads():
 							_mroads.erase(rd)
 						else: temp_roads[rd] = _mroads[rd]
 					else: temp_roads[rd] = _mroads[rd]
+	
+	var temp_roads = {}
+	for rd in _mroads:
+		if _mroads[rd] == 2:
+			temp_roads[rd] = _mroads[rd]
+	#now clean farms
+	var done = []
+	for loc in _mbuildings:
+		if _mbuildings[loc].type in ["residential", "center", "store"] and \
+		   not _mbuildings[loc] in done:
+			var building_connections = get_connected_buildings(loc, _mroads, [2], true)
+			var square_connections = get_connected_squares(loc, _mroads, 2, true)
+			for tile in square_connections:
+				if _mroads.get(tile, 0) == 2:
+					temp_roads.erase(tile)
+					if not get_connected_buildings(loc, temp_roads, [2], 'farm') < building_connections:
+						if not tile in _mbuildings: 
+							all_roads_erased.append(tile)
+							emit_signal("destroy_roads", [tile])
+							_mroads.erase(tile)
+						else: temp_roads[tile] = _mroads[tile]
+					else: temp_roads[tile] = _mroads[tile]
 		
+	
 	return all_roads_erased
 
 func canpath_to(loc, target, type):
@@ -300,6 +352,7 @@ func random_location(center, sdev):
 	var y = int(round(rng.randfn(center.y, sdev))) % height
 	return Vector2(x, y)
 
+# Construct a building that is 1x1
 func construct_building(type, center, sdev, connect, road_type):
 	var loc
 	var time_start = OS.get_unix_time()
@@ -333,6 +386,7 @@ func construct_building(type, center, sdev, connect, road_type):
 				for tile in p:
 					if not tile in _mroads and not tile in _mbuildings:
 						_mroads[tile] = road_type
+						set_tile_owner(tile, self)
 				emit_signal("construct_roads", p, _mbuildings, road_type)
 				emit_signal("construct_building", new_build)
 				return loc
@@ -342,7 +396,15 @@ func construct_building(type, center, sdev, connect, road_type):
 
 # This is for special types of buildings, that require different 
 # shapes than just 1x1
-func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, no_adj, size):
+func construct_multi_building(center, \
+							  sdev, \
+							  type, \
+							  is_road, \
+							  paths_to, \
+							  road_type, \
+							  no_adj, \
+							  size, \
+							  owner_obj):
 	var x
 	var y
 	var x_sz
@@ -387,11 +449,13 @@ func construct_multi_building(center, sdev, type, is_road, paths_to, road_type, 
 				var new_build = new_building(locs, type)
 				for loc in locs: 
 					_mbuildings[loc] = new_build
+					set_tile_owner(loc, owner_obj)
 					if is_road: 
 						_mroads[loc] = road_type
 				for tile in path:
 					if not tile in _mroads and not tile in _mbuildings:
 						_mroads[tile] = road_type
+						set_tile_owner(tile, owner_obj)
 				emit_signal("construct_roads", path, _mbuildings, road_type)
 				emit_signal("construct_building", new_build)
 				return new_build
@@ -410,6 +474,14 @@ func get_building(location):
 func get_road(location):
 	if location in _mroads:
 		return _mroads[location]
+	return false
+
+func set_tile_owner(location, obj):
+	_owners[location] = obj
+
+func get_tile_owner(location):
+	if location in _owners:
+		return _owners[location]
 	return false
 
 func new_building(location, ty):

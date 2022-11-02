@@ -111,6 +111,9 @@ func constructRoads():
 				   (get_road_tile(tile+dif) == 1 and path[tile] == 1):
 					if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 						dirs[i] = 1
+				elif get_road_tile(tile+dif) == 2 and path[tile] == 2 and\
+					 towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile):
+						dirs[i] = 1
 				i += 1
 			_roads_dirs[tile] = dirs
 
@@ -119,60 +122,67 @@ func get_pos(location):
 	pos.y += 48
 	return pos
 
-var MULTI_ROADS = {
-	1: false, 2: true, 3: true, 4: false, 5: true
-}
-
 var BUILDING_LAYERS = {
-	1: [1,2], 2: [1], 3: [1], 4: [1], 5: [2]
+	1: [1,2], 
+	2: [1,2], 
+	3: [1  ], 
+	4: [1,2], 
+	5: [  2]
 }
 
-var RESIDENTIAL_TILES = {
-	2: 19,
-	3: 19,
-	0: 16 + (rng.randi_range(0,1)*2),
-	1: 17
-}
-
-var CENTER_TILES = {
-	2: 20,
-	3: 20,
-	0: 22,
-	1: 21
+var MULTI_ROADS = {
+	1: {1: false, 2: true },
+	2: {1: true,  2: true }, 
+	3: {1: true,  2: false}, 
+	4: {1: false, 2: true },
+	5: {1: false, 2: false}
 }
 
 func constructBuildings():
 	for tile in _buildings:
 		if _buildings[tile]:
-			# Set road type of adjacent roads
-			var tiles_to_connect = [] + BUILDING_LAYERS[_buildings[tile]]
-			var i = 0
 			var d = 0
-			var connected = false
-			for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
-				if (tile + dif) in _buildings:
-					if _buildings[(tile + dif)] == 3:
-						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-							connected = true
-							d=i
-							if not MULTI_ROADS[_buildings[tile]]: 
-								break
-				i += 1
+			var i = 0
 			
-			i = 0
-			if (MULTI_ROADS[_buildings[tile]]) or \
-			   (not connected):
+			if 1 in BUILDING_LAYERS[_buildings[tile]]:
+				# Set road type of adjacent roads
+				# Check for squares and make the connection. Connected = true, d=i
 				for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
-					if get_road_tile(tile+dif) in tiles_to_connect:
-						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-							_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
-							connected=true
-							d=i
-							if not MULTI_ROADS[_buildings[tile]]: 
-								tiles_to_connect.erase(get_road_tile(tile+dif))
-								if tiles_to_connect == []:
+					if (tile + dif) in _buildings:
+						if _buildings[(tile + dif)] == 3:
+							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+								towns.map_set_building_connected(tile)
+								d=i
+								if not MULTI_ROADS[_buildings[tile]][1]: 
 									break
 					i += 1
+				
+				# Check for connected main roads if not connected.
+				i = 0
+				if (MULTI_ROADS[_buildings[tile]][1]) or (not towns.map_get_building_connected(tile)):
+					for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
+						if get_road_tile(tile+dif) == 1:
+							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+								_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
+								towns.map_set_building_connected(tile)
+								d=i
+								if not MULTI_ROADS[_buildings[tile]][1]: 
+									break
+						i += 1
+			
+			if 2 in BUILDING_LAYERS[_buildings[tile]]:
+				i = 0
+				# Finally, connected personal roads, only for show.
+				if (MULTI_ROADS[_buildings[tile]][2]) or (not towns.map_get_building_connected(tile)):
+					for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
+						if get_road_tile(tile+dif) == 2:
+							if towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile):
+								_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
+								towns.map_set_building_connected(tile)
+								if not MULTI_ROADS[_buildings[tile]][2]: 
+									break
+						i += 1
+			
 			# TODO: Set building type depending on whether or not
 			# there are adjacent roads.
 			match _buildings[tile]:
@@ -189,6 +199,20 @@ func constructBuildings():
 					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
 				5:
 					_layered_types[0][tile] = square_tile(tile, 5, FARM_DICT)
+
+var RESIDENTIAL_TILES = {
+	2: 19,
+	3: 19,
+	0: 16 + (rng.randi_range(0,1)*2),
+	1: 17
+}
+
+var CENTER_TILES = {
+	2: 20,
+	3: 20,
+	0: 22,
+	1: 21
+}
 
 func square_tile(tile, type, dict):
 	var i = 0
