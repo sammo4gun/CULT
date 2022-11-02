@@ -74,6 +74,7 @@ func _process(_delta):
 		if new_time!= time:
 			time = new_time
 			population._hour_update(time)
+			towns._hour_update(time)
 			if new_time == 0:
 				day += 1
 

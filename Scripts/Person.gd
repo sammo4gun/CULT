@@ -109,8 +109,8 @@ func make_thoughts() -> void:
 # CREATION: Pinged by the town after done constructing work stuff.
 func set_work():
 	var work = get_work()
-	paths_from_home[work] = get_path_to(work)
-	var square_dist = len(paths_from_home[work])
+	#paths_from_home[work] = get_path_to(work)
+	var square_dist = len(get_path_to(work))
 	wake_up_time = 7 - int(square_dist / 10)
 
 # CREATION: Makes the name of the player.
@@ -270,19 +270,41 @@ func work_enjoyer():
 	assert(location in get_work())
 	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
 	
-	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
-	var step
-	step = choices[world.rng.randi_range(0,4)]
-	if (location + step) in get_work():
-		var target = location + step
-		target_step = target
-		yield(self, "movement_arrived")
+	if in_building.type == "square":
+		var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
+		var step
+		step = choices[world.rng.randi_range(0,4)]
+		if (location + step) in get_work():
+			var target = location + step
+			target_step = target
+			yield(self, "movement_arrived")
+		
+		if world.rng.randf_range(0,1) > 0.5:
+			display_emotion("happy")
+		
+		yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
 	
-	if world.rng.randf_range(0,1) > 0.5:
-		display_emotion("happy")
-	
-	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
-	
+	elif in_building.type == "farm":
+		
+		if not in_building.is_watered(location):
+			in_building.water(location)
+			display_emotion("sweat")
+			yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
+		else:
+			var to_water = []
+			for tile in get_work():
+				if not in_building.is_watered(tile):
+					to_water.append(tile)
+			var dist = 9999
+			if len(to_water) < 1:
+				to_water = get_work()
+			var go_tile
+			for tile in to_water:
+				if location.distance_to(tile) < dist:
+					go_tile = tile
+					dist = location.distance_to(tile)
+			target_step = go_tile
+			yield(self, "movement_arrived")
 	return true
 
 # UTILITY: Returns the squares associated with "work"

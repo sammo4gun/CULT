@@ -90,12 +90,11 @@ func check_adjacent_obs(loc, town, buildings, road_type, roads):
 		if has_town_road:
 			if not has_town_road == town:
 				return true
-		for path in roads:
-			if loc in path:
-				if road_type == 2:
-					return true
-				if path[loc] != road_type:
-					return true
+		if loc in town._mroads:
+			if road_type == 2:
+				return true
+			if town._mroads[loc] != road_type:
+				return true
 	return false
 
 func is_walkable(loc, buildings, roads, must_roads, road_types):

@@ -4,6 +4,10 @@ signal refresh
 
 onready var map = $"../Map"
 
+func _hour_update(time):
+	for town in get_children():
+		town._hour_update(time)
+
 # Either returns the name of a town or the name of a person 
 func get_owner_obj(tile):
 	for town in get_children():

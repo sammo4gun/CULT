@@ -33,8 +33,8 @@ var _owners = {}
 var _mroads = {} #maps map locations to road types
 # 1 = normal road
 # 2 = "personal" road or dirt path
-# 3 = big road ?
 var _mbuildings = {} #maps map locations to buildings
+var unique_buildings = []
 
 #Utility
 var drawer
@@ -42,6 +42,10 @@ var pathfinder
 var world
 var name_generator
 var population
+
+func _hour_update(time):
+	for building in unique_buildings:
+		building._hour_update(time)
 
 func set_parents(dr, pf, wrld, nmg, pop):
 	drawer = dr
@@ -383,6 +387,7 @@ func construct_building(type, center, sdev, connect, road_type):
 			if len(p) < MAX_PATH_DIST:
 				var new_build = new_building([loc], type)
 				_mbuildings[loc] = new_build
+				unique_buildings.append(new_build)
 				for tile in p:
 					if not tile in _mroads and not tile in _mbuildings:
 						_mroads[tile] = road_type
@@ -447,6 +452,7 @@ func construct_multi_building(center, \
 		if path:
 			if len(path) < MAX_PATH_DIST:
 				var new_build = new_building(locs, type)
+				unique_buildings.append(new_build)
 				for loc in locs: 
 					_mbuildings[loc] = new_build
 					set_tile_owner(loc, owner_obj)

@@ -7,6 +7,8 @@ var location
 var house_name
 var map_connected = false
 
+var state = {}
+
 var town_name
 var town
 
@@ -33,6 +35,12 @@ var TYPES = {
 	"farm": 5
 }
 
+func _hour_update(time):
+	if type == "farm":
+		if time == 0:
+			for loc in location:
+				state[loc]['watered'] = false
+
 func build(twn, loc, nmg, pos):
 	town = twn
 	town_name = twn.town_name
@@ -56,15 +64,20 @@ func is_type(ty):
 func set_type(ty):
 	type = ty
 	match type:
-		"residential": house_name = "Residence"
-		"center": house_name = "Mayors House"
+		"residential": 
+			house_name = "Residence"
+		"center": 
+			house_name = "Mayors House"
 		"square": 
 			house_name = "Town Square"
 			can_enter = false
-		"store": house_name = name_generator.store()
+		"store": 
+			house_name = name_generator.store()
 		"farm": 
 			house_name = "Farm"
 			can_enter = false
+			for loc in location:
+				state[loc] = {'watered': false}
 
 func add_owner(person):
 	if not person in owners: 
@@ -98,6 +111,13 @@ func turn_lights_off():
 	lights_on = false
 	lights.visible = false
 	town.update_building(self)
+
+func is_watered(loc):
+	return state[loc]['watered']
+
+func water(loc):
+	assert(loc in location)
+	state[loc]['watered'] = true
 
 var LIGHT_MAP = {
 	16: 45,
