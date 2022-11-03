@@ -10,6 +10,13 @@ onready var contents_label = $Main/StatusBar/Bars/Bar2/Contents/Background/Numbe
 onready var hour_label = $Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background/Hour
 onready var minute_label = $Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background/Minute
 
+onready var char_button = $Main/HBoxContainer/GUI_Selector/MarginContainer2/Character/Button
+onready var char_anim = $Main/HBoxContainer/GUI_Selector/MarginContainer2/Character/Button/AnimationPlayer
+onready var tile_button = $Main/HBoxContainer/GUI_Selector/MarginContainer/Tile/Button
+onready var tile_anim = $Main/HBoxContainer/GUI_Selector/MarginContainer/Tile/Button/AnimationPlayer
+onready var build_button = $Main/HBoxContainer/GUI_Selector/MarginContainer3/Building/Button
+onready var build_anim = $Main/HBoxContainer/GUI_Selector/MarginContainer3/Building/Button/AnimationPlayer
+
 onready var towns = $"../../Towns"
 onready var world = get_tree().root.get_child(0)
 
@@ -82,6 +89,7 @@ func _on_Selector_selected_person(person):
 	selected_tile = null
 	selected_person = person
 	if selected_person: $CharacterOptions.reselect_person()
+	char_anim.play("flare_red")
 	display()
 
 # Selected a new square, or clicked outside the map
@@ -90,6 +98,8 @@ func _on_Selector_selected_tile(new_selected):
 		selected_tile = new_selected
 		if selected_person: $CharacterOptions.deselect_person()
 		selected_person = null
+		tile_anim.play("flare_red")
+		if(towns.get_building(selected_tile)): build_anim.play("flare_red")
 		display()
 	else:
 		selected_tile = null
