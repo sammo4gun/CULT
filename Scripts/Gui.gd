@@ -81,18 +81,24 @@ func _on_Towns_refresh():
 func _on_Selector_selected_person(person):
 	selected_tile = null
 	selected_person = person
+	if selected_person: $CharacterOptions.reselect_person()
 	display()
 
 # Selected a new square, or clicked outside the map
 func _on_Selector_selected_tile(new_selected):
 	if new_selected != null:
 		selected_tile = new_selected
+		if selected_person: $CharacterOptions.deselect_person()
 		selected_person = null
 		display()
 	else:
 		selected_tile = null
+		if selected_person: $CharacterOptions.deselect_person()
 		selected_person = null
 		rm_display()
 
 func _on_VSlider_value_changed(value):
 	emit_signal("time_slider", value)
+
+func _on_Button_pressed():
+	$CharacterOptions.pressed()
