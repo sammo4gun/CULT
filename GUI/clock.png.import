@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/BarV4_Bar.png-6a154bc5829410fceeb1f147e3aa7269.stex"
+path="res://.import/clock.png-72f5fac43d7f3d1d2e956574172da329.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/ProgressBar_04/BarV4_Bar.png"
-dest_files=[ "res://.import/BarV4_Bar.png-6a154bc5829410fceeb1f147e3aa7269.stex" ]
+source_file="res://GUI/clock.png"
+dest_files=[ "res://.import/clock.png-72f5fac43d7f3d1d2e956574172da329.stex" ]
 
 [params]
 

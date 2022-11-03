@@ -58,5 +58,22 @@ position = Vector2( -0.574249, 8.81851 )
 scale = Vector2( 0.259228, 0.259228 )
 texture = ExtResource( 6 )
 
+[node name="Popup" type="TextureRect" parent="."]
+visible = false
+margin_left = -6.0
+margin_top = -38.0
+margin_right = 83.0
+margin_bottom = -1.0
+texture = ExtResource( 6 )
+expand = true
+
+[node name="Label" type="Label" parent="Popup"]
+margin_left = 8.5749
+margin_top = 4.15749
+margin_right = 80.5749
+margin_bottom = 35.1575
+text = "Jeremy 
+Longstrider"
+
 [connection signal="mouse_entered" from="Area2D" to="." method="_on_Area2D_mouse_entered"]
 [connection signal="mouse_exited" from="Area2D" to="." method="_on_Area2D_mouse_exited"]

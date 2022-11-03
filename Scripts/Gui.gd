@@ -1,16 +1,16 @@
 extends MarginContainer
 
-signal button
+signal time_slider
 
-onready var name_label = $HBoxContainer/Bars/Bar1/Name/Background/Number
-onready var location_label = $HBoxContainer/Bars/Bar1/Location/Background/Number
-onready var building_label = $HBoxContainer/Bars/Bar2/Building/Background/Number
-onready var contents_label = $HBoxContainer/Bars/Bar2/Contents/Background/Number
+onready var name_label = $Main/StatusBar/Bars/Bar1/Name/Background/Number
+onready var location_label = $Main/StatusBar/Bars/Bar1/Location/Background/Number
+onready var building_label = $Main/StatusBar/Bars/Bar2/Building/Background/Number
+onready var contents_label = $Main/StatusBar/Bars/Bar2/Contents/Background/Number
 
-onready var hour_label = $HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background/Hour
-onready var minute_label = $HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background/Minute
+onready var hour_label = $Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background/Hour
+onready var minute_label = $Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background/Minute
 
-onready var towns = $"../../../Towns"
+onready var towns = $"../../Towns"
 onready var world = get_tree().root.get_child(0)
 
 var altitude
@@ -22,15 +22,6 @@ var selected_person = null
 var time_started = false
 
 func _process(_delta):
-	$HBoxContainer/Button.rect_size.x = 40
-	$HBoxContainer/Button.rect_size.y = 40
-	rect_position.y = get_viewport().size.y/30
-	rect_position.x = get_viewport().size.x/20
-	var new_size = get_viewport().size.x * 15 /20
-	$Background.position.x += (new_size - rect_size.x) / 2
-	$Background.scale.x += (new_size/rect_size.x) / 2
-	rect_size.x = new_size
-	
 	if time_started:
 		set_time(world.get_time())
 
@@ -103,5 +94,5 @@ func _on_Selector_selected_tile(new_selected):
 		selected_person = null
 		rm_display()
 
-func _on_Button_pressed():
-	emit_signal("button")
+func _on_VSlider_value_changed(value):
+	emit_signal("time_slider", value)

@@ -6,6 +6,7 @@ var Person = preload("res://Scenes/Person.tscn")
 
 var pop = []
 var towns = []
+var mouse_on = false
 
 onready var namegenerator = $"../NameGenerator"
 onready var ydrawer = $"../YDrawer"

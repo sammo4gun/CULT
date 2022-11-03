@@ -56,15 +56,6 @@ position = Vector2( 509.583, 297.677 )
 current = true
 script = ExtResource( 6 )
 
-[node name="CanvasLayer" type="CanvasLayer" parent="Camera2D"]
-follow_viewport_scale = 2.0
-
-[node name="GUI" parent="Camera2D/CanvasLayer" instance=ExtResource( 2 )]
-margin_top = -5.0
-margin_right = 795.0
-margin_bottom = 78.0
-rect_scale = Vector2( 1.2, 1.2 )
-
 [node name="Day_Night" type="CanvasModulate" parent="."]
 color = Color( 0.34902, 0.34902, 0.34902, 1 )
 script = ExtResource( 12 )
@@ -127,9 +118,19 @@ script = ExtResource( 7 )
 visible = false
 scale = Vector2( 0.6, 0.6 )
 
-[connection signal="button" from="Camera2D/CanvasLayer/GUI" to="." method="_on_GUI_button"]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+offset = Vector2( 15, 15 )
+transform = Transform2D( 1, 0, 0, 1, 15, 15 )
+follow_viewport_scale = 2.0
+
+[node name="GUI" parent="CanvasLayer" instance=ExtResource( 2 )]
+anchor_right = 0.8
+margin_right = -20.0
+rect_scale = Vector2( 1.2, 1.2 )
+
 [connection signal="selected_tile" from="Map" to="." method="_on_tile_selected"]
 [connection signal="chosen_profession" from="Population" to="Towns" method="_on_Population_chosen_profession"]
-[connection signal="refresh" from="Towns" to="Camera2D/CanvasLayer/GUI" method="_on_Towns_refresh"]
-[connection signal="selected_person" from="Selector" to="Camera2D/CanvasLayer/GUI" method="_on_Selector_selected_person"]
-[connection signal="selected_tile" from="Selector" to="Camera2D/CanvasLayer/GUI" method="_on_Selector_selected_tile"]
+[connection signal="refresh" from="Towns" to="CanvasLayer/GUI" method="_on_Towns_refresh"]
+[connection signal="selected_person" from="Selector" to="CanvasLayer/GUI" method="_on_Selector_selected_person"]
+[connection signal="selected_tile" from="Selector" to="CanvasLayer/GUI" method="_on_Selector_selected_tile"]
+[connection signal="time_slider" from="CanvasLayer/GUI" to="." method="_on_GUI_time_slider"]

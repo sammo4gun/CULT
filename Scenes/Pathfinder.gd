@@ -150,8 +150,8 @@ func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
 					tg += 1
 					if promising in roads:
 						if roads[promising] != roads[new_pos]:
-							tg += 5
-				else: tg += 10
+							tg += 10
+				else: tg += 20
 				
 				#compute h
 				var th = new_pos.distance_to(finish[0])

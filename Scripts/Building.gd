@@ -39,7 +39,7 @@ func _hour_update(time):
 	if type == "farm":
 		if time == 0:
 			for loc in location:
-				state[loc]['watered'] = false
+				state[loc]['watered'] -= 0.25
 
 func build(twn, loc, nmg, pos):
 	town = twn
@@ -77,7 +77,7 @@ func set_type(ty):
 			house_name = "Farm"
 			can_enter = false
 			for loc in location:
-				state[loc] = {'watered': false}
+				state[loc] = {'watered': 0.0}
 
 func add_owner(person):
 	if not person in owners: 
@@ -113,11 +113,11 @@ func turn_lights_off():
 	town.update_building(self)
 
 func is_watered(loc):
-	return state[loc]['watered']
+	return state[loc]['watered'] == 1.0
 
 func water(loc):
 	assert(loc in location)
-	state[loc]['watered'] = true
+	state[loc]['watered'] += 0.25
 
 var LIGHT_MAP = {
 	16: 45,

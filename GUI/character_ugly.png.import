@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/BarV7_Bar.png-ae3238d4a002ef7f19ff5c63736b2af7.stex"
+path="res://.import/character_ugly.png-4b342ca7197040c4e33a4bf906e5ebb3.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/ProgressBar_07/BarV7_Bar.png"
-dest_files=[ "res://.import/BarV7_Bar.png-ae3238d4a002ef7f19ff5c63736b2af7.stex" ]
+source_file="res://GUI/character_ugly.png"
+dest_files=[ "res://.import/character_ugly.png-4b342ca7197040c4e33a4bf906e5ebb3.stex" ]
 
 [params]
 

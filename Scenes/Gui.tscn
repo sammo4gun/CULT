@@ -1,14 +1,15 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Sprites/Btn01.png" type="Texture" id=1]
 [ext_resource path="res://Sprites/Icons/Icon03.png" type="Texture" id=2]
 [ext_resource path="res://Scripts/Gui.gd" type="Script" id=3]
-[ext_resource path="res://Sprites/Icons/Icon04.png" type="Texture" id=4]
+[ext_resource path="res://GUI/clock.png" type="Texture" id=4]
 [ext_resource path="res://Sprites/Panel01.png" type="Texture" id=5]
 [ext_resource path="res://Sprites/Icons/Icon19.png" type="Texture" id=6]
 [ext_resource path="res://Sprites/Icons/Icon12.png" type="Texture" id=7]
 [ext_resource path="res://Sprites/Icons/Icon18.png" type="Texture" id=8]
 [ext_resource path="res://Sprites/GEORGIAB.TTF" type="DynamicFontData" id=9]
+[ext_resource path="res://Sprites/BAHNSCHRIFT.TTF" type="DynamicFontData" id=10]
 
 [sub_resource type="DynamicFont" id=1]
 size = 64
@@ -18,37 +19,45 @@ font_data = ExtResource( 9 )
 size = 64
 font_data = ExtResource( 9 )
 
+[sub_resource type="DynamicFont" id=3]
+font_data = ExtResource( 10 )
+
 [node name="GUI" type="MarginContainer"]
-margin_left = 11.0
-margin_top = 17.0
-margin_right = 799.0
-margin_bottom = 94.0
+anchor_right = 1.0
+margin_right = -50.0
+margin_bottom = 100.0
+mouse_filter = 2
 script = ExtResource( 3 )
 
-[node name="Background" type="Sprite" parent="."]
-position = Vector2( 391.71, 30 )
+[node name="Main" type="VBoxContainer" parent="."]
+margin_right = 974.0
+margin_bottom = 162.0
+mouse_filter = 2
+
+[node name="StatusBar" type="HBoxContainer" parent="Main"]
+margin_right = 974.0
+margin_bottom = 60.0
+
+[node name="Background" type="Sprite" parent="Main/StatusBar"]
+position = Vector2( 521.334, 25.8402 )
 rotation = 3.14159
-scale = Vector2( 1.803, 3.291 )
+scale = Vector2( 2.37656, 3.05331 )
 texture = ExtResource( 5 )
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-margin_right = 788.0
-margin_bottom = 77.0
-
-[node name="Bars" type="VBoxContainer" parent="HBoxContainer"]
-margin_right = 668.0
-margin_bottom = 77.0
+[node name="Bars" type="VBoxContainer" parent="Main/StatusBar"]
+margin_right = 826.0
+margin_bottom = 60.0
 size_flags_horizontal = 3
 
-[node name="Bar1" type="HBoxContainer" parent="HBoxContainer/Bars"]
-margin_right = 668.0
+[node name="Bar1" type="HBoxContainer" parent="Main/StatusBar/Bars"]
+margin_right = 826.0
 margin_bottom = 24.0
 
-[node name="Name" type="MarginContainer" parent="HBoxContainer/Bars/Bar1"]
+[node name="Name" type="MarginContainer" parent="Main/StatusBar/Bars/Bar1"]
 margin_right = 200.0
 margin_bottom = 24.0
 
-[node name="Background" type="NinePatchRect" parent="HBoxContainer/Bars/Bar1/Name"]
+[node name="Background" type="NinePatchRect" parent="Main/StatusBar/Bars/Bar1/Name"]
 margin_right = 200.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 200, 20 )
@@ -56,7 +65,7 @@ texture = ExtResource( 1 )
 region_rect = Rect2( -7, -4, 370, 64 )
 patch_margin_top = 24
 
-[node name="Title" type="TextureRect" parent="HBoxContainer/Bars/Bar1/Name/Background"]
+[node name="Title" type="TextureRect" parent="Main/StatusBar/Bars/Bar1/Name/Background"]
 margin_left = 9.19238
 margin_top = 5.65686
 margin_right = 61.1924
@@ -65,7 +74,7 @@ rect_scale = Vector2( 0.246554, 0.254111 )
 texture = ExtResource( 2 )
 stretch_mode = 4
 
-[node name="Number" type="Label" parent="HBoxContainer/Bars/Bar1/Name/Background"]
+[node name="Number" type="Label" parent="Main/StatusBar/Bars/Bar1/Name/Background"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 10.2531
@@ -76,12 +85,12 @@ rect_scale = Vector2( 0.910733, 0.93482 )
 align = 2
 valign = 1
 
-[node name="Location" type="MarginContainer" parent="HBoxContainer/Bars/Bar1"]
+[node name="Location" type="MarginContainer" parent="Main/StatusBar/Bars/Bar1"]
 margin_left = 204.0
 margin_right = 404.0
 margin_bottom = 24.0
 
-[node name="Background" type="NinePatchRect" parent="HBoxContainer/Bars/Bar1/Location"]
+[node name="Background" type="NinePatchRect" parent="Main/StatusBar/Bars/Bar1/Location"]
 margin_right = 200.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 200, 20 )
@@ -89,7 +98,7 @@ texture = ExtResource( 1 )
 region_rect = Rect2( -7, -4, 370, 64 )
 patch_margin_top = 24
 
-[node name="Title" type="TextureRect" parent="HBoxContainer/Bars/Bar1/Location/Background"]
+[node name="Title" type="TextureRect" parent="Main/StatusBar/Bars/Bar1/Location/Background"]
 margin_left = 8.25
 margin_top = 4.75
 margin_right = 65.25
@@ -98,7 +107,7 @@ rect_scale = Vector2( 0.246554, 0.254111 )
 texture = ExtResource( 8 )
 stretch_mode = 4
 
-[node name="Number" type="Label" parent="HBoxContainer/Bars/Bar1/Location/Background"]
+[node name="Number" type="Label" parent="Main/StatusBar/Bars/Bar1/Location/Background"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 10.2531
@@ -109,18 +118,18 @@ rect_scale = Vector2( 0.910733, 0.93482 )
 align = 2
 valign = 1
 
-[node name="Bar2" type="HBoxContainer" parent="HBoxContainer/Bars"]
+[node name="Bar2" type="HBoxContainer" parent="Main/StatusBar/Bars"]
 margin_top = 28.0
-margin_right = 668.0
+margin_right = 826.0
 margin_bottom = 52.0
 
-[node name="Building" type="MarginContainer" parent="HBoxContainer/Bars/Bar2"]
+[node name="Building" type="MarginContainer" parent="Main/StatusBar/Bars/Bar2"]
 margin_right = 300.0
 margin_bottom = 24.0
 grow_vertical = 0
 rect_min_size = Vector2( 300, 0 )
 
-[node name="Background" type="NinePatchRect" parent="HBoxContainer/Bars/Bar2/Building"]
+[node name="Background" type="NinePatchRect" parent="Main/StatusBar/Bars/Bar2/Building"]
 margin_right = 300.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 200, 20 )
@@ -128,7 +137,7 @@ texture = ExtResource( 1 )
 region_rect = Rect2( -7, -4, 370, 64 )
 patch_margin_top = 24
 
-[node name="Title" type="TextureRect" parent="HBoxContainer/Bars/Bar2/Building/Background"]
+[node name="Title" type="TextureRect" parent="Main/StatusBar/Bars/Bar2/Building/Background"]
 margin_left = 10.9424
 margin_top = 4.65686
 margin_right = 67.9424
@@ -137,7 +146,7 @@ rect_scale = Vector2( 0.246554, 0.254111 )
 texture = ExtResource( 7 )
 stretch_mode = 4
 
-[node name="Number" type="Label" parent="HBoxContainer/Bars/Bar2/Building/Background"]
+[node name="Number" type="Label" parent="Main/StatusBar/Bars/Bar2/Building/Background"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 10.2531
@@ -148,12 +157,12 @@ rect_scale = Vector2( 0.910733, 0.93482 )
 align = 2
 valign = 1
 
-[node name="Contents" type="MarginContainer" parent="HBoxContainer/Bars/Bar2"]
+[node name="Contents" type="MarginContainer" parent="Main/StatusBar/Bars/Bar2"]
 margin_left = 304.0
 margin_right = 504.0
 margin_bottom = 24.0
 
-[node name="Background" type="NinePatchRect" parent="HBoxContainer/Bars/Bar2/Contents"]
+[node name="Background" type="NinePatchRect" parent="Main/StatusBar/Bars/Bar2/Contents"]
 margin_right = 200.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 200, 20 )
@@ -161,7 +170,7 @@ texture = ExtResource( 1 )
 region_rect = Rect2( -7, -4, 370, 64 )
 patch_margin_top = 24
 
-[node name="Title" type="TextureRect" parent="HBoxContainer/Bars/Bar2/Contents/Background"]
+[node name="Title" type="TextureRect" parent="Main/StatusBar/Bars/Bar2/Contents/Background"]
 margin_left = 8.44238
 margin_top = 4.15686
 margin_right = 69.4424
@@ -170,7 +179,7 @@ rect_scale = Vector2( 0.246554, 0.254111 )
 texture = ExtResource( 6 )
 stretch_mode = 4
 
-[node name="Number" type="Label" parent="HBoxContainer/Bars/Bar2/Contents/Background"]
+[node name="Number" type="Label" parent="Main/StatusBar/Bars/Bar2/Contents/Background"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 10.2531
@@ -181,21 +190,21 @@ rect_scale = Vector2( 0.910733, 0.93482 )
 align = 2
 valign = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
-margin_left = 672.0
-margin_right = 772.0
-margin_bottom = 77.0
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/StatusBar"]
+margin_left = 830.0
+margin_right = 930.0
+margin_bottom = 60.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/StatusBar/VBoxContainer"]
 margin_right = 100.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 0, 60 )
 
-[node name="Name2" type="MarginContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Name2" type="MarginContainer" parent="Main/StatusBar/VBoxContainer/HBoxContainer"]
 margin_right = 100.0
 margin_bottom = 60.0
 
-[node name="Background" type="NinePatchRect" parent="HBoxContainer/VBoxContainer/HBoxContainer/Name2"]
+[node name="Background" type="NinePatchRect" parent="Main/StatusBar/VBoxContainer/HBoxContainer/Name2"]
 margin_right = 100.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 100, 20 )
@@ -203,7 +212,7 @@ texture = ExtResource( 1 )
 region_rect = Rect2( -7, -4, 370, 64 )
 patch_margin_top = 24
 
-[node name="Title" type="TextureRect" parent="HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background"]
+[node name="Title" type="TextureRect" parent="Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background"]
 margin_left = 31.4899
 margin_top = 6.10281
 margin_right = 88.4899
@@ -212,7 +221,7 @@ rect_scale = Vector2( 0.644134, 0.663877 )
 texture = ExtResource( 7 )
 stretch_mode = 4
 
-[node name="Hour" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background"]
+[node name="Hour" type="Label" parent="Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.402
@@ -224,7 +233,7 @@ custom_fonts/font = SubResource( 1 )
 align = 1
 valign = 1
 
-[node name="Minute" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer/Name2/Background"]
+[node name="Minute" type="Label" parent="Main/StatusBar/VBoxContainer/HBoxContainer/Name2/Background"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 70.57
@@ -236,15 +245,82 @@ custom_fonts/font = SubResource( 2 )
 align = 1
 valign = 1
 
-[node name="Button" type="Button" parent="HBoxContainer"]
-margin_left = 776.0
-margin_right = 788.0
-margin_bottom = 77.0
-icon_align = 1
+[node name="MarginContainer" type="MarginContainer" parent="Main/StatusBar"]
+margin_left = 934.0
+margin_right = 974.0
+margin_bottom = 60.0
 
-[node name="Sprite" type="Sprite" parent="HBoxContainer/Button"]
-position = Vector2( 20.2393, 19.8425 )
-scale = Vector2( 0.517168, 0.517168 )
+[node name="Clock" type="NinePatchRect" parent="Main/StatusBar/MarginContainer"]
+margin_right = 40.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 40, 0 )
+
+[node name="Time" type="VSlider" parent="Main/StatusBar/MarginContainer/Clock"]
+margin_right = 16.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 0, 60 )
+min_value = 20.0
+value = 60.0
+
+[node name="TextureRect" type="TextureRect" parent="Main/StatusBar/MarginContainer/Clock"]
+margin_left = 19.0
+margin_top = 14.3382
+margin_right = 49.0
+margin_bottom = 48.3382
 texture = ExtResource( 4 )
+expand = true
 
-[connection signal="pressed" from="HBoxContainer/Button" to="." method="_on_Button_pressed"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Main"]
+margin_top = 64.0
+margin_right = 974.0
+margin_bottom = 162.0
+mouse_filter = 2
+
+[node name="GUI_Selector" type="VBoxContainer" parent="Main/HBoxContainer"]
+margin_right = 80.0
+margin_bottom = 98.0
+rect_min_size = Vector2( 80, 0 )
+
+[node name="Background" type="Sprite" parent="Main/HBoxContainer/GUI_Selector"]
+position = Vector2( 35.5967, 63.9944 )
+rotation = -3.14159
+scale = Vector2( 0.227969, 4.14688 )
+texture = ExtResource( 5 )
+
+[node name="MarginContainer" type="MarginContainer" parent="Main/HBoxContainer/GUI_Selector"]
+margin_right = 80.0
+margin_bottom = 30.0
+rect_min_size = Vector2( 30, 30 )
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Main/HBoxContainer/GUI_Selector/MarginContainer"]
+margin_right = 80.0
+margin_bottom = 30.0
+
+[node name="Label" type="Label" parent="Main/HBoxContainer/GUI_Selector/MarginContainer/NinePatchRect"]
+margin_left = 33.0
+margin_top = 8.0
+margin_right = 70.0
+margin_bottom = 25.0
+custom_fonts/font = SubResource( 3 )
+text = "Char"
+
+[node name="Character" type="MenuButton" parent="Main/HBoxContainer/GUI_Selector/MarginContainer/NinePatchRect"]
+margin_right = 36.0
+margin_bottom = 30.0
+rect_min_size = Vector2( 20, 30 )
+icon = ExtResource( 8 )
+expand_icon = true
+
+[node name="Tile" type="Button" parent="Main/HBoxContainer/GUI_Selector"]
+margin_top = 34.0
+margin_right = 80.0
+margin_bottom = 64.0
+rect_min_size = Vector2( 20, 30 )
+
+[node name="Building" type="Button" parent="Main/HBoxContainer/GUI_Selector"]
+margin_top = 68.0
+margin_right = 80.0
+margin_bottom = 98.0
+rect_min_size = Vector2( 20, 30 )
+
+[connection signal="value_changed" from="Main/StatusBar/MarginContainer/Clock/Time" to="." method="_on_VSlider_value_changed"]

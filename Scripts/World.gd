@@ -3,7 +3,7 @@ extends Node2D
 export var HEIGHT = 60
 export var WIDTH = 40
 export var NUM_TOWNS = 3
-var speed_factor = 1
+var speed_factor = range_lerp(60, 20, 100, 0.25, 5)
 
 var SPEEDS = {
 	0: 1.5,
@@ -33,7 +33,8 @@ var new_time
 var day = 1
 
 onready var selector = $Selector
-onready var GUI = $Camera2D/CanvasLayer/GUI
+#onready var GUI = $Camera2D/CanvasLayer/GUI
+onready var GUI = $CanvasLayer/GUI
 onready var drawer = $Map
 onready var pathfinding = $Pathfinder
 onready var towns = $Towns
@@ -195,3 +196,7 @@ func _on_GUI_button():
 	sp = sp % 5
 	speed_factor = sp_factors[sp]
 	daynightcycle.adjust_cycle(1.0/sp_factors[sp])
+
+func _on_GUI_time_slider(time):
+	speed_factor = range_lerp(time, 20, 100, 0.25, 5)
+	daynightcycle.adjust_cycle(1.0/speed_factor)

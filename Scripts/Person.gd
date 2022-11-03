@@ -86,6 +86,7 @@ func make_thoughts() -> void:
 	# work to save processing time.
 	var square_locations = town.get_town_square_loc()
 	var square_dist = 0
+	$Popup/Label.text = person_name[0] + '\n' + person_name[1]
 	if square_locations:
 	#	paths_from_home[square_locations] = get_path_to(square_locations)
 		square_dist = len(get_path_to(square_locations))
@@ -380,7 +381,12 @@ func _input(event):
 				get_tree().set_input_as_handled()
 
 func _on_Area2D_mouse_entered():
-	mouse_on = true
+	if not population.mouse_on:
+		population.mouse_on = true
+		$Popup.visible = true
+		mouse_on = true
 
 func _on_Area2D_mouse_exited():
+	population.mouse_on = false
+	$Popup.visible = false
 	mouse_on = false
