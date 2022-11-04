@@ -25,7 +25,7 @@ func setSelected(tile):
 	self.position.y += 30 - 16*tile[1]
 	self.visible = true
 	
-	building = $"../Towns".get_building(selected_tile)
+	building = $"../Towns".get_proper_building(selected_tile)
 	if building != null:
 		building.on_selected()
 	

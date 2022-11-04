@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://Sprites/Btn01.png" type="Texture" id=1]
 [ext_resource path="res://Sprites/Icons/Icon03.png" type="Texture" id=2]
@@ -12,8 +12,6 @@
 [ext_resource path="res://Sprites/BAHNSCHRIFT.TTF" type="DynamicFontData" id=10]
 [ext_resource path="res://Sprites/Icons/Icon07.png" type="Texture" id=11]
 [ext_resource path="res://Sprites/Icons/Icon15.png" type="Texture" id=12]
-[ext_resource path="res://Scenes/GUI/CharacterOptions.tscn" type="PackedScene" id=13]
-[ext_resource path="res://Scenes/GUI/BuildingOptions.tscn" type="PackedScene" id=14]
 
 [sub_resource type="DynamicFont" id=1]
 size = 64
@@ -190,14 +188,14 @@ tracks/0/keys = {
 
 [node name="GUI" type="MarginContainer"]
 anchor_right = 1.0
+anchor_bottom = 1.0
 margin_right = -50.0
-margin_bottom = 487.0
 mouse_filter = 2
 script = ExtResource( 3 )
 
 [node name="Main" type="VBoxContainer" parent="."]
 margin_right = 974.0
-margin_bottom = 487.0
+margin_bottom = 600.0
 mouse_filter = 2
 
 [node name="StatusBar" type="HBoxContainer" parent="Main"]
@@ -542,13 +540,7 @@ root_node = NodePath("../../../../MarginContainer2/Character/Button")
 anims/RESET = SubResource( 4 )
 anims/flare_red = SubResource( 6 )
 
-[node name="CharacterOptions" parent="." instance=ExtResource( 13 )]
-visible = false
-position = Vector2( 464.543, 265.586 )
-
-[node name="BuildingOptions" parent="." instance=ExtResource( 14 )]
-position = Vector2( 820.553, 337.735 )
-
 [connection signal="value_changed" from="Main/StatusBar/MarginContainer/Clock/Time" to="." method="_on_VSlider_value_changed"]
 [connection signal="pressed" from="Main/HBoxContainer/GUI_Selector/MarginContainer2/Character/Button" to="." method="_on_Button_pressed"]
 [connection signal="toggled" from="Main/HBoxContainer/GUI_Selector/MarginContainer2/Character/Button" to="." method="_on_Button_toggled"]
+[connection signal="pressed" from="Main/HBoxContainer/GUI_Selector/MarginContainer3/Building/Button" to="." method="_on_Building_Button_pressed"]

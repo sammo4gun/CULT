@@ -1,15 +1,14 @@
-extends Node2D
+extends MarginContainer
 
 var is_pressed = false
 var character = false
 
-onready var gui = get_parent()
+onready var gui = $"../GUI"
 onready var name_label = $MarginContainer/VBoxContainer/Name/Background/Label
 onready var job_label = $MarginContainer/VBoxContainer/Job/Background/Label
 
 func _ready():
 	hide()
-	position.x = get_viewport().size.x/2
 
 func _process(_delta):
 	if character:
@@ -18,19 +17,21 @@ func _process(_delta):
 			job_label.text = "no job"
 		else: job_label.text = character.profession
 
-func deselect_person():
+func deselect():
 	if is_pressed:
 		hide()
 		is_pressed = false
 	
-func reselect_person():
-	if is_pressed:
-		character = gui.selected_person
-
-func pressed():
-	if not is_pressed and gui.selected_person: 
+func reselect(person):
+	if not person:
+		deselect()
+	elif is_pressed:
+		character = person
+		
+func pressed(person):
+	if not is_pressed and person: 
 		show()
-		character = gui.selected_person
+		character = person
 		is_pressed = true
 	else: 
 		hide()

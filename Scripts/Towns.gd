@@ -19,6 +19,15 @@ func get_building(location):
 	for town in get_children():
 		if town.get_building(location):
 			return(town.get_building(location))
+	return null
+
+func get_proper_building(location):
+	for town in get_children():
+		var b = town.get_building(location)
+		if b:
+			if b.is_proper():
+				return b
+	return null
 
 func get_road(location):
 	for town in get_children():

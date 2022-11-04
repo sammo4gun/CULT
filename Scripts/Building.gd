@@ -27,6 +27,14 @@ var inside = []
 # State variables
 var lights_on = true
 
+var PROPER = {
+	"residential": true,
+	"center": true,
+	"square": false,
+	"store": true,
+	"farm": false
+}
+
 var TYPES = {
 	"residential": 1,
 	"center": 2,
@@ -93,6 +101,9 @@ func set_inhabitant(person, is_owner):
 	inside.append(person)
 
 var selected = false
+
+func is_proper():
+	return PROPER[type]
 
 func enter(person):
 	self.inside.append(person)

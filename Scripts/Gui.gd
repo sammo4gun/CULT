@@ -20,6 +20,10 @@ onready var build_anim = $Main/HBoxContainer/GUI_Selector/MarginContainer3/Build
 onready var towns = $"../../Towns"
 onready var world = get_tree().root.get_child(0)
 
+onready var character_options_gui = $"../CharacterOptions"
+onready var building_options_gui = $"../BuildingOptions"
+onready var tile_options_gui = null
+
 var altitude
 var buildings
 var building
@@ -87,28 +91,31 @@ func _on_Towns_refresh():
 # Selected a new person
 func _on_Selector_selected_person(person):
 	selected_tile = null
+	building_options_gui.reselect(null)
 	selected_person = person
-	if selected_person: $CharacterOptions.reselect_person()
+	character_options_gui.reselect(selected_person)
 	char_anim.play("flare_red")
 	display()
 
 # Selected a new square, or clicked outside the map
 func _on_Selector_selected_tile(new_selected):
-	if new_selected != null:
-		selected_tile = new_selected
-		if selected_person: $CharacterOptions.deselect_person()
-		selected_person = null
+	selected_tile = null
+	building_options_gui.reselect(towns.get_proper_building(new_selected))
+	selected_person = null
+	character_options_gui.reselect(selected_person)
+	
+	selected_tile = new_selected
+	if selected_tile != null:
 		tile_anim.play("flare_red")
-		if(towns.get_building(selected_tile)): build_anim.play("flare_red")
+		if(towns.get_proper_building(selected_tile)):
+			build_anim.play("flare_red")
 		display()
-	else:
-		selected_tile = null
-		if selected_person: $CharacterOptions.deselect_person()
-		selected_person = null
-		rm_display()
 
 func _on_VSlider_value_changed(value):
 	emit_signal("time_slider", value)
 
 func _on_Button_pressed():
-	$CharacterOptions.pressed()
+	character_options_gui.pressed(selected_person)
+
+func _on_Building_Button_pressed():
+	building_options_gui.pressed(towns.get_proper_building(selected_tile))
