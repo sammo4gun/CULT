@@ -16,7 +16,19 @@ export var SDEV_CENTER = 5
 export var EDGE_DIST = 10
 export var MAX_BUILD_TIME = 10
 
-var Building = preload("res://Scenes/Building.tscn")
+var Residence = preload("res://Scenes/Buildings/Residence.tscn")
+var Farm = preload("res://Scenes/Buildings/Farm.tscn")
+var Center = preload("res://Scenes/Buildings/Center.tscn")
+var Square = preload("res://Scenes/Buildings/Square.tscn")
+var Store = preload("res://Scenes/Buildings/Store.tscn")
+
+var TYPE_DICT={
+	"residence": Residence,
+	"farm": Farm,
+	"center": Center,
+	"square": Square,
+	"store": Store
+}
 
 var rng = RandomNumberGenerator.new()
 var map_heights
@@ -96,7 +108,7 @@ func build_town(w, h, mtypes, mheights):
 	# build residential buildings
 	
 	for _i in range(NUM_RESIDENTIAL):
-		current_location = construct_building("residential", _center, SDEV_RESIDENTIAL, ['road1', 'square'], 1)
+		current_location = construct_building("residence", _center, SDEV_RESIDENTIAL, ['road1', 'square'], 1)
 		if current_location == null:
 			print("FAILED TO BUILD")
 			break
@@ -199,7 +211,7 @@ func canwalk_to(loc, target, roads, type):
 	return pathfinder.walkRoadPath(loc, target, world._mbuildings, roads, type, true)
 	
 var BUILD_TO_ROAD = {
-	"residential": [1,2],
+	"residence": [1,2],
 	"center": [1,2],
 	"square": [1],
 	"store": [1,2],
@@ -272,7 +284,7 @@ func clean_roads():
 	#now clean farms
 	var done = []
 	for loc in _mbuildings:
-		if _mbuildings[loc].type in ["residential", "center", "store"] and \
+		if _mbuildings[loc].type in ["residence", "center", "store"] and \
 		   not _mbuildings[loc] in done:
 			var building_connections = get_connected_buildings(loc, _mroads, [2], true)
 			var square_connections = get_connected_squares(loc, _mroads, 2, true)
@@ -491,9 +503,8 @@ func get_tile_owner(location):
 	return false
 
 func new_building(location, ty):
-	var building = Building.instance()
+	var building = TYPE_DICT[ty].instance()
 	building.build(self, location, name_generator, world.towns.get_pos(location))
-	building.set_type(ty)
 	drawer.add_child(building)
 	return building
 

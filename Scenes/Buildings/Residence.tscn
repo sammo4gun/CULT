@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scripts/Buildings/Residence.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/Buildings/ConstructedBuilding.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Resources/light.png" type="Texture" id=3]
+
+[node name="Residence" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+
+[node name="HouseLights" type="Light2D" parent="." index="0"]
+visible = false
+position = Vector2( 0, 10 )
+scale = Vector2( 2, 1 )
+texture = ExtResource( 3 )
+texture_scale = 0.18
+color = Color( 1, 0.282353, 0.282353, 1 )
+energy = 0.52

@@ -25,7 +25,6 @@ scale = Vector2( 0.4, 0.4 )
 texture = ExtResource( 1 )
 
 [node name="Area2D" type="Area2D" parent="Sprite"]
-scale = Vector2( 1, 1 )
 
 [node name="Click_Catcher" type="CollisionShape2D" parent="Sprite/Area2D"]
 shape = SubResource( 1 )
@@ -87,7 +86,7 @@ margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
 
 [node name="Name" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-modulate = Color( 0.960784, 0.431373, 0.431373, 1 )
+modulate = Color( 0, 0, 0, 1 )
 margin_top = 44.0
 margin_right = 200.0
 margin_bottom = 84.0
@@ -111,7 +110,7 @@ valign = 1
 uppercase = true
 
 [node name="Job" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-modulate = Color( 0.960784, 0.431373, 0.431373, 1 )
+modulate = Color( 0, 0, 0, 1 )
 margin_top = 88.0
 margin_right = 200.0
 margin_bottom = 108.0

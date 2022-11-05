@@ -1,16 +1,6 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://Resources/light.png" type="Texture" id=1]
 [ext_resource path="res://Scripts/Building.gd" type="Script" id=2]
 
 [node name="Building" type="Node2D"]
 script = ExtResource( 2 )
-
-[node name="HouseLights" type="Light2D" parent="."]
-visible = false
-position = Vector2( 0, 10 )
-scale = Vector2( 2, 1 )
-texture = ExtResource( 1 )
-texture_scale = 0.18
-color = Color( 1, 0.282353, 0.282353, 1 )
-energy = 0.52
