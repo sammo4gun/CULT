@@ -43,22 +43,25 @@ onready var namegenerator = $NameGenerator
 onready var daynightcycle = $Day_Night
 
 func _ready():
+	build_world()
+	build_towns()
+	start_game()
+
+func build_world():
 	randomize()
 	_altitude = buildEnv(100, 5)
 	_moisture = buildEnv(50, 2)
 	terrainMap()
 	
 	pathfinding.initialisePathfinding(WIDTH, HEIGHT, _mtype, _mheight)
-	
-	#include code to produce civilization
-	#_mroads = buildEmpty()
+
+func build_towns():
 	_mbuildings = buildEmpty()
 	
 	for i in NUM_TOWNS:
 		towns_dict["town" + str(i)] = make_town()
-	
-	# clean up roads by removing roads that don't connect buildings
-	
+
+func start_game():
 	GUI.map_ready(_altitude, _mbuildings)
 	drawer.map_ready(WIDTH, HEIGHT, \
 					_mtype, _mheight, \
@@ -67,6 +70,7 @@ func _ready():
 	daynightcycle.start_cycle(5)
 	GUI.start_time()
 	time = get_time()["hour"]
+	
 
 var starttime = OS.get_unix_time()
 func _process(_delta):
@@ -189,14 +193,6 @@ func _on_Town_destroy_roads(roads):
 				path.erase(tile)
 				_mtype[tile] = 0
 
-var sp = 0
-var sp_factors = [1,2,4,0.25,0.5]
-func _on_GUI_button():
-	sp += 1
-	sp = sp % 5
-	speed_factor = sp_factors[sp]
-	daynightcycle.adjust_cycle(1.0/sp_factors[sp])
-
-func _on_GUI_time_slider(time):
-	speed_factor = range_lerp(time, 20, 100, 0.25, 5)
+func _on_GUI_time_slider(speed):
+	speed_factor = range_lerp(speed, 20, 100, 0.25, 5)
 	daynightcycle.adjust_cycle(1.0/speed_factor)

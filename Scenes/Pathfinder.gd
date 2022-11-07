@@ -59,7 +59,7 @@ func findRoadPath(start, finish, town, buildings, road_type, roads):
 						return path
 					new_pos = parents[new_pos]
 			if new_pos in map_types:
-				var build_restricted = check_adjacent_obs(new_pos, town, buildings, road_type, roads)
+				var build_restricted = check_adjacent_obs(new_pos, town, buildings, road_type)
 				if map_types[new_pos] != 3 and \
 					map_heights[new_pos] == 0 and \
 					not build_restricted:
@@ -82,7 +82,7 @@ func findRoadPath(start, finish, town, buildings, road_type, roads):
 						open.append(new_pos)
 			closed.append(promising)
 
-func check_adjacent_obs(loc, town, buildings, road_type, roads):
+func check_adjacent_obs(loc, town, buildings, road_type):
 	if loc in buildings:
 		if buildings[loc] in [1,2,4,5]:
 			return true

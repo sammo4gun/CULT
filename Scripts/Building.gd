@@ -28,7 +28,7 @@ var TYPES = {
 func _ready():
 	pass
 
-func _hour_update(time):
+func _hour_update(_time):
 	pass
 
 func build(twn, loc, nmg, pos):

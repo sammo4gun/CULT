@@ -131,6 +131,7 @@ margin_right = -20.0
 rect_scale = Vector2( 1.2, 1.2 )
 
 [node name="BuildingOptions" parent="CanvasLayer" instance=ExtResource( 14 )]
+visible = false
 
 [node name="CharacterOptions" parent="CanvasLayer" instance=ExtResource( 15 )]
 visible = false

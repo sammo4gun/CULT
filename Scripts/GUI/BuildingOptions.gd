@@ -3,10 +3,38 @@ extends "res://Scripts/GUI/PopupMenu.gd"
 var building = false
 
 onready var type_label = $Main/TypeBar/Name/NinePatchRect/Label
+onready var cellar_label = $Main/ResourceBar/Name/NinePatchRect/Label
+onready var name_label = $Main/InfoBar/Name/NinePatchRect/Label
+onready var name2_label = $Main/InfoBar/Name2/NinePatchRect/Label
+onready var basement_label = $Main/BasementBar/Name/NinePatchRect/Label
+
+onready var contents_popup = $Main/ResourceBar/Name/NinePatchRect/MenuButton.get_popup()
+
+onready var person_options_gui = $"../CharacterOptions"
+
+var inside_people
+var to_handle_contents
 
 func _process(_delta):
 	if building:
 		type_label.text = building.type
+		inside_people = building.get_inside()
+		if inside_people:
+			name_label.text = inside_people[0].string_name
+		else: name_label.text = ''
+		
+		to_handle_contents = []
+		for c in building.contents:
+			to_handle_contents.append(c)
+		
+		for i in range(contents_popup.get_item_count()):
+			if contents_popup.get_item_text(i) in to_handle_contents:
+				to_handle_contents.remove(contents_popup.get_item_text(i))
+			else: 
+				contents_popup.remove_item(i)
+		
+		for c in to_handle_contents:
+			contents_popup.add_item(c + ": " + str(building.contents[c]))
 
 func reselect(build):
 	if not build:
@@ -15,6 +43,7 @@ func reselect(build):
 		building = build
 
 func pressed(build):
+	person_options_gui.pressed(null)
 	if not is_pressed and build: 
 		show()
 		building = build
@@ -23,3 +52,8 @@ func pressed(build):
 		hide()
 		building = false
 		is_pressed = false
+
+func _on_name_button_pressed():
+	if building and inside_people:
+		person_options_gui.pressed(inside_people[0])
+		reselect(null)

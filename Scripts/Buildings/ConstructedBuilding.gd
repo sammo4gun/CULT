@@ -10,11 +10,15 @@ var inhabitants = []
 # floors -> rooms
 var rooms = {}
 
+var contents = {}
+
 # State variables
 var lights_on = false
 
 func _ready():
 	can_enter = true
+	contents["food"] = 5
+	contents["clothes"] = 2
 	._ready()
 
 func set_inhabitant(person, is_owner):
@@ -23,6 +27,9 @@ func set_inhabitant(person, is_owner):
 		house_name += ": " + person.string_name
 	inhabitants.append(person)
 	inside.append(person)
+
+func get_inside():
+	return inside
 
 func is_proper():
 	return true
