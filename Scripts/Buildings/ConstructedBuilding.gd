@@ -34,6 +34,9 @@ func get_inside():
 func is_proper():
 	return true
 
+func add_content(item, amount = 1):
+	contents[item] = contents.get(item, 0) + amount
+
 func turn_lights_on():
 	lights_on = true
 	lights.visible = true

@@ -25,7 +25,7 @@ func initialisePathfinding(w, h, mtypes, mheights):
 # For now, lets say the higher portions of the map are simply not 
 # available.
 # Returns a list of the coords or false.
-func findRoadPath(start, finish, town, buildings, road_type, roads):
+func findRoadPath(start, finish, town, buildings, road_type):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}

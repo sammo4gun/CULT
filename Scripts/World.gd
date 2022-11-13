@@ -5,6 +5,8 @@ export var WIDTH = 40
 export var NUM_TOWNS = 3
 var speed_factor = range_lerp(60, 20, 100, 0.25, 5)
 
+var CURRENT
+
 var SPEEDS = {
 	0: 1.5,
 	1: 2,
@@ -58,8 +60,11 @@ func build_world():
 func build_towns():
 	_mbuildings = buildEmpty()
 	
+	var c_town
 	for i in NUM_TOWNS:
-		towns_dict["town" + str(i)] = make_town()
+		c_town = make_town()
+		if c_town:
+			towns_dict["town" + str(i)] = c_town
 
 func start_game():
 	GUI.map_ready(_altitude, _mbuildings)
@@ -88,12 +93,15 @@ func make_town():
 	town.connect("construct_roads", self, "_on_Town_construct_roads")
 	town.connect("construct_building", self, "_on_Town_construct_building")
 	town.connect("destroy_roads", self, "_on_Town_destroy_roads")
+	town.connect("destroy_building", self, "_on_Town_destroy_building")
 	town.set_parents(drawer, pathfinding, self, namegenerator, population)
 	towns.add_child(town)
 	
 	town.NUM_RESIDENTIAL = 10
-	town.build_town(WIDTH, HEIGHT, _mtype, _mheight)
-	return town
+	if not town.build_town(WIDTH, HEIGHT, _mtype, _mheight):
+		town.destroy_town()
+		return false
+	else: return town
 
 func buildEmpty():
 	var map = {}
@@ -192,6 +200,11 @@ func _on_Town_destroy_roads(roads):
 			if tile in path:
 				path.erase(tile)
 				_mtype[tile] = 0
+
+func _on_Town_destroy_building(building):
+	for loc in building.location:
+		_mbuildings[loc] = 0
+		_mtype[loc] = 0
 
 func _on_GUI_time_slider(speed):
 	speed_factor = range_lerp(speed, 20, 100, 0.25, 5)

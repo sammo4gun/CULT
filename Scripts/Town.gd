@@ -3,6 +3,7 @@ extends Node2D
 signal construct_roads
 signal construct_building
 signal destroy_roads
+signal destroy_building
 
 #Generation Variables
 export var NUM_RESIDENTIAL = 5
@@ -94,15 +95,14 @@ func build_town(w, h, mtypes, mheights):
 	current_location = construct_building("center", get_town_square_loc()[0], SDEV_CENTER, ['road1', 'square'], 1)
 	
 	create_resident(population, self, _mbuildings[current_location])
-
 	
 	# build store buildings
 	
 	for _i in range(NUM_STORES):
 		current_location = construct_building("store", get_town_square_loc()[0], SDEV_CENTER/2, ['road1', 'square'], 1) 
 		if current_location == null:
-			print("FAILED TO BUILD")
-			break
+			fail_message()
+			return false
 		create_resident(population, self, _mbuildings[current_location])
 	
 	# build residential buildings
@@ -110,14 +110,30 @@ func build_town(w, h, mtypes, mheights):
 	for _i in range(NUM_RESIDENTIAL):
 		current_location = construct_building("residence", _center, SDEV_RESIDENTIAL, ['road1', 'square'], 1)
 		if current_location == null:
-			print("FAILED TO BUILD")
-			break
+			fail_message()
+			return false
 		create_resident(population, self, _mbuildings[current_location])
 	
 	clean_roads()
+	return true
+
+func destroy_town():
+	for building in unique_buildings:
+		building.destroy()
+		emit_signal("destroy_building", building)
+	emit_signal("destroy_roads", _mroads)
+	for child in get_children():
+		remove_child(child)
+	get_parent().remove_child(self)
+
+func fail_message():
+	print('=================================')
+	print("ERROR BUILDING TOWN: " + town_name)
+	print("TOWN COORDS: " + str(_center))
+	print('=================================')
 
 func build_farm(person, nr):
-	for _i in nr:
+	for i in nr:
 		var farmers_house = person.house.location[0]
 		var new_farm = construct_multi_building( \
 					   person.house.location[0], \
@@ -304,7 +320,7 @@ func clean_roads():
 
 func canpath_to(loc, target, type):
 	if target != null:
-		return pathfinder.findRoadPath(loc, target, self, world._mbuildings, type, world._mroads)
+		return pathfinder.findRoadPath(loc, target, self, world._mbuildings, type)
 	return [loc]
 
 func canbuild(loc, check_adj):
@@ -408,7 +424,7 @@ func construct_building(type, center, sdev, connect, road_type):
 				emit_signal("construct_building", new_build)
 				return loc
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
-			print("Couldn't finish building")
+			print("Couldn't finish building: " + type)
 			return null
 
 # This is for special types of buildings, that require different 
@@ -478,7 +494,7 @@ func construct_multi_building(center, \
 				emit_signal("construct_building", new_build)
 				return new_build
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
-			print("Couldn't finish building")
+			print("Couldn't finish building: " + type)
 			return false
 
 func create_resident(pop, town, house):

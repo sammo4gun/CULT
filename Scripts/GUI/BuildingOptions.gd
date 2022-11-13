@@ -25,16 +25,18 @@ func _process(_delta):
 		
 		to_handle_contents = []
 		for c in building.contents:
-			to_handle_contents.append(c)
+			if building.contents[c] > 0:
+				to_handle_contents.append(c)
 		
 		for i in range(contents_popup.get_item_count()):
-			if contents_popup.get_item_text(i) in to_handle_contents:
-				to_handle_contents.remove(contents_popup.get_item_text(i))
+			if contents_popup.get_item_text(i).split(': ')[0] in to_handle_contents:
+				contents_popup.set_item_text(i, contents_popup.get_item_text(i).split(': ')[0] + ": " + str(building.contents[contents_popup.get_item_text(i).split(': ')[0]]))
+				to_handle_contents.erase(contents_popup.get_item_text(i).split(': ')[0])
 			else: 
 				contents_popup.remove_item(i)
 		
 		for c in to_handle_contents:
-			contents_popup.add_item(c + ": " + str(building.contents[c]))
+			contents_popup.add_item(c)
 
 func reselect(build):
 	if not build:
@@ -52,6 +54,11 @@ func pressed(build):
 		hide()
 		building = false
 		is_pressed = false
+
+func _unhandled_key_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_F:
+			building.add_content("johnsons", 1)
 
 func _on_name_button_pressed():
 	if building and inside_people:

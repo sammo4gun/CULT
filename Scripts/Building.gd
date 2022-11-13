@@ -38,6 +38,9 @@ func build(twn, loc, nmg, pos):
 	name_generator = nmg
 	position = pos
 
+func destroy():
+	pass
+
 func get_location():
 	return self.location
 
