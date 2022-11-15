@@ -416,12 +416,12 @@ func construct_building(type, center, sdev, connect, road_type):
 				var new_build = new_building([loc], type)
 				_mbuildings[loc] = new_build
 				unique_buildings.append(new_build)
+				emit_signal("construct_building", new_build)
 				for tile in p:
 					if not tile in _mroads and not tile in _mbuildings:
 						_mroads[tile] = road_type
 						set_tile_owner(tile, self)
 				emit_signal("construct_roads", p, _mbuildings, road_type)
-				emit_signal("construct_building", new_build)
 				return loc
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
 			print("Couldn't finish building: " + type)
@@ -486,12 +486,12 @@ func construct_multi_building(center, \
 					set_tile_owner(loc, owner_obj)
 					if is_road: 
 						_mroads[loc] = road_type
+				emit_signal("construct_building", new_build)
 				for tile in path:
 					if not tile in _mroads and not tile in _mbuildings:
 						_mroads[tile] = road_type
 						set_tile_owner(tile, owner_obj)
 				emit_signal("construct_roads", path, _mbuildings, road_type)
-				emit_signal("construct_building", new_build)
 				return new_build
 		if OS.get_unix_time() - time_start >= MAX_BUILD_TIME:
 			print("Couldn't finish building: " + type)
@@ -524,5 +524,5 @@ func new_building(location, ty):
 	drawer.add_child(building)
 	return building
 
-func update_building(building):
-	world.towns.update_building(building.location[0], building.get_sprite())
+func update_building(building, tile):
+	get_parent().update_building(tile, building.get_sprite(tile))

@@ -20,11 +20,11 @@ func _hour_update(hour):
 
 func make_person(town, house):
 	var pers = Person.instance()
+	for loc in house.location:
+		town.set_tile_owner(loc, pers)
 	pers.create(world, self, town, house, behaviours)
 	house.set_inhabitant(pers, true)
 	pop.append(pers)
-	for loc in house.location:
-		town.set_tile_owner(loc, pers)
 	ydrawer.add_child(pers)
 	if not town in towns:
 		towns.append(town)

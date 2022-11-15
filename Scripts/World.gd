@@ -56,6 +56,9 @@ func build_world():
 	terrainMap()
 	
 	pathfinding.initialisePathfinding(WIDTH, HEIGHT, _mtype, _mheight)
+	drawer.map_init(WIDTH, HEIGHT, \
+					_mtype, _mheight, \
+					_mroads, _mbuildings)
 
 func build_towns():
 	_mbuildings = buildEmpty()
@@ -67,15 +70,9 @@ func build_towns():
 			towns_dict["town" + str(i)] = c_town
 
 func start_game():
-	GUI.map_ready(_altitude, _mbuildings)
-	drawer.map_ready(WIDTH, HEIGHT, \
-					_mtype, _mheight, \
-					_mroads, _mbuildings)
-	
 	daynightcycle.start_cycle(5)
 	GUI.start_time()
 	time = get_time()["hour"]
-	
 
 var starttime = OS.get_unix_time()
 func _process(_delta):
@@ -166,7 +163,7 @@ func terrainMap():
 func is_road_tile(tile):
 	for path in _mroads:
 		if tile in path:
-			return true
+			return path[tile]
 	return false
 
 func get_time():
@@ -181,18 +178,20 @@ func selected_person(person):
 	selector.selectPerson(person)
 
 func _on_Town_construct_roads(path, buildings, type):
-	if len(path) > 1:
-		var p = {}
-		for tile in path:
-			if not tile in buildings and not is_road_tile(tile):
-				p[tile] = type
-				_mtype[tile] = 2
-		_mroads.append(p)
+	var p = {}
+	for tile in path:
+		if not tile in buildings and not is_road_tile(tile):
+			p[tile] = type
+			_mtype[tile] = 2
+			drawer.terrain_update(tile)
+	_mroads.append(p)
+	drawer.road_update(p)
 
 func _on_Town_construct_building(building):
 	for loc in building.location:
 		_mbuildings[loc] = building.get_id()
 		_mtype[loc] = 2
+		drawer.building_update(loc)
 
 func _on_Town_destroy_roads(roads):
 	for tile in roads:
@@ -200,11 +199,15 @@ func _on_Town_destroy_roads(roads):
 			if tile in path:
 				path.erase(tile)
 				_mtype[tile] = 0
+				drawer.remove_road(tile)
+				drawer.terrain_update(tile)
 
 func _on_Town_destroy_building(building):
 	for loc in building.location:
 		_mbuildings[loc] = 0
 		_mtype[loc] = 0
+		drawer.terrain_update(loc)
+		#drawer.building_update(loc)
 
 func _on_GUI_time_slider(speed):
 	speed_factor = range_lerp(speed, 20, 100, 0.25, 5)

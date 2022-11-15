@@ -25,7 +25,6 @@ onready var building_options_gui = $"../BuildingOptions"
 onready var tile_options_gui = null
 
 var altitude
-var buildings
 var building
 var selected_tile = null
 var selected_person = null
@@ -46,10 +45,6 @@ func set_time(time):
 	minute_label.text = str(time["minute"])
 	if len(minute_label.text) < 2:
 		minute_label.text = '0' + minute_label.text
-
-func map_ready(alt, builds):
-	altitude = alt
-	buildings = builds
 
 func display():
 	if selected_tile != null:

@@ -11,6 +11,8 @@ var map_connected = false
 var can_enter = false
 var selected = false
 
+var sprites = {}
+
 # list of owners of the building
 var owners = []
 
@@ -37,6 +39,8 @@ func build(twn, loc, nmg, pos):
 	location = loc
 	name_generator = nmg
 	position = pos
+	for tile in location:
+		sprites[tile] = 4
 
 func destroy():
 	pass
@@ -59,6 +63,12 @@ func add_owner(person):
 		owners.append(person)
 		if len(owners) == 1:
 			house_name += ": " + person.string_name
+
+func set_sprite(tile, id):
+	sprites[tile] = id
+
+func get_sprite(tile):
+	return sprites[tile]
 
 func is_proper():
 	return false

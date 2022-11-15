@@ -203,9 +203,9 @@ margin_right = 974.0
 margin_bottom = 60.0
 
 [node name="Background" type="Sprite" parent="Main/StatusBar"]
-position = Vector2( 521.334, 25.8402 )
+position = Vector2( 800, 25.84 )
 rotation = 3.14159
-scale = Vector2( 2.37656, 3.05331 )
+scale = Vector2( 5, 3.053 )
 texture = ExtResource( 5 )
 
 [node name="Bars" type="VBoxContainer" parent="Main/StatusBar"]

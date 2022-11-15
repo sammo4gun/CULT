@@ -42,38 +42,15 @@ var ROADS_DICT = {
 	[1,1,0,1]: 15
 	}
 
-var SQUARE_DICT = {
-	[0,1,1,0]: 39,
-	[1,1,0,0]: 35,
-	[1,1,1,0]: 36,
-	[1,0,0,1]: 38,
-	[0,1,1,1]: 34,
-	[0,0,1,1]: 40,
-	[1,1,1,1]: 37,
-	[1,0,1,1]: 41,
-	[1,1,0,1]: 33
-	}
-
-var FARM_DICT = {
-	[0,1,1,0]: 73,
-	[1,1,0,0]: 69,
-	[1,1,1,0]: 70,
-	[1,0,0,1]: 72,
-	[0,1,1,1]: 68,
-	[0,0,1,1]: 74,
-	[1,1,1,1]: 71,
-	[1,0,1,1]: 66,
-	[1,1,0,1]: 67
-	}
-
 onready var ground = $"../YDrawer/Ground"
 onready var hill = $"../YDrawer/Hill"
 onready var mountain = $"../YDrawer/Mountain"
 onready var towns = $"../Towns"
+onready var world = get_parent()
 
 onready var _layers = {0: ground, 1: hill, 2: mountain}
 
-func map_ready(w, h, types, heights, roads, buildings):
+func map_init(w, h, types, heights, roads, buildings):
 	WIDTH = w
 	HEIGHT = h
 	_heights = heights
@@ -90,37 +67,77 @@ func map_ready(w, h, types, heights, roads, buildings):
 		_buildings[tile] = buildings[tile]
 	randomTrees()
 	splitMap()
-	constructRoads()
-	constructBuildings()
-	drawRoads()
 	drawMap()
 
-func _unhandled_input(event):
-	if event is InputEventMouseButton:
-		if event.is_pressed():
-			if event.button_index == BUTTON_LEFT:
-				emit_signal("selected_tile", setSelected(get_global_mouse_position()))
+# Change the type of terrain on a square
+func terrain_update(tile: Vector2):
+	var type = world._mtype[tile]
+	if type == 5:
+		_types[tile] = 23+rng.randi_range(0,9)
+	else: 
+		_types[tile] = type
+	
+	for lay in _layers:
+		if _heights[tile] == lay:
+			#redraw that tile on that layer
+			_layers[lay].updateTerrain(tile, type)
 
-func constructRoads():
-	for path in _roads:
-		for tile in path:
-			var dirs = [0,0,0,0]
-			var i = 0
-			for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
-				if (tile + dif) in path or \
-				   (get_road_tile(tile+dif) == 1 and path[tile] == 1):
-					if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-						dirs[i] = 1
-				elif get_road_tile(tile+dif) == 2 and path[tile] == 2 and\
-					 towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile):
-						dirs[i] = 1
-				i += 1
-			_roads_dirs[tile] = dirs
+# Change the type of road on a path, connect that road to adjacent 
+# buildings/roads.
+func road_update(path: Dictionary):
+	var type
+	_roads.append(path)
+	for tile in path:
+		_roads_dirs[tile] = [0, 0, 0, 0]
+		type = path[tile]
+	
+	# Tiles for now must always be on the 0 layer, (_layers[0])
+	for tile in path:
+		var i = 0
+		for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+			match type:
+				1:
+					if (tile + dif) in path or \
+					   (get_road_tile(tile+dif) == 1):
+						if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+							_roads_dirs[tile][i] = 1
+							_layers[0].updateRoad(tile, _roads_dirs[tile], type)
+							_roads_dirs[tile+dif][(i+2)%4] = 1
+							_layers[0].updateRoad(tile+dif, _roads_dirs[tile+dif], type)
+					elif towns.has_building(tile+dif):
+						if type in BUILDING_LAYERS[world._mbuildings[tile+dif]] and \
+						   (not towns.map_get_building_connected(tile+dif) or \
+						   MULTI_ROADS[world._mbuildings[tile+dif]][type]):
+							building_update(tile+dif)
+							_roads_dirs[tile][i] = 1
+							_layers[0].updateRoad(tile, _roads_dirs[tile], type)
+				2:
+					if (get_road_tile(tile+dif) == 2) and\
+					   (towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile)):
+							_roads_dirs[tile][i] = 1
+							_layers[0].updateRoad(tile, _roads_dirs[tile], type)
+							_roads_dirs[tile+dif][(i+2)%4] = 1
+							_layers[0].updateRoad(tile+dif, _roads_dirs[tile+dif], type)
+					elif towns.has_building(tile+dif):
+						if (type in BUILDING_LAYERS[world._mbuildings[tile+dif]]) and \
+						   (towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile)) and \
+						   (not towns.map_get_building_connected(tile+dif) or \
+							MULTI_ROADS[world._mbuildings[tile+dif]][type]):
+							_roads_dirs[tile][i] = 1
+							_layers[0].updateRoad(tile, _roads_dirs[tile], type)
+							towns.map_set_building_connected(tile+dif)
+			i += 1
 
-func get_pos(location):
-	var pos = ground.map_to_world(location)
-	pos.y += 48
-	return pos
+func remove_road(tile: Vector2):
+	var i = 0
+	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+		if _roads_dirs[tile][i] == 1 and world.is_road_tile(tile+dif):
+			_roads_dirs[tile+dif][(i+2)%4] = 0
+			_layers[0].updateRoad(tile+dif, _roads_dirs[tile+dif], world.is_road_tile(tile+dif))
+		elif _roads_dirs[tile][i] == 1 and towns.has_building(tile+dif):
+			towns.map_set_building_disconnected(tile+dif)
+			full_building_update(tile+dif)
+		i+=1
 
 var BUILDING_LAYERS = {
 	1: [1,2], 
@@ -138,67 +155,100 @@ var MULTI_ROADS = {
 	5: {1: false, 2: false}
 }
 
-func constructBuildings():
-	for tile in _buildings:
-		if _buildings[tile]:
+# Change the type of building on a square, connect that building to adjacent
+# roads.
+func building_update(tile: Vector2):
+	var type = world._mbuildings[tile]
+	_buildings[tile] = type
+	assert(type > 0)
+	
+	for lay in _layers:
+		if _heights[tile] == lay:
+			# CASE ONE: Simple house. Draw house, uspdate roads
 			var d = 0
 			var i = 0
-			
-			if 1 in BUILDING_LAYERS[_buildings[tile]]:
-				# Set road type of adjacent roads
+			if 1 in BUILDING_LAYERS[type]:
 				# Check for squares and make the connection. Connected = true, d=i
+				# Connection check for a town square that the house belongs to
 				for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
 					if (tile + dif) in _buildings:
 						if _buildings[(tile + dif)] == 3:
 							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 								towns.map_set_building_connected(tile)
 								d=i
-								if not MULTI_ROADS[_buildings[tile]][1]: 
+								if not MULTI_ROADS[type][1]: 
 									break
 					i += 1
 				
 				# Check for connected main roads if not connected.
 				i = 0
-				if (MULTI_ROADS[_buildings[tile]][1]) or (not towns.map_get_building_connected(tile)):
+				if (MULTI_ROADS[type][1]) or (not towns.map_get_building_connected(tile)):
 					for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
 						if get_road_tile(tile+dif) == 1:
 							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 								_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
 								towns.map_set_building_connected(tile)
 								d=i
-								if not MULTI_ROADS[_buildings[tile]][1]: 
+								_layers[lay].updateRoad(tile+dif, _roads_dirs[tile+dif], 1)
+								if not MULTI_ROADS[type][1]: 
 									break
 						i += 1
 			
-			if 2 in BUILDING_LAYERS[_buildings[tile]]:
+			if 2 in BUILDING_LAYERS[type]:
 				i = 0
 				# Finally, connected personal roads, only for show.
-				if (MULTI_ROADS[_buildings[tile]][2]) or (not towns.map_get_building_connected(tile)):
+				if (MULTI_ROADS[type][2]) or (not towns.map_get_building_connected(tile)):
 					for dif in [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]:
 						if get_road_tile(tile+dif) == 2:
 							if towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile):
 								_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
+								_layers[lay].updateRoad(tile+dif, _roads_dirs[tile+dif], 2)
 								towns.map_set_building_connected(tile)
-								if not MULTI_ROADS[_buildings[tile]][2]: 
+								# UPDATE ROAD ON THIS TILE WITH OPPOSING DIRECTION
+								if not MULTI_ROADS[type][2]: 
 									break
 						i += 1
 			
-			# TODO: Set building type depending on whether or not
-			# there are adjacent roads.
-			match _buildings[tile]:
+			# ACTUAL DRAWING
+			match type:
 				1:
-					towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
-					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
+					towns.get_building(tile).set_sprite(tile, RESIDENTIAL_TILES[d])
 				2:
-					towns.get_building(tile).set_sprite(CENTER_TILES[d])
-					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
-				3:
-					_layered_types[0][tile] = square_tile(tile, 3, SQUARE_DICT)
+					towns.get_building(tile).set_sprite(tile, CENTER_TILES[d])
 				4:
-					towns.get_building(tile).set_sprite(RESIDENTIAL_TILES[d])
-					_layered_types[0][tile] = towns.get_building(tile).get_sprite()
-				5:
-					_layered_types[0][tile] = square_tile(tile, 5, FARM_DICT)
+					towns.get_building(tile).set_sprite(tile, RESIDENTIAL_TILES[d])
+			
+			# Change this to just pass the direction?
+			_layers[lay].updateBuilding(tile, towns.get_building(tile).get_sprite(tile))
+
+func full_building_update(tile: Vector2):
+	var all_tiles = towns.get_full_building(tile)
+	for tile in all_tiles:
+		building_update(tile)
+
+func square_tile(tile, type, dict):
+	var i = 0
+	var dirs = [0,0,0,0]
+	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+		if (tile + dif) in _buildings:
+			if _buildings[(tile + dif)] == type:
+				if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
+					dirs[i] = 1
+		i += 1
+	if not dirs in dict:
+		return dict[[1,1,1,1]]
+	return dict[dirs]
+
+func _unhandled_input(event):
+	if event is InputEventMouseButton:
+		if event.is_pressed():
+			if event.button_index == BUTTON_LEFT:
+				emit_signal("selected_tile", setSelected(get_global_mouse_position()))
+
+func get_pos(location):
+	var pos = ground.map_to_world(location)
+	pos.y += 48
+	return pos
 
 var RESIDENTIAL_TILES = {
 	2: 19,
@@ -213,27 +263,6 @@ var CENTER_TILES = {
 	0: 22,
 	1: 21
 }
-
-func square_tile(tile, type, dict):
-	var i = 0
-	var dirs = [0,0,0,0]
-	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
-		if (tile + dif) in _buildings:
-			if _buildings[(tile + dif)] == type:
-				if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-					dirs[i] = 1
-		i += 1
-	if not dirs in dict:
-		return dict[[1,1,0,0]]
-	return dict[dirs]
-
-func drawRoads():
-	for path in _roads:
-		for tile in path:
-			if path[tile] == 1:
-				_layered_types[0][tile] = ROADS_DICT[_roads_dirs[tile]]
-			if path[tile] == 2:
-				_layered_types[0][tile] = ROADS_DICT[_roads_dirs[tile]]
 
 # converts the value "4" to one of the correct tree values
 func randomTrees():
@@ -286,5 +315,5 @@ func modify_road(dirs, i):
 		dirs[(i+3)%4] = 1
 	return dirs
 
-func update_building(location, value):
-	ground.set_cell(location.x, location.y, value)
+func refresh_building(location, value):
+	ground.updateBuilding(location, value)

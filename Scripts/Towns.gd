@@ -13,13 +13,19 @@ func get_owner_obj(tile):
 	for town in get_children():
 		var own = town.get_tile_owner(tile)
 		if own: return own
-	return false
+	return null
 
 func get_building(location):
 	for town in get_children():
 		if town.get_building(location):
 			return(town.get_building(location))
 	return null
+
+func has_building(location):
+	for town in get_children():
+		if town.get_building(location):
+			return true
+	return false
 
 func get_proper_building(location):
 	for town in get_children():
@@ -37,7 +43,7 @@ func get_road(location):
 func building_exists(house):
 	for town in get_children():
 		for building in town.get_children():
-			if building.house_name==house:
+			if building.house_name == house:
 				return true
 	return false
 
@@ -56,6 +62,11 @@ func check_ownership(location):
 			return town
 	return false
 
+func get_full_building(loc):
+	for town in get_children():
+		if loc in town._mbuildings:
+			return town._mbuildings[loc].location
+
 func map_get_building_connected(loc):
 	for town in get_children():
 		if loc in town._mbuildings:
@@ -67,14 +78,20 @@ func map_set_building_connected(loc):
 			town._mbuildings[loc].map_connected = true
 			return
 
+func map_set_building_disconnected(loc):
+	for town in get_children():
+		if loc in town._mbuildings:
+			town._mbuildings[loc].map_connected = false
+			return
+			
 func get_pos(location):
 	return map.get_pos(location[0])
 
 func ping_gui():
 	emit_signal("refresh")
-	
+
 func update_building(location, value):
-	map.update_building(location, value)
+	map.refresh_building(location, value)
 
 func _on_Population_chosen_profession(person, prof):
 	match prof:
