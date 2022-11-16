@@ -27,8 +27,10 @@ The points of the stars can also lead to specific information
 
 Ideas for archetypes/powers:
 - DEVIL, biblical devil, you use the seven deadly sins. Goal is to rule the town
-- DEMON, chaos demon, the goal is chaos
+- DEMON, chaos demon, the goal is chaos, spec into elements
 - FAE, let nature take over the town
 - BLIGHT, destroy all natural forces with illnesses
 - SHAPESHIFTER, infiltrate the town with a physical form
 - BANSHEE, return from the dead, possessing people with the spirit of revenge
+- FALLEN ANGEL, corrupt the christian church to be extremely lawful
+- DJINNI, born from a shadowless flame

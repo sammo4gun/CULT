@@ -28,6 +28,17 @@ func set_inhabitant(person, is_owner):
 	inhabitants.append(person)
 	inside.append(person)
 
+func remove_person(person):
+	if person in owners:
+		owners.erase(person)
+	if person in inhabitants:
+		inhabitants.erase(person)
+	if person in inside:
+		inside.erase(person)
+
+func unmake():
+	queue_free()
+
 func get_inside():
 	return inside
 

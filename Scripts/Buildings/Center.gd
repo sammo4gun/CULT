@@ -8,9 +8,11 @@ extends "res://Scripts/Buildings/ConstructedBuilding.gd"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	._ready()
 	type = "center"
 	house_name = "Mayors House"
-	._ready()
+	BUILDING_LAYER = {1: true,  2: true}
+	MULTI_ROAD =     {1: true,  2: true}
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

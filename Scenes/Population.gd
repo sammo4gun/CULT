@@ -29,6 +29,13 @@ func make_person(town, house):
 	if not town in towns:
 		towns.append(town)
 
+func unmake_person(person):
+	assert(person in pop)
+	if person.house:
+		person.house.remove_person(person)
+	pop.erase(person)
+	person.destroy()
+
 func name_exists(nm):
 	for person in pop:
 		if person.person_name == nm:

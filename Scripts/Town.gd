@@ -119,12 +119,15 @@ func build_town(w, h, mtypes, mheights):
 
 func destroy_town():
 	for building in unique_buildings:
-		building.destroy()
+		if building.can_enter:
+			for person in building.inhabitants:
+				population.unmake_person(person)
+		building.unmake()
 		emit_signal("destroy_building", building)
 	emit_signal("destroy_roads", _mroads)
 	for child in get_children():
 		remove_child(child)
-	get_parent().remove_child(self)
+	queue_free()
 
 func fail_message():
 	print('=================================')

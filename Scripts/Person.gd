@@ -80,6 +80,9 @@ func create(wrld, pop, twn, hse, beh) -> void:
 	
 	make_thoughts()
 
+func destroy() -> void:
+	queue_free()
+
 # CREATION: Randomly generates what this person's job and personality is like.
 func make_thoughts() -> void:
 	# As the character starts at home, this calculates their path from home to

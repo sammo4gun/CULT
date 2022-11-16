@@ -16,6 +16,8 @@ func _ready():
 	._ready()
 	type = "square"
 	house_name = "Town Square"
+	BUILDING_LAYER = {1: true, 2: false}
+	MULTI_ROAD = 	 {1: true, 2: false}
 
 func get_sprite(tile):
 	return SQUARE_DICT[[1,1,1,1]]

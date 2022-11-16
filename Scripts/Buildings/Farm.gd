@@ -18,6 +18,8 @@ func _ready():
 	._ready()
 	type = "farm"
 	house_name = "Farm"
+	BUILDING_LAYER = {1: false, 2: true}
+	MULTI_ROAD =     {1: false, 2: false}
 	for loc in location:
 		state[loc] = {'watered': 0.0}
 

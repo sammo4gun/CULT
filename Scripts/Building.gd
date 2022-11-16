@@ -1,5 +1,10 @@
 extends Node2D
 
+var SPRITE_DICT
+
+var BUILDING_LAYER
+var MULTI_ROAD
+
 var type
 var location
 var house_name
@@ -42,8 +47,9 @@ func build(twn, loc, nmg, pos):
 	for tile in location:
 		sprites[tile] = 4
 
-func destroy():
-	pass
+
+func unmake():
+	queue_free()
 
 func get_location():
 	return self.location

@@ -63,10 +63,12 @@ func build_world():
 func build_towns():
 	_mbuildings = buildEmpty()
 	
+	var i = 0
 	var c_town
-	for i in NUM_TOWNS:
+	while i < NUM_TOWNS:
 		c_town = make_town()
 		if c_town:
+			i+=1
 			towns_dict["town" + str(i)] = c_town
 
 func start_game():
@@ -164,7 +166,7 @@ func is_road_tile(tile):
 	for path in _mroads:
 		if tile in path:
 			return path[tile]
-	return false
+	return 0
 
 func get_time():
 	return daynightcycle.get_time()
@@ -206,8 +208,8 @@ func _on_Town_destroy_building(building):
 	for loc in building.location:
 		_mbuildings[loc] = 0
 		_mtype[loc] = 0
+		drawer.remove_building(loc)
 		drawer.terrain_update(loc)
-		#drawer.building_update(loc)
 
 func _on_GUI_time_slider(speed):
 	speed_factor = range_lerp(speed, 20, 100, 0.25, 5)
