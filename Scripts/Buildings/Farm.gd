@@ -12,7 +12,7 @@ var FARM_DICT = {
 	[1,1,1,1]: 71,
 	[1,0,1,1]: 66,
 	[1,1,0,1]: 67
-	}
+}
 
 func _ready():
 	._ready()
@@ -36,4 +36,10 @@ func water(loc):
 	state[loc]['watered'] += 0.25
 
 func get_sprite(tile):
-	return FARM_DICT[[1,1,1,1]]
+	var dirs = [0,0,0,0]
+	var i = 0
+	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+		if tile + dif in location:
+			dirs[i] = 1
+		i += 1
+	return FARM_DICT[dirs]

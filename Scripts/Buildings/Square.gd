@@ -20,4 +20,10 @@ func _ready():
 	MULTI_ROAD = 	 {1: true, 2: false}
 
 func get_sprite(tile):
-	return SQUARE_DICT[[1,1,1,1]]
+	var dirs = [0,0,0,0]
+	var i = 0
+	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+		if tile + dif in location:
+			dirs[i] = 1
+		i += 1
+	return SQUARE_DICT[dirs]

@@ -6,9 +6,17 @@ extends "res://Scripts/Buildings/ConstructedBuilding.gd"
 # var b = "text"
 
 
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	._ready()
+	directional_sprites = {
+		2: 20,
+		3: 20,
+		0: 22,
+		1: 21
+	}
 	type = "center"
 	house_name = "Mayors House"
 	BUILDING_LAYER = {1: true,  2: true}

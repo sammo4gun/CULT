@@ -92,6 +92,7 @@ func road_update(path: Dictionary):
 							building_update(tile+dif)
 							_roads_dirs[tile][i] = 1
 							_layers[0].updateRoad(tile, _roads_dirs[tile], type)
+							#add entrance
 				2:
 					if (world.is_road_tile(tile+dif) == 2) and\
 					   (towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile)):
@@ -106,7 +107,7 @@ func road_update(path: Dictionary):
 							towns.get_building(tile+dif).MULTI_ROAD[type]):
 							_roads_dirs[tile][i] = 1
 							_layers[0].updateRoad(tile, _roads_dirs[tile], type)
-							towns.map_set_building_connected(tile+dif)
+							towns.map_set_building_connected(tile+dif, tile)
 			i += 1
 
 func remove_road(tile: Vector2):
@@ -118,14 +119,6 @@ func remove_road(tile: Vector2):
 		elif _roads_dirs[tile][i] == 1 and towns.has_building(tile+dif):
 			towns.map_set_building_disconnected(tile+dif)
 			full_building_update(tile+dif)
-		i+=1
-
-func remove_building(tile: Vector2):
-	var i = 0
-	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
-		if world.is_road_tile(tile+dif):
-			_roads_dirs[tile+dif][(i+2)%4] = 0
-			_layers[0].updateRoad(tile+dif, _roads_dirs[tile+dif], world.is_road_tile(tile+dif))
 		i+=1
 
 # Change the type of building on a square, connect that building to adjacent
@@ -140,7 +133,7 @@ func building_update(tile: Vector2):
 	
 	for lay in _layers:
 		if _heights[tile] == lay:
-			# CASE ONE: Simple house. Draw house, uspdate roads
+			# CASE ONE: Simple house. Draw house, update roads
 			var d = 0
 			var i = 0
 			if LAYER[1]:
@@ -150,7 +143,7 @@ func building_update(tile: Vector2):
 					if (tile + dif) in _buildings:
 						if _buildings[(tile + dif)] == 3:
 							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-								towns.map_set_building_connected(tile)
+								towns.map_set_building_connected(tile, tile+dif)
 								d=i
 								if not MULTI[1]: 
 									break
@@ -163,7 +156,7 @@ func building_update(tile: Vector2):
 						if world.is_road_tile(tile+dif) == 1:
 							if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
 								_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
-								towns.map_set_building_connected(tile)
+								towns.map_set_building_connected(tile, tile+dif)
 								d=i
 								_layers[lay].updateRoad(tile+dif, _roads_dirs[tile+dif], 1)
 								if not MULTI[1]: 
@@ -179,28 +172,31 @@ func building_update(tile: Vector2):
 							if towns.get_owner_obj(tile+dif) == towns.get_owner_obj(tile):
 								_roads_dirs[tile + dif] = modify_road(_roads_dirs[tile + dif], i)
 								_layers[lay].updateRoad(tile+dif, _roads_dirs[tile+dif], 2)
-								towns.map_set_building_connected(tile)
+								towns.map_set_building_connected(tile, tile+dif)
 								# UPDATE ROAD ON THIS TILE WITH OPPOSING DIRECTION
 								if not MULTI[2]: 
 									break
 						i += 1
 			
 			# ACTUAL DRAWING
-			match TYPE:
-				1:
-					building.set_sprite(tile, RESIDENTIAL_TILES[d])
-				2:
-					building.set_sprite(tile, CENTER_TILES[d])
-				4:
-					building.set_sprite(tile, RESIDENTIAL_TILES[d])
+			if building.is_proper(): 
+				building.set_main_dir(d)
 			
 			# Change this to just pass the direction?
-			_layers[lay].updateBuilding(tile, towns.get_building(tile).get_sprite(tile))
+			_layers[lay].updateBuilding(tile, building.get_sprite(tile))
 
 func full_building_update(tile: Vector2):
 	var all_tiles = towns.get_full_building(tile)
 	for tile in all_tiles:
 		building_update(tile)
+
+func remove_building(tile: Vector2):
+	var i = 0
+	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
+		if world.is_road_tile(tile+dif):
+			_roads_dirs[tile+dif][(i+2)%4] = 0
+			_layers[0].updateRoad(tile+dif, _roads_dirs[tile+dif], world.is_road_tile(tile+dif))
+		i+=1
 
 func square_tile(tile, type, dict):
 	var i = 0
@@ -225,20 +221,6 @@ func get_pos(location):
 	var pos = ground.map_to_world(location)
 	pos.y += 48
 	return pos
-
-var RESIDENTIAL_TILES = {
-	2: 19,
-	3: 19,
-	0: 16 + (rng.randi_range(0,1)*2),
-	1: 17
-}
-
-var CENTER_TILES = {
-	2: 20,
-	3: 20,
-	0: 22,
-	1: 21
-}
 
 # converts the value "5" to one of the correct tree values
 func randomTrees():

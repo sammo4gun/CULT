@@ -228,7 +228,7 @@ func get_nearest(loc, ls):
 
 func canwalk_to(loc, target, roads, type):
 	return pathfinder.walkRoadPath(loc, target, world._mbuildings, roads, type, true)
-	
+
 var BUILD_TO_ROAD = {
 	"residence": [1,2],
 	"center": [1,2],
@@ -347,6 +347,12 @@ func get_town_hall_loc():
 	for b in _mbuildings:
 		if _mbuildings[b].is_type("center"):
 			return _mbuildings[b].location[0]
+	return null
+
+func get_town_square():
+	for b in _mbuildings:
+		if _mbuildings[b].is_type("square"):
+			return _mbuildings[b]
 	return null
 
 func get_town_square_loc():

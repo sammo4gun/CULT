@@ -12,6 +12,15 @@ var rooms = {}
 
 var contents = {}
 
+var rng =  RandomNumberGenerator.new()
+var dir = [0,0,0,0]
+var directional_sprites = {
+	2: 19,
+	3: 19,
+	0: 16 + (rng.randi_range(0,1)*2),
+	1: 17
+}
+
 # State variables
 var lights_on = false
 
@@ -70,13 +79,14 @@ var LIGHT_MAP = {
 var sprite = 16
 var light_sprite = 45
 
-func set_sprite(tile, id):
-	if len(location) == 1 and tile in location:
-		sprite = id
-		if sprite in LIGHT_MAP:
-			light_sprite = LIGHT_MAP[id]
-	else:
-		sprites[tile] = id
+func set_main_dir(dir):
+	assert(len(location) == 1)
+	sprite = directional_sprites[dir]
+	if sprite in LIGHT_MAP:
+		light_sprite = LIGHT_MAP[sprite]
+	
+	var difs = [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]
+	add_entrance_tile(difs[dir] + location[0])
 
 func get_sprite(tile):
 	if len(location) == 1 and tile in location:

@@ -103,7 +103,7 @@ func make_thoughts() -> void:
 		profession = "mayor"
 	elif house.type == "store":
 		profession = "shopkeep"
-	elif square_dist > 3 and world.rng.randf_range(0,1) > 0.3: 
+	elif square_dist > 3 and world.rng.randf_range(0,1) > 0.8: 
 		profession = "farmer"
 	else: 
 		profession = "none"
@@ -114,7 +114,7 @@ func make_thoughts() -> void:
 func set_work():
 	var work = get_work()
 	#paths_from_home[work] = get_path_to(work)
-	var square_dist = len(get_path_to(work))
+	var square_dist = len(get_path_to_building(work))
 	wake_up_time = 7 - int(square_dist / 10)
 
 # CREATION: Makes the name of the player.
@@ -146,9 +146,9 @@ func _process(delta):
 							open = false
 							prepare_to_leave()
 							activity = "work"
-					elif location in get_work():
+					elif location in get_work().location:
 						open = false
-						go(house.location)
+						go_building(house)
 			"sleep":
 				if in_building.lights_on: in_building.turn_lights_off()
 				if day_time in ['day', 'dawn']: 
@@ -164,14 +164,14 @@ func _process(delta):
 				if in_building:
 					if in_building == house:
 						open = false
-						var work_location = get_work()
-						if work_location in paths_from_home:
-							go_path(paths_from_home[work_location])
+						var work_building = get_work()
+						if work_building in paths_from_home:
+							go_path(paths_from_home[work_building])
 						else: 
-							paths_from_home[work_location] = get_path_to(work_location)
-							go_path(paths_from_home[work_location])
+							paths_from_home[work_building] = get_path_to_building(work_building)
+							go_path(paths_from_home[work_building])
 					
-					elif location in get_work():
+					elif location in get_work().location:
 						var square_time = 20 - (7 - wake_up_time)
 						if world_time <= square_time:
 							open = false
@@ -207,6 +207,11 @@ func calculate_speed(loc, target):
 # BEHAVIOUR: Call the square enjoyment function, then set open to true
 func work_activity():
 	yield(work_enjoyer(), "completed")
+	open = true
+
+func go_building(building):
+	var path = pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false)
+	yield(follow_path(path), "completed")
 	open = true
 
 # BEHAVIOUR: Head to a target after generating a path to that target
@@ -271,14 +276,14 @@ func leave_building():
 
 # EXECUTION: Enjoy work for a few seconds
 func work_enjoyer():
-	assert(location in get_work())
+	assert(location in get_work().location)
 	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
 	
 	if in_building.type == "square":
 		var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
 		var step
 		step = choices[world.rng.randi_range(0,4)]
-		if (location + step) in get_work():
+		if (location + step) in get_work().location:
 			var target = location + step
 			target_step = target
 			yield(self, "movement_arrived")
@@ -296,12 +301,12 @@ func work_enjoyer():
 			yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
 		else:
 			var to_water = []
-			for tile in get_work():
+			for tile in get_work().location:
 				if not in_building.is_watered(tile):
 					to_water.append(tile)
 			var dist = 9999
 			if len(to_water) < 1:
-				to_water = get_work()
+				to_water = get_work().location
 			var go_tile
 			for tile in to_water:
 				if location.distance_to(tile) < dist:
@@ -315,12 +320,15 @@ func work_enjoyer():
 func get_work():
 	if profession == "farmer" and "farm" in owned_properties:
 		var chosen_farm = owned_properties["farm"][world.day % len(owned_properties['farm'])]
-		return chosen_farm.get_location()
-	return town.get_town_square_loc()
+		return chosen_farm
+	return town.get_town_square()
 
 # UTILITY: Get a path to a target
 func get_path_to(target):
 	return pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false)
+
+func get_path_to_building(building):
+	return pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false)
 
 # UTILITY: Setting the target square to each square following the path.
 func follow_path(path):

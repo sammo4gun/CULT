@@ -13,6 +13,7 @@ var town_name
 var town
 
 var map_connected = false
+var entrance_tiles = []
 var can_enter = false
 var selected = false
 
@@ -47,7 +48,6 @@ func build(twn, loc, nmg, pos):
 	for tile in location:
 		sprites[tile] = 4
 
-
 func unmake():
 	queue_free()
 
@@ -73,11 +73,27 @@ func add_owner(person):
 func set_sprite(tile, id):
 	sprites[tile] = id
 
+func set_entrance(tile):
+	entrance_tiles.append(tile)
+
 func get_sprite(tile):
 	return sprites[tile]
 
 func is_proper():
 	return false
+
+func add_entrance_tile(tile):
+	if not tile in entrance_tiles:
+		entrance_tiles.append(tile)
+	
+	clean_entrance_tiles()
+
+func clean_entrance_tiles():
+	for tile in entrance_tiles:
+		if (not town.world.is_road_tile(tile) and \
+			not tile in town.get_town_square_loc()) or \
+		   tile in location:
+			entrance_tiles.erase(tile)
 
 func enter(person):
 	self.inside.append(person)
@@ -88,6 +104,7 @@ func leave(person):
 	if selected: town.get_parent().ping_gui()
 
 func on_selected():
+	print(entrance_tiles)
 	selected = true
 
 func on_deselected():

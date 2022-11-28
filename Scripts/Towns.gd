@@ -72,16 +72,18 @@ func map_get_building_connected(loc):
 		if loc in town._mbuildings:
 			return town._mbuildings[loc].map_connected
 
-func map_set_building_connected(loc):
+func map_set_building_connected(loc, from):
 	for town in get_children():
 		if loc in town._mbuildings:
 			town._mbuildings[loc].map_connected = true
+			town._mbuildings[loc].add_entrance_tile(from)
 			return
 
 func map_set_building_disconnected(loc):
 	for town in get_children():
 		if loc in town._mbuildings:
 			town._mbuildings[loc].map_connected = false
+			town._mbuildings[loc].clean_entrance_tiles()
 			return
 			
 func get_pos(location):

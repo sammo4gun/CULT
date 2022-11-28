@@ -109,6 +109,15 @@ func is_walkable(loc, buildings, roads, must_roads, road_types):
 			return true
 	return false
 
+func walkToBuilding(start, building, from_building, buildings, roads, road_types, must_roads):
+	var start_to_path = []
+	if from_building:
+		start_to_path = walkRoadPath(start, from_building.entrance_tiles, buildings, roads, road_types, must_roads)
+		start = start_to_path[-1]
+	var path_to_entrance = walkRoadPath(start, building.entrance_tiles, buildings, roads, road_types, must_roads)
+	var entrance_to_inside = walkRoadPath(path_to_entrance[-1], building.location, buildings, roads, road_types, must_roads)
+	return start_to_path + path_to_entrance + entrance_to_inside
+
 func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
 	var g = {start: 0}
 	var h = {start: 0}
