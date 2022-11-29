@@ -13,8 +13,8 @@ var population
 var world
 var pathfinding
 var ground
-var behaviours
 var speeds
+var selected = false
 
 # There are two parts to creating a person: 1. their own stats and 2. the role they fill in the world.
 # 1.
@@ -32,7 +32,6 @@ var work_loc
 var owned_properties = {}
 
 # 3. One-time calc variables
-var paths_from_home = {}
 var wake_up_time
 
 # DIRECT STATE VARIABLES
@@ -59,13 +58,12 @@ var day_time = "night"
 
 # CREATION: Sets parents, owned house, starting house, and position
 # Also calls make_thoughts() to figure out who this person is.
-func create(wrld, pop, twn, hse, beh) -> void:
+func create(wrld, pop, twn, hse) -> void:
 	time_start = OS.get_unix_time()
 	world = wrld
 	population = pop
 	town = twn
 	house = hse
-	behaviours = beh
 	namegenerator = wrld.namegenerator
 	pathfinding = wrld.pathfinding
 	speeds = wrld.SPEEDS
@@ -91,7 +89,6 @@ func make_thoughts() -> void:
 	var square_dist = 0
 	$Popup/Label.text = person_name[0] + '\n' + person_name[1]
 	if square_locations:
-	#	paths_from_home[square_locations] = get_path_to(square_locations)
 		square_dist = len(get_path_to(square_locations))
 		wake_up_time = 7 - int(square_dist / 10)
 	else: 
@@ -99,21 +96,11 @@ func make_thoughts() -> void:
 	
 	# Determine Professions
 	
-	if house.type == "center":
-		profession = "mayor"
-	elif house.type == "store":
-		profession = "shopkeep"
-	elif square_dist > 3 and world.rng.randf_range(0,1) > 0.8: 
-		profession = "farmer"
-	else: 
-		profession = "none"
-	
-	population.chosen_profession(self, profession)
+	profession = "none"
 
 # CREATION: Pinged by the town after done constructing work stuff.
-func set_work():
+func set_work() -> void:
 	var work = get_work()
-	#paths_from_home[work] = get_path_to(work)
 	var square_dist = len(get_path_to_building(work))
 	wake_up_time = 7 - int(square_dist / 10)
 
@@ -165,11 +152,7 @@ func _process(delta):
 					if in_building == house:
 						open = false
 						var work_building = get_work()
-						if work_building in paths_from_home:
-							go_path(paths_from_home[work_building])
-						else: 
-							paths_from_home[work_building] = get_path_to_building(work_building)
-							go_path(paths_from_home[work_building])
+						go_path(get_path_to_building(work_building))
 					
 					elif location in get_work().location:
 						var square_time = 20 - (7 - wake_up_time)
@@ -279,48 +262,23 @@ func work_enjoyer():
 	assert(location in get_work().location)
 	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
 	
-	if in_building.type == "square":
-		var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
-		var step
-		step = choices[world.rng.randi_range(0,4)]
-		if (location + step) in get_work().location:
-			var target = location + step
-			target_step = target
-			yield(self, "movement_arrived")
-		
-		if world.rng.randf_range(0,1) > 0.5:
-			display_emotion("happy")
-		
-		yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
+	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
+	var step
+	step = choices[world.rng.randi_range(0,4)]
+	if (location + step) in get_work().location:
+		var target = location + step
+		target_step = target
+		yield(self, "movement_arrived")
 	
-	elif in_building.type == "farm":
-		
-		if not in_building.is_watered(location):
-			in_building.water(location)
-			display_emotion("sweat")
-			yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
-		else:
-			var to_water = []
-			for tile in get_work().location:
-				if not in_building.is_watered(tile):
-					to_water.append(tile)
-			var dist = 9999
-			if len(to_water) < 1:
-				to_water = get_work().location
-			var go_tile
-			for tile in to_water:
-				if location.distance_to(tile) < dist:
-					go_tile = tile
-					dist = location.distance_to(tile)
-			target_step = go_tile
-			yield(self, "movement_arrived")
+	if world.rng.randf_range(0,1) > 0.5:
+		display_emotion("happy")
+	
+	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
+	
 	return true
 
 # UTILITY: Returns the squares associated with "work"
 func get_work():
-	if profession == "farmer" and "farm" in owned_properties:
-		var chosen_farm = owned_properties["farm"][world.day % len(owned_properties['farm'])]
-		return chosen_farm
 	return town.get_town_square()
 
 # UTILITY: Get a path to a target
@@ -378,11 +336,54 @@ func timer_length(mini, maxi) -> float:
 # UTILITY: On selected
 func on_selected():
 	display_emotion("surprise")
+	selected = true
 	selector.visible = true
 
 # UTILITY: Not selected
 func on_deselected():
+	selected = false
 	selector.visible = false
+
+func change_type(profession):
+	var n_person = population.prof_dict[profession].instance()
+	n_person.namegenerator = namegenerator
+	n_person.population = population
+	n_person.world = world
+	n_person.pathfinding = pathfinding
+	n_person.ground = ground
+	n_person.speeds = speeds
+	n_person.selected = selected
+	
+	n_person.person_name = person_name
+	n_person.string_name = string_name
+	
+	n_person.town = town
+	n_person.house = house
+	
+	n_person.owned_properties = owned_properties
+	
+	n_person.location = location
+	n_person.in_building = in_building
+	
+	n_person.activity = activity
+	
+	n_person.moving_to = moving_to
+	n_person.target_step = target_step
+	n_person.prevloc = prevloc
+	n_person.adj_speed = adj_speed
+
+	n_person.time_start = time_start
+	n_person.chance = chance
+	n_person.mouse_on = mouse_on
+
+	n_person.open = open
+	n_person.world_time = world_time
+	
+	n_person.day_time = day_time
+	
+	n_person.make_thoughts()
+	
+	population.replace_person(n_person, self)
 
 func _input(event):
 	if mouse_on:

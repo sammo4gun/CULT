@@ -1,5 +1,9 @@
-extends "res://Scripts/Building.gd"
+extends "res://Scripts/Buildings/Building.gd"
 
+# STATS
+var required_workers = 1
+
+# CURRENT/UPDATABLE
 var state = {}
 
 var FARM_DICT = {
@@ -22,6 +26,8 @@ func _ready():
 	MULTI_ROAD =     {1: false, 2: false}
 	for loc in location:
 		state[loc] = {'watered': 0.0}
+	
+	required_workers = int(float(len(location)) / 3)
 
 func _hour_update(time):
 	if time == 0:

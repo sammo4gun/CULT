@@ -109,16 +109,23 @@ func is_walkable(loc, buildings, roads, must_roads, road_types):
 			return true
 	return false
 
-func walkToBuilding(start, building, from_building, buildings, roads, road_types, must_roads):
-	var start_to_path = []
+func walkToBuilding(start, target_building, from_building, buildings, roads, road_types, must_roads):
+	var start_to_path = [start]
 	if from_building:
-		start_to_path = walkRoadPath(start, from_building.entrance_tiles, buildings, roads, road_types, must_roads)
-		start = start_to_path[-1]
-	var path_to_entrance = walkRoadPath(start, building.entrance_tiles, buildings, roads, road_types, must_roads)
-	var entrance_to_inside = walkRoadPath(path_to_entrance[-1], building.location, buildings, roads, road_types, must_roads)
+		var pot_start
+		var cost = 99999
+		var n
+		for til in from_building.entrance_tiles:
+			n = walkRoadPath(til, target_building.entrance_tiles, buildings, roads, road_types, must_roads, true)
+			if  n[1] < cost:
+				pot_start = til
+				cost = n[1]
+		start_to_path = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads)
+	var path_to_entrance = walkRoadPath(start_to_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads)
+	var entrance_to_inside = walkRoadPath(path_to_entrance[-1], target_building.location, buildings, roads, road_types, must_roads)
 	return start_to_path + path_to_entrance + entrance_to_inside
 
-func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
+func walkRoadPath(start, finish, buildings, roads, road_types, must_roads, get_cost = false):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}
@@ -126,10 +133,16 @@ func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
 	var open = []
 	var closed = []
 	
+	if start in finish:
+		if get_cost: return [[start], 0]
+		return [start]
+	
 	open.append(start)
 	var cur
 	while true:
-		if len(open) == 0: return false
+		if len(open) == 0: 
+			if get_cost: return [false, 99999999]
+			return false
 		
 		var minimum = 999999
 		var promising = null
@@ -140,27 +153,29 @@ func walkRoadPath(start, finish, buildings, roads, road_types, must_roads):
 				minimum = cur
 		open.erase(promising)
 		
+		if promising in finish:
+			var path = []
+			var new_pos = promising
+			while true:
+				path.append(new_pos)
+				if new_pos == start:
+					path.invert()
+					if get_cost: return [path, g[promising]]
+					return path
+				new_pos = parents[new_pos]
+		
 		for vec in [Vector2(-1,0),Vector2(1,0), Vector2(0,1), Vector2(0,-1)]:
 			var new_pos = promising + vec
-			if new_pos in finish:
-				var path = []
-				path.append(new_pos)
-				new_pos = promising
-				while true:
-					path.append(new_pos)
-					if new_pos == start:
-						path.invert()
-						return path
-					new_pos = parents[new_pos]
-			if is_walkable(new_pos, buildings, roads, must_roads, road_types):
+			if is_walkable(new_pos, buildings, roads, must_roads, road_types) or \
+			   new_pos in finish:
 				#compute g
 				var tg = g[promising]
 				if new_pos in roads:
 					tg += 1
 					if promising in roads:
 						if roads[promising] != roads[new_pos]:
-							tg += 10
-				else: tg += 20
+							tg += 40
+				else: tg += 30
 				
 				#compute h
 				var th = new_pos.distance_to(finish[0])

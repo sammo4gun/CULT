@@ -1,10 +1,10 @@
 [gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://Scripts/Person.gd" type="Script" id=1]
+[ext_resource path="res://Scripts/Persons/Person.gd" type="Script" id=1]
 [ext_resource path="res://Sprites/person.png" type="Texture" id=2]
 [ext_resource path="res://Sprites/thought_bubble.png" type="Texture" id=3]
-[ext_resource path="res://Sprites/happy.png" type="Texture" id=4]
-[ext_resource path="res://Sprites/surprise.png" type="Texture" id=5]
+[ext_resource path="res://Sprites/surprise.png" type="Texture" id=4]
+[ext_resource path="res://Sprites/happy.png" type="Texture" id=5]
 [ext_resource path="res://Sprites/selector.png" type="Texture" id=6]
 [ext_resource path="res://Sprites/sweat.png" type="Texture" id=7]
 
@@ -38,13 +38,13 @@ texture = ExtResource( 3 )
 visible = false
 position = Vector2( 0, -1.075 )
 scale = Vector2( 0.026178, 0.026178 )
-texture = ExtResource( 4 )
+texture = ExtResource( 5 )
 
 [node name="Surprise" type="Sprite" parent="."]
 visible = false
 position = Vector2( -0.140305, 1.12246 )
 scale = Vector2( 0.0353927, 0.0328013 )
-texture = ExtResource( 5 )
+texture = ExtResource( 4 )
 
 [node name="Sweat" type="Sprite" parent="."]
 visible = false

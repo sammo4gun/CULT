@@ -2,10 +2,10 @@ extends TileMap
 
 var ROADS_DICT = {
 	[0,0,0,0]: 13, #should never happen
-	[1,0,0,0]: 8, #8
-	[0,1,0,0]: 6, #6
-	[0,0,1,0]: 8, #8
-	[0,0,0,1]: 6, #6
+	[1,0,0,0]: 13, #should never happen
+	[0,1,0,0]: 13, #should never happen
+	[0,0,1,0]: 13, #should never happen
+	[0,0,0,1]: 13, #should never happen
 	[0,1,1,0]: 5,
 	[0,1,0,1]: 6,
 	[1,1,0,0]: 7,
@@ -27,10 +27,10 @@ func drawMap(w, h, map):
 			set_cell(x,y, map[Vector2(x,y)])
 
 func updateTerrain(pos: Vector2, type: int):
-	set_cell(pos.x, pos.y, type)
+	set_cell(int(pos.x), int(pos.y), type)
 
 func updateRoad(pos: Vector2, dirs: Array, _type: int):
-	set_cell(pos.x, pos.y, ROADS_DICT[dirs])
+	set_cell(int(pos.x), int(pos.y), ROADS_DICT[dirs])
 
-func updateBuilding(pos: Vector2, type: int):
-	set_cell(pos.x, pos.y, type)
+func updateBuilding(pos: Vector2, building):
+	set_cell(int(pos.x), int(pos.y), building.get_sprite(pos))

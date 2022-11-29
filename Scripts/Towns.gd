@@ -92,8 +92,8 @@ func get_pos(location):
 func ping_gui():
 	emit_signal("refresh")
 
-func update_building(location, value):
-	map.refresh_building(location, value)
+func update_building(location, building):
+	map.refresh_building(location, building)
 
 func _on_Population_chosen_profession(person, prof):
 	match prof:

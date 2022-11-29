@@ -1,4 +1,4 @@
-extends "res://Scripts/Building.gd"
+extends "res://Scripts/Buildings/Building.gd"
 
 var SQUARE_DICT = {
 	[0,1,1,0]: 39,

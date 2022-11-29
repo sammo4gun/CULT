@@ -1,4 +1,4 @@
-extends "res://Scripts/Building.gd"
+extends "res://Scripts/Buildings/Building.gd"
 
 onready var lights = $HouseLights
 
@@ -79,8 +79,9 @@ var LIGHT_MAP = {
 var sprite = 16
 var light_sprite = 45
 
-func set_main_dir(dir):
+func set_main_dir(direct):
 	assert(len(location) == 1)
+	dir = direct
 	sprite = directional_sprites[dir]
 	if sprite in LIGHT_MAP:
 		light_sprite = LIGHT_MAP[sprite]

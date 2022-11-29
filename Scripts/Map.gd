@@ -183,7 +183,7 @@ func building_update(tile: Vector2):
 				building.set_main_dir(d)
 			
 			# Change this to just pass the direction?
-			_layers[lay].updateBuilding(tile, building.get_sprite(tile))
+			_layers[lay].updateBuilding(tile, building)
 
 func full_building_update(tile: Vector2):
 	var all_tiles = towns.get_full_building(tile)
@@ -275,5 +275,5 @@ func road_has_dir(pos, i):
 			return true
 	return false
 
-func refresh_building(location, value):
-	ground.updateBuilding(location, value)
+func refresh_building(location, building):
+	ground.updateBuilding(location, building)

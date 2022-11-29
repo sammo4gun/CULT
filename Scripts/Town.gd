@@ -534,4 +534,4 @@ func new_building(location, ty):
 	return building
 
 func update_building(building, tile):
-	get_parent().update_building(tile, building.get_sprite(tile))
+	get_parent().update_building(tile, building)

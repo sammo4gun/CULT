@@ -104,7 +104,6 @@ func leave(person):
 	if selected: town.get_parent().ping_gui()
 
 func on_selected():
-	print(entrance_tiles)
 	selected = true
 
 func on_deselected():
