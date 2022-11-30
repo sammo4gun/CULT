@@ -6,7 +6,8 @@ var do_work = funcref(self, "work_unemp")
 var PROFESSIONS_DICT = {
 	"farmer": [funcref(self, "get_work_farmer"), funcref(self, "work_farmer")],
 	"none": [funcref(self, "get_work_unemp"), funcref(self, "work_unemp")],
-	"mayor": [funcref(self, "get_work_unemp"), funcref(self, "work_unemp")]
+	"mayor": [funcref(self, "get_work_unemp"), funcref(self, "work_unemp")],
+	"farmhand": [funcref(self, "get_work_farmhand"), funcref(self, "work_farmhand")]
 }
 
 # CHANGING JOBS
@@ -47,30 +48,76 @@ func get_work_farmer():
 	if "farm" in owned_properties:
 		var chosen_farm = owned_properties["farm"][world.day % len(owned_properties['farm'])]
 		return chosen_farm
+	else:
+		return get_work_unemp()
 
 func work_farmer():
-	if not in_building.is_watered(location):
-		in_building.water(location)
-		display_emotion("sweat")
-		yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
-	else:
-		var to_water = []
-		for tile in get_work.call_func().location:
-			if not in_building.is_watered(tile):
-				to_water.append(tile)
-		var dist = 9999
-		if len(to_water) < 1:
-			to_water = get_work.call_func().location
-		var go_tile
-		for tile in to_water:
-			if location.distance_to(tile) < dist:
-				go_tile = tile
-				dist = location.distance_to(tile)
-		target_step = go_tile
-		yield(self, "movement_arrived")
+	if "farm" in owned_properties:
+		if not in_building.is_watered(location):
+			in_building.water(location)
+			display_emotion("sweat")
+			yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
+		else:
+			var to_water = []
+			for tile in get_work.call_func().location:
+				if not in_building.is_watered(tile):
+					to_water.append(tile)
+			var dist = 9999
+			if len(to_water) < 1:
+				to_water = get_work.call_func().location
+			var go_tile
+			for tile in to_water:
+				if location.distance_to(tile) < dist:
+					go_tile = tile
+					dist = location.distance_to(tile)
+			target_step = go_tile
+			yield(self, "movement_arrived")
+	else: 
+		yield(work_unemp(), "completed")
+		return true
+
+func make_farmhand():
+	var person = population.random_person([self])
+	person.set_work("farmhand", self)
 
 func get_required_help(farms) -> Dictionary:
 	var help_dict = {}
 	for farm in farms:
 		help_dict[farm] = farm.required_workers
 	return help_dict
+
+# FARMHAND
+
+var boss
+
+func get_work_farmhand():
+	if "farm" in boss.owned_properties:
+		var chosen_farm = boss.owned_properties["farm"][world.day % len(boss.owned_properties['farm'])]
+		return chosen_farm
+	else:
+		return get_work_unemp()
+
+func work_farmhand():
+	if "farm" in boss.owned_properties:
+		if not in_building.is_watered(location):
+			in_building.water(location)
+			display_emotion("sweat")
+			yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
+		else:
+			var to_water = []
+			for tile in get_work.call_func().location:
+				if not in_building.is_watered(tile):
+					to_water.append(tile)
+			var dist = 9999
+			if len(to_water) < 1:
+				to_water = get_work.call_func().location
+			var go_tile
+			for tile in to_water:
+				if location.distance_to(tile) < dist:
+					go_tile = tile
+					dist = location.distance_to(tile)
+			target_step = go_tile
+			yield(self, "movement_arrived")
+	else: 
+		yield(work_unemp(), "completed")
+		return true

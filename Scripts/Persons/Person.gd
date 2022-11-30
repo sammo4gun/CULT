@@ -38,7 +38,8 @@ func make_thoughts() -> void:
 	else: 
 		wake_up_time = 7
 
-func set_work(prof):
+func set_work(prof, bs = null):
+	boss = bs
 	profession = prof
 	update_profession()
 	reconsider = true
@@ -151,5 +152,5 @@ func _unhandled_input(event):
 	if selected:
 		if event is InputEventKey:
 			if event.pressed and event.scancode == KEY_I:
-				if profession == "farmer": set_work("none")
-				elif profession == "none": set_work("farmer")
+				if profession == "farmer":
+					make_farmhand()

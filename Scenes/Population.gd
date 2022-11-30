@@ -17,8 +17,12 @@ func _hour_update(hour):
 	for person in pop:
 		person._hour_update(hour)
 
-func random_person():
-	return pop[world.rng.randi_range(0,len(pop)-1)]
+func random_person(excluded = []):
+	var potpers
+	while true:
+		potpers = pop[world.rng.randi_range(0,len(pop)-1)]
+		if not potpers in excluded:
+			return pop[world.rng.randi_range(0,len(pop)-1)]
 
 func make_person(town, house):
 	# Determine the profession of the person based on the town. In this case,
