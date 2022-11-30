@@ -43,6 +43,10 @@ func deSelect():
 	self.visible = false
 	emit_signal("selected_tile", selected_tile)
 
+func switchPerson(person):
+	assert(selected_person)
+	selected_person = person
+
 func selectPerson(person):
 	if selected_person == person: return
 	if selected_person != null:

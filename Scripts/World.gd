@@ -179,6 +179,9 @@ func _on_tile_selected(tile):
 func selected_person(person):
 	selector.selectPerson(person)
 
+func switch_selected_person(person):
+	selector.switchPerson(person)
+
 func _on_Town_construct_roads(path, buildings, type):
 	var p = {}
 	for tile in path:

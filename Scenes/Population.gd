@@ -3,9 +3,6 @@ extends Node
 signal chosen_profession
 
 var Person = preload("res://Scenes/Persons/Person.tscn")
-var Farmer = preload("res://Scenes/Persons/Farmer.tscn")
-var Farmhand = preload("res://Scenes/Persons/Farmhand.tscn")
-var prof_dict = {"person": Person, "farmer": Farmer, "farmhand": Farmhand}
 
 var pop = []
 var towns = []
@@ -37,10 +34,15 @@ func make_person(town, house):
 	
 	if house.type == "center":
 		pers = Person.instance()
+		pers.set_work("mayor")
 	elif t and world.rng.randf_range(0,1) > 0.8:
-		pers = Farmer.instance()
+		pers = Person.instance()
+		pers.set_work("farmer")
+		# set to farmer
 	else: 
 		pers = Person.instance()
+		pers.set_work("none")
+		# set to unemployed
 	
 	for loc in house.location:
 		town.set_tile_owner(loc, pers)
@@ -58,7 +60,7 @@ func replace_person(new_person, old_person):
 	if old_person.house:
 		for loc in old_person.house.location:
 			old_person.town.set_tile_owner(loc, new_person)
-			old_person.house.set_inhabitant(new_person, true)
+		old_person.house.set_inhabitant(new_person, true)
 	for type in old_person.owned_properties:
 		for build in old_person.owned_properties[type]:
 			for loc in build.location:

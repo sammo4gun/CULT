@@ -150,7 +150,7 @@ func build_farm(person, nr):
 					   person)
 		if new_farm:
 			person.add_property(new_farm)
-			person.set_work()
+			#person.set_work()
 
 func pick_center(w, h):
 	var c

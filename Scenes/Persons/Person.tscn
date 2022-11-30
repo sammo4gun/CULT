@@ -15,6 +15,7 @@ height = 7.6211
 [node name="Person" type="Node2D"]
 visible = false
 script = ExtResource( 1 )
+SPEED = 40
 
 [node name="Area2D" type="Area2D" parent="."]
 
