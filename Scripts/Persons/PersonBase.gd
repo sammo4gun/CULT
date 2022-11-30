@@ -27,12 +27,9 @@ var string_name = ""
 var town
 var house
 # Friends
-var profession
-var work_loc
 var owned_properties = {}
 
 # 3. One-time calc variables
-var wake_up_time
 
 # DIRECT STATE VARIABLES
 var location

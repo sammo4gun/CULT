@@ -112,15 +112,20 @@ func is_walkable(loc, buildings, roads, must_roads, road_types):
 func walkToBuilding(start, target_building, from_building, buildings, roads, road_types, must_roads):
 	var start_to_path = [start]
 	if from_building:
-		var pot_start
-		var cost = 99999
-		var n
-		for til in from_building.entrance_tiles:
-			n = walkRoadPath(til, target_building.entrance_tiles, buildings, roads, road_types, must_roads, true)
-			if  n[1] < cost:
-				pot_start = til
-				cost = n[1]
-		start_to_path = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads)
+		var needs = true
+		for ent in target_building.entrance_tiles:
+			if ent in from_building.location:
+				needs = false
+		if needs:
+			var pot_start
+			var cost = 99999
+			var n
+			for til in from_building.entrance_tiles:
+				n = walkRoadPath(til, target_building.entrance_tiles, buildings, roads, road_types, must_roads, true)
+				if  n[1] < cost:
+					pot_start = til
+					cost = n[1]
+			start_to_path = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads)
 	var path_to_entrance = walkRoadPath(start_to_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads)
 	var entrance_to_inside = walkRoadPath(path_to_entrance[-1], target_building.location, buildings, roads, road_types, must_roads)
 	return start_to_path + path_to_entrance + entrance_to_inside

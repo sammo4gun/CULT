@@ -42,12 +42,13 @@ func set_work(prof, bs = null):
 	boss = bs
 	profession = prof
 	update_profession()
+	if town: set_wakeup_time()
 	reconsider = true
 
 func set_wakeup_time() -> void:
 	var work = get_work.call_func()
-	var square_dist = len(get_path_to_building(work))
-	wake_up_time = 7 - int(square_dist / 10)
+	var work_dist = len(pathfinding.walkToBuilding(house.location[0], work, house, world._mbuildings, town._mroads, [1,2], false))
+	wake_up_time = 7 - int(work_dist / 10)
 
 # CREATION: Makes the name of the player.
 func create_name() -> void:
@@ -75,9 +76,13 @@ func _process(delta):
 							asleep()
 							activity = "sleep"
 						if world_time >= wake_up_time and world_time <= 20 - (7 - wake_up_time):
-							open = false
-							prepare_to_leave()
-							activity = "work"
+							if not work_done:
+								open = false
+								prepare_to_leave()
+								activity = "work"
+							else:
+								#just chill, maybe do a fun activity?
+								pass
 					else:
 						open = false
 						go_building(house)
@@ -92,23 +97,22 @@ func _process(delta):
 					activity = "home"
 				if world_time == 2:
 					set_wakeup_time()
-				if world_time >= wake_up_time and world_time <= 20 - (7 - wake_up_time):
+					work_done = false
+				if world_time > max(3, wake_up_time) and world_time <= 20 - (7 - wake_up_time):
 					open = false
 					awaken()
 					activity = "home"
 			"work":
 				# At home and preparing to go to the square
-				if in_building:
+				if work_done:
+					activity = "home"
+				elif in_building:
 					if in_building != get_work.call_func():
 						open = false
 						go_path(get_path_to_building(get_work.call_func()))
-					
 					else:
-						var square_time = 20 - (7 - wake_up_time)
-						if world_time <= square_time:
-							open = false
-							work_activity()
-						else: activity = "home"
+						open = false
+						work_activity()
 				else: 
 					open = false
 					go_path(get_path_to_building(get_work.call_func()))

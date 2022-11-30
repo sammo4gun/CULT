@@ -27,7 +27,7 @@ func _ready():
 	for loc in location:
 		state[loc] = {'watered': 0.0}
 	
-	required_workers = int(float(len(location)) / 3)
+	required_workers = max(1,int(float(len(location)) / 6))
 
 func _hour_update(time):
 	if time == 0:

@@ -17,17 +17,20 @@ func _hour_update(hour):
 	for person in pop:
 		person._hour_update(hour)
 
-func random_person(excluded = []):
-	var potpers
-	while true:
-		potpers = pop[world.rng.randi_range(0,len(pop)-1)]
-		if not potpers in excluded:
-			return pop[world.rng.randi_range(0,len(pop)-1)]
+func random_person(excluded = [], profs = []):
+	var potpers = []
+	for pers in pop:
+		if not pers in excluded:
+			if len(profs) > 0:
+				if pers.profession in profs:
+					potpers.append(pers)
+	if len(potpers) > 0:
+		return potpers[world.rng.randi_range(0,len(potpers)-1)]
+	return false
 
 func make_person(town, house):
 	# Determine the profession of the person based on the town. In this case,
 	# Farmer if square_dist > 3 and world.rng.randf_range(0,1) > 0.8.
-	
 	var pers
 	
 	var t = true
@@ -39,7 +42,7 @@ func make_person(town, house):
 	if house.type == "center":
 		pers = Person.instance()
 		pers.set_work("mayor")
-	elif t and world.rng.randf_range(0,1) > 0.8:
+	elif t and world.rng.randf_range(0,1) > 0.3:
 		pers = Person.instance()
 		pers.set_work("farmer")
 		# set to farmer
