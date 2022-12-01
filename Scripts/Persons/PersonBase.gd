@@ -126,7 +126,7 @@ func go(target):
 
 # BEHAVIOUR: Follow a path to its completion
 func go_path(path):
-	yield(follow_path(path), "completed")
+	yield(self.follow_path(path), "completed")
 	open = true
 
 # BEHAVIOUR: Take a few seconds to wake up / do other end of night stuff
@@ -155,23 +155,25 @@ func get_path_to_building(building):
 	return pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false)
 
 # UTILITY: Setting the target square to each square following the path.
-func follow_path(path):
+func follow_path(path) -> bool:
 	assert(path[0] == location)
 	if in_building:
 		leave_building()
 	
 	for step in path:
+		if reconsider:
+			reconsider = false
+			yield(get_tree(), "idle_frame")
+			return true
 		# instead of ugly jump, set it to be a smooth transition from current location to the next step.
 		if location != step:
 			target_step = step
 			yield(self, "movement_arrived")
-			if reconsider:
-				reconsider = false
-				return true
 	
 	if world.towns.get_building(location):
 		enter_building()
 	
+	yield(get_tree(), "idle_frame")
 	return true
 
 # UTILITY: Adds a piece of property to the player's owned_properties 

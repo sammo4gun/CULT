@@ -78,14 +78,19 @@ func get_work_farmer():
 		else: return work_farm
 	else: return get_work_unemp()
 
+func farm_dry(farm):
+	assert(farm.type == "farm")
+	for tile in farm.location:
+		if not farm.is_watered(tile):
+			return true
+	return false
+
 func get_dry_farm():
 	if "farm" in owned_properties:
 		var available_farms = []
 		for farm in owned_properties["farm"]:
-			for tile in farm.location:
-				if not farm.is_watered(tile):
-					available_farms.append(farm)
-					break
+			if farm_dry(farm): 
+				available_farms.append(farm)
 		if len(available_farms) > 0:
 			return available_farms[world.rng.randi_range(0,len(available_farms)-1)]
 		else: return false
@@ -96,6 +101,13 @@ func give_work_farmhand(farmhand):
 	assert(farmhand in workers)
 	if "farm" in owned_properties:
 		if not workers_farms[farmhand]:
+			workers_farms[farmhand] = get_dry_farm()
+			if workers_farms[farmhand]:
+				return workers_farms[farmhand]
+			else: 
+				farmhand.work_done = true
+				return farmhand.house #not necessary, should be replaced straight away
+		elif not farm_dry(workers_farms[farmhand]): 
 			workers_farms[farmhand] = get_dry_farm()
 			if workers_farms[farmhand]:
 				return workers_farms[farmhand]
@@ -144,9 +156,10 @@ func work_farmer():
 
 func make_farmhand():
 	var person = population.random_person([self], ["none"])
-	workers.append(person)
-	workers_farms[person] = null
-	person.set_work("farmhand", self)
+	if person:
+		workers.append(person)
+		workers_farms[person] = null
+		person.set_work("farmhand", self)
 
 func get_required_help(farms) -> int:
 	var helps = 0
@@ -158,11 +171,6 @@ func get_required_help(farms) -> int:
 
 func get_work_farmhand():
 	return boss.give_work_farmhand(self)
-#	if "farm" in boss.owned_properties:
-#		var chosen_farm = boss.owned_properties["farm"][world.day % len(boss.owned_properties['farm'])]
-#		return chosen_farm
-#	else:
-#		return get_work_unemp()
 
 func work_farmhand():
 	var square_time = 20 - (7 - wake_up_time)
@@ -181,7 +189,6 @@ func work_farmhand():
 			var dist = 9999
 			if len(to_water) < 1:
 				to_water = get_work.call_func().location
-				work_done = true
 			var go_tile
 			for tile in to_water:
 				if location.distance_to(tile) < dist:

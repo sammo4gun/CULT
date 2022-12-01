@@ -3,7 +3,7 @@ extends Node2D
 export var HEIGHT = 60
 export var WIDTH = 40
 export var NUM_TOWNS = 3
-var speed_factor = range_lerp(60, 20, 100, 0.25, 5)
+var speed_factor = range_lerp(60, 20, 100, 0.25, 8)
 
 var CURRENT
 
@@ -215,5 +215,6 @@ func _on_Town_destroy_building(building):
 		drawer.terrain_update(loc)
 
 func _on_GUI_time_slider(speed):
-	speed_factor = range_lerp(speed, 20, 100, 0.25, 5)
+	speed_factor = range_lerp(speed, 20, 100, 0.25, 8)
+#	speed_factor = range_lerp(speed, 20, 100, 0.25, 80)
 	daynightcycle.adjust_cycle(1.0/speed_factor)
