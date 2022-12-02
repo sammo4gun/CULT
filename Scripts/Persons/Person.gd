@@ -1,4 +1,4 @@
-extends "res://Scripts/Persons/Professions.gd"
+extends "res://Scripts/Persons/Personality.gd"
 
 # CREATION: Sets parents, owned house, starting house, and position
 # Also calls make_thoughts() to figure out who this person is.
@@ -14,11 +14,13 @@ func create(wrld, pop, twn, hse) -> void:
 	ground = pop.ground
 	
 	in_building = house
-	location = house.location[0]
+	location = house.get_location()[0]
 	create_name()
 	position = ground.map_to_world(location)
 	position.y += 45
 	prevloc = location
+	
+	prev_work_building = get_work.call_func()
 	
 	make_thoughts()
 
@@ -42,13 +44,16 @@ func set_work(prof, bs = null):
 	boss = bs
 	profession = prof
 	update_profession()
-	if town: set_wakeup_time()
+	if town: 
+		set_wakeup_time()
 	reconsider = true
 
 func set_wakeup_time() -> void:
 	var work = get_work.call_func()
-	var work_dist = len(pathfinding.walkToBuilding(house.location[0], work, house, world._mbuildings, town._mroads, [1,2], false))
-	wake_up_time = 7 - int(work_dist / 10)
+	if work != prev_work_building:
+		var work_dist = len(pathfinding.walkToBuilding(house.get_location()[0], work, house, world._mbuildings, town._mroads, [1,2], false))
+		wake_up_time = 7 - int(work_dist / 10)
+		prev_work_building = work
 
 # CREATION: Makes the name of the player.
 func create_name() -> void:
@@ -90,15 +95,16 @@ func _process(delta):
 					open = false
 					go_building(house)
 			"sleep":
-				if in_building.lights_on: in_building.turn_lights_off()
+				if in_building.lights_on: 
+					in_building.turn_lights_off()
 				if day_time in ['day', 'dawn']: 
 					open = false
 					awaken()
 					activity = "home"
 				if world_time == 2:
 					set_wakeup_time()
-					work_done = false
-				if world_time > max(3, wake_up_time) and world_time <= 20 - (7 - wake_up_time):
+					day_reset.call_func()
+				elif world_time > max(2, wake_up_time) and world_time <= 20 - (7 - wake_up_time):
 					open = false
 					awaken()
 					activity = "home"
@@ -106,14 +112,10 @@ func _process(delta):
 				# At home and preparing to go to the square
 				if work_done:
 					activity = "home"
-				elif in_building:
-					if in_building != get_work.call_func():
-						open = false
-						go_path(get_path_to_building(get_work.call_func()))
-					else:
-						open = false
-						work_activity()
-				else: 
+				elif is_at_work():
+					open = false
+					work_activity()
+				else:
 					open = false
 					go_path(get_path_to_building(get_work.call_func()))
 	._process(delta)
@@ -122,24 +124,6 @@ func _process(delta):
 func work_activity():
 	yield(do_work.call_func(), "completed")
 	open = true
-
-func _input(event):
-	if mouse_on:
-		if event is InputEventMouseButton:
-			if event.button_index == BUTTON_LEFT and event.pressed:
-				world.selected_person(self)
-				get_tree().set_input_as_handled()
-
-func _on_Area2D_mouse_entered():
-	if not population.mouse_on:
-		population.mouse_on = true
-		$Popup.visible = true
-		mouse_on = true
-
-func _on_Area2D_mouse_exited():
-	population.mouse_on = false
-	$Popup.visible = false
-	mouse_on = false
 
 # UTILITY: On selected
 func on_selected():

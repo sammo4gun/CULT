@@ -35,7 +35,7 @@ func make_person(town, house):
 	
 	var t = true
 	for tile in town.get_town_square_loc():
-		if house.location[0].distance_to(tile) <= 3:
+		if house.get_location()[0].distance_to(tile) <= 3:
 			t = false
 			break
 	
@@ -51,7 +51,7 @@ func make_person(town, house):
 		pers.set_work("none")
 		# set to unemployed
 	
-	for loc in house.location:
+	for loc in house.get_location():
 		town.set_tile_owner(loc, pers)
 	
 	pers.create(world, self, town, house)
@@ -65,12 +65,12 @@ func make_person(town, house):
 
 func replace_person(new_person, old_person):
 	if old_person.house:
-		for loc in old_person.house.location:
+		for loc in old_person.house.get_location():
 			old_person.town.set_tile_owner(loc, new_person)
 		old_person.house.set_inhabitant(new_person, true)
 	for type in old_person.owned_properties:
 		for build in old_person.owned_properties[type]:
-			for loc in build.location:
+			for loc in build.get_location():
 				old_person.town.set_tile_owner(loc, new_person)
 	unmake_person(old_person)
 	

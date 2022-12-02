@@ -35,7 +35,6 @@ var new_time
 var day = 1
 
 onready var selector = $Selector
-#onready var GUI = $Camera2D/CanvasLayer/GUI
 onready var GUI = $CanvasLayer/GUI
 onready var drawer = $Map
 onready var pathfinding = $Pathfinder
@@ -193,7 +192,7 @@ func _on_Town_construct_roads(path, buildings, type):
 	drawer.road_update(p)
 
 func _on_Town_construct_building(building):
-	for loc in building.location:
+	for loc in building.get_location():
 		_mbuildings[loc] = building.get_id()
 		_mtype[loc] = 2
 		drawer.building_update(loc)
@@ -208,7 +207,7 @@ func _on_Town_destroy_roads(roads):
 				drawer.terrain_update(tile)
 
 func _on_Town_destroy_building(building):
-	for loc in building.location:
+	for loc in building.get_location():
 		_mbuildings[loc] = 0
 		_mtype[loc] = 0
 		drawer.remove_building(loc)

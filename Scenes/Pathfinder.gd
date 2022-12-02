@@ -110,27 +110,38 @@ func is_walkable(loc, buildings, roads, must_roads, road_types):
 	return false
 
 func walkToBuilding(start, target_building, from_building, buildings, roads, road_types, must_roads):
-	var start_to_path = [start]
+	var full_path = [start]
+	var needs = true
 	if from_building:
-		var needs = true
 		for ent in target_building.entrance_tiles:
-			if ent in from_building.location:
+			if ent in from_building.get_location():
 				needs = false
 		if needs:
-			var pot_start
+			var pot_start = from_building.entrance_tiles[0]
 			var cost = 99999
 			var n
-			for til in from_building.entrance_tiles:
-				n = walkRoadPath(til, target_building.entrance_tiles, buildings, roads, road_types, must_roads, true)
-				if  n[1] < cost:
-					pot_start = til
-					cost = n[1]
-			start_to_path = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads)
-	var path_to_entrance = walkRoadPath(start_to_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads)
-	var entrance_to_inside = walkRoadPath(path_to_entrance[-1], target_building.location, buildings, roads, road_types, must_roads)
-	return start_to_path + path_to_entrance + entrance_to_inside
+			if len(from_building.entrance_tiles) > 1:
+				for til in from_building.entrance_tiles:
+					n = walkRoadPath(til, target_building.entrance_tiles, buildings, roads, road_types, must_roads, true)
+					if  n[1] < cost:
+						pot_start = til
+						cost = n[1]
+			full_path = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads, false, [], from_building.get_location())
+		
+		needs = true
+		for tile in from_building.entrance_tiles:
+			if tile in target_building.get_location():
+				full_path.append(tile)
+				needs = false
+	if needs: 
+		full_path += walkRoadPath(full_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads, false, target_building.get_location())
+		full_path += walkRoadPath(full_path[-1], target_building.get_location(), buildings, roads, road_types, must_roads)
+	return full_path
 
-func walkRoadPath(start, finish, buildings, roads, road_types, must_roads, get_cost = false):
+func walkRoadPath(  start, finish, buildings, roads, road_types, must_roads, 
+					get_cost = false,
+					excluded = [],
+					included = []):
 	var g = {start: 0}
 	var h = {start: 0}
 	var parents = {}
@@ -171,7 +182,9 @@ func walkRoadPath(start, finish, buildings, roads, road_types, must_roads, get_c
 		
 		for vec in [Vector2(-1,0),Vector2(1,0), Vector2(0,1), Vector2(0,-1)]:
 			var new_pos = promising + vec
-			if is_walkable(new_pos, buildings, roads, must_roads, road_types) or \
+			if (is_walkable(new_pos, buildings, roads, must_roads, road_types) and \
+			   not new_pos in excluded and \
+			   (len(included) == 0 or new_pos in included)) or \
 			   new_pos in finish:
 				#compute g
 				var tg = g[promising]
@@ -179,7 +192,7 @@ func walkRoadPath(start, finish, buildings, roads, road_types, must_roads, get_c
 					tg += 1
 					if promising in roads:
 						if roads[promising] != roads[new_pos]:
-							tg += 40
+							tg += 20
 				else: tg += 30
 				
 				#compute h

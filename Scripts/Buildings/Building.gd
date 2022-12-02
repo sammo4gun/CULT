@@ -52,6 +52,7 @@ func unmake():
 	queue_free()
 
 func get_location():
+	assert(location[0])
 	return self.location
 
 func get_id():

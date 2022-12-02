@@ -65,7 +65,7 @@ func check_ownership(location):
 func get_full_building(loc):
 	for town in get_children():
 		if loc in town._mbuildings:
-			return town._mbuildings[loc].location
+			return town._mbuildings[loc].get_location()
 
 func map_get_building_connected(loc):
 	for town in get_children():

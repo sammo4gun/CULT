@@ -3,7 +3,7 @@
 [ext_resource path="res://Scenes/Persons/Person.tscn" type="PackedScene" id=1]
 
 [sub_resource type="GDScript" id=1]
-script/source = "extends \"res://Scripts/Persons/Person.gd\"
+script/source = "xtends \"res://Scripts/Persons/Person.gd\"
 
 "
 

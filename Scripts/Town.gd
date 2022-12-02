@@ -137,9 +137,9 @@ func fail_message():
 
 func build_farm(person, nr):
 	for i in nr:
-		var farmers_house = person.house.location[0]
+		var farmers_house = person.house.get_location()[0]
 		var new_farm = construct_multi_building( \
-					   person.house.location[0], \
+					   person.house.get_location()[0], \
 					   SDEV_CENTER/2, \
 					   'farm', \
 					   false, \
@@ -346,7 +346,7 @@ func canbuild(loc, check_adj):
 func get_town_hall_loc():
 	for b in _mbuildings:
 		if _mbuildings[b].is_type("center"):
-			return _mbuildings[b].location[0]
+			return _mbuildings[b].get_location()[0]
 	return null
 
 func get_town_square():
@@ -358,7 +358,7 @@ func get_town_square():
 func get_town_square_loc():
 	for b in _mbuildings:
 		if _mbuildings[b].is_type("square"):
-			return _mbuildings[b].location
+			return _mbuildings[b].get_location()
 	return null
 
 #return how many adjacent tiles are available

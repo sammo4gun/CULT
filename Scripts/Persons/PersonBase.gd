@@ -55,6 +55,8 @@ var world_time = 0
 # night, dawn, day, dusk
 var day_time = "night"
 
+var prev_work_building
+
 func _process(delta):
 	if target_step != null and moving_to == null:
 		moving_to = ground.map_to_world(target_step)
@@ -203,3 +205,59 @@ func timer_length(mini, maxi) -> float:
 	if maxi:
 		return world.rng.randf_range(mini, maxi)/world.speed_factor
 	return mini/world.speed_factor
+
+func _input(event):
+	if mouse_on:
+		if event is InputEventMouseButton:
+			if event.button_index == BUTTON_LEFT and event.pressed:
+				world.selected_person(self)
+				get_tree().set_input_as_handled()
+
+func _on_Area2D_mouse_entered():
+	if not population.mouse_on:
+		population.mouse_on = true
+		$Popup.visible = true
+		mouse_on = true
+
+func _on_Area2D_mouse_exited():
+	population.mouse_on = false
+	$Popup.visible = false
+	mouse_on = false
+
+# TEMPORARY SOCIALISING FUNCTIONS (WILL HAVE TO BE MOVED TO PROPER PLACE)
+
+func get_random_social(profs = []):
+	assert(in_building) #or on same/adjacent location?
+	var poss_people = []
+	for pers in in_building.inside:
+		if pers != self and pers.profession in profs:
+			poss_people.append(pers)
+	
+	if len(poss_people) > 0:
+		return poss_people[world.rng.randi_range(0,len(poss_people)-1)]
+	return false
+
+var conversing = false
+
+func receive_q(from_person, q):
+	yield(get_tree(), "idle_frame")
+	return true
+
+func engage_conversation(target_person, qs):
+	conversing = target_person
+	target_person.conversing = self
+	for q in qs:
+		# ask that question
+		yield(target_person.receive_q(self, q), "completed")
+
+func req_converse(target_person, qs):
+	if target_person.rec_converse(self, qs):
+		yield(engage_conversation(target_person, qs), "completed")
+		return true
+	else: 
+		return false
+
+func rec_converse(from_person, qs):
+	if not conversing:
+		return true #we always want to talk!
+	else: return false
