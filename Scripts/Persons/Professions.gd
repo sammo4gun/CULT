@@ -1,4 +1,4 @@
-extends "res://Scripts/Persons/PersonBase.gd"
+extends "res://Scripts/Persons/Personality.gd"
 
 var get_work = funcref(self, "get_work_unemp")
 var do_work = funcref(self, "work_unemp")
@@ -8,24 +8,24 @@ var boss
 var workers = []
 var profession
 var work_loc
-var wake_up_time
+var travel_time
 
 var work_done = false
 
 var PROFESSIONS_DICT = {
-	"none": [		funcref(self, "get_work_unemp"), \
+	"none": [   	funcref(self, "get_work_unemp"), \
 					funcref(self, "work_unemp"), \
 					funcref(self, "day_reset_unemp")],
 					
-	"farmer": [		funcref(self, "get_work_farmer"), \
+	"farmer": [ 	funcref(self, "get_work_farmer"), \
 					funcref(self, "work_farmer"), \
 					funcref(self, "day_reset_farmer")],
 					
-	"farmhand": [	funcref(self, "get_work_farmhand"), \
+	"farmhand":[	funcref(self, "get_work_farmhand"), \
 					funcref(self, "work_farmhand"), \
 					funcref(self, "day_reset_farmhand")],
 					
-	"mayor": [		funcref(self, "get_work_unemp"), \
+	"mayor": [  	funcref(self, "get_work_unemp"), \
 					funcref(self, "work_unemp"), \
 					funcref(self, "day_reset_unemp")],
 }
@@ -55,6 +55,11 @@ func get_work_unemp():
 # EXECUTION: Enjoy work for a few seconds
 func work_unemp():
 	assert(location in get_work.call_func().get_location())
+	
+	var square_time = 20.0 - travel_time
+	if world_time > square_time:
+		work_done = true
+	
 	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
 	
 	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
@@ -70,10 +75,6 @@ func work_unemp():
 	
 	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
 	
-	var square_time = 20 - (7 - wake_up_time)
-	if world_time > square_time:
-		work_done = true
-	
 	return true
 
 # FARMER
@@ -82,12 +83,14 @@ var work_farm
 var workers_farms = {} #keep track of which worker works where
 var need_workers = false
 var recruited_time_started = null
+var checked_workers = []
 
 func day_reset_farmer():
 	work_done = false
 	if "farm" in owned_properties:
 		if 1 + len(workers) < get_required_help(owned_properties['farm']):
 			need_workers = true
+			checked_workers = []
 			recruited_time_started = null
 
 func get_work_farmer():
@@ -105,7 +108,7 @@ func get_work_farmer():
 		return get_work_unemp()
 
 func work_farmer():
-	var square_time = 20 - (7 - wake_up_time)
+	var square_time = 20.0 - travel_time
 	if world_time > square_time:
 		work_done = true
 	if "farm" in owned_properties and in_building in owned_properties['farm']:
@@ -132,14 +135,15 @@ func work_farmer():
 			yield(self, "movement_arrived")
 			
 			return true
+		
 	elif in_building == town.get_town_square() and "farm" in owned_properties:
 		if need_workers:
-			yield(work_unemp(), "completed")
 			make_farmhand()
+			yield(get_tree(), "idle_frame")
 			return true
 		else: 
-			reconsider = true
 			yield(get_tree(), "idle_frame")
+			reconsider = true
 			return true
 	else: 
 		yield(work_unemp(), "completed")
@@ -147,15 +151,25 @@ func work_farmer():
 
 func make_farmhand():
 	assert(in_building == town.get_town_square())
-	var person = get_random_social(["none"])
-	if person:
-		workers.append(person)
-		workers_farms[person] = null
-		person.set_work("farmhand", self)
+	# maybe split this to have the decision which farmhand not to be fully random?
+	var persons = get_social_options([], checked_workers)
+	if persons:
+		var picked_person = null
+		var closest_dist = 9999
+		var dist
+		for person in persons:
+			dist = person.house.location[0].distance_to(house.location[0])
+			if dist < closest_dist:
+				closest_dist = dist
+				picked_person = person
+		
+		if not conversing:
+			engage_conversation(picked_person, ['farmhand'])
+			checked_workers.append(picked_person)
 	else:
 		if recruited_time_started == null:
 			recruited_time_started = world_time
-		if world_time - recruited_time_started >= 3:
+		if world_time - recruited_time_started >= 3.0:
 			# give up on finding help for today
 			# maybe eventually start giving up on finding help altogether?
 			need_workers = false
@@ -208,6 +222,25 @@ func get_required_help(farms) -> int:
 		helps += farm.required_workers
 	return helps
 
+# FARMER RECRUIT
+
+func asked_farmhand() -> Array: # sure I'll be your farmhand!
+	assert(conversing.profession == "farmer")
+	if profession == 'none':
+		return [true, false]
+	return [false, false]
+
+func y_farmhand(): # whoever I am talking to has said yes to the recruit
+	workers.append(conversing)
+	workers_farms[conversing] = null
+	conversing.set_work("farmhand", self)
+	if 1 + len(workers) >= get_required_help(owned_properties['farm']):
+		need_workers = false
+
+func n_farmhand():
+	# be sad, dislike this person
+	pass
+
 # FARMHAND
 
 func day_reset_farmhand():
@@ -217,8 +250,8 @@ func get_work_farmhand():
 	return boss.give_work_farmhand(self)
 
 func work_farmhand():
-	var square_time = 20 - (7 - wake_up_time)
-	if world_time > square_time:
+	var done_time = 20.0 - travel_time
+	if world_time > done_time:
 		work_done = true
 	if "farm" in boss.owned_properties:
 		if in_building in boss.owned_properties['farm'] and location in in_building.get_location():

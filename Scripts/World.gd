@@ -73,18 +73,18 @@ func build_towns():
 func start_game():
 	daynightcycle.start_cycle(5)
 	GUI.start_time()
-	time = get_time()["hour"]
+	time = get_time()["exact"]
 
-var starttime = OS.get_unix_time()
 func _process(_delta):
 	if time != null:
-		new_time = get_time()['hour']
-		if new_time!= time:
+		new_time = get_time()['exact']
+		if new_time != time:
+			if int(new_time) != int(time):
+				towns._hour_update(int(new_time))
+				if new_time == 0:
+					day += 1
+			population._time_update(new_time)
 			time = new_time
-			population._hour_update(time)
-			towns._hour_update(time)
-			if new_time == 0:
-				day += 1
 
 func make_town():
 	var town = Town.instance()

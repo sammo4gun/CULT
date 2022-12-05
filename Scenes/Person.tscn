@@ -1,12 +1,13 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scripts/Persons/Person.gd" type="Script" id=1]
 [ext_resource path="res://Sprites/person.png" type="Texture" id=2]
 [ext_resource path="res://Sprites/thought_bubble.png" type="Texture" id=3]
-[ext_resource path="res://Sprites/surprise.png" type="Texture" id=4]
-[ext_resource path="res://Sprites/happy.png" type="Texture" id=5]
-[ext_resource path="res://Sprites/selector.png" type="Texture" id=6]
-[ext_resource path="res://Sprites/sweat.png" type="Texture" id=7]
+[ext_resource path="res://Sprites/happy.png" type="Texture" id=4]
+[ext_resource path="res://Sprites/selector.png" type="Texture" id=5]
+[ext_resource path="res://Sprites/sweat.png" type="Texture" id=6]
+[ext_resource path="res://Sprites/surprise.png" type="Texture" id=7]
+[ext_resource path="res://Sprites/conversation.png" type="Texture" id=8]
 
 [sub_resource type="CapsuleShape2D" id=1]
 radius = 9.45628
@@ -35,29 +36,35 @@ position = Vector2( -0.135545, 1.22668 )
 scale = Vector2( 0.0453309, 0.0390671 )
 texture = ExtResource( 3 )
 
+[node name="Chat" type="Sprite" parent="."]
+visible = false
+position = Vector2( 0, -3 )
+scale = Vector2( -0.0292218, -0.0292218 )
+texture = ExtResource( 8 )
+
 [node name="Happy" type="Sprite" parent="."]
 visible = false
 position = Vector2( 0, -1.075 )
 scale = Vector2( 0.026178, 0.026178 )
-texture = ExtResource( 5 )
+texture = ExtResource( 4 )
 
 [node name="Surprise" type="Sprite" parent="."]
 visible = false
 position = Vector2( -0.140305, 1.12246 )
 scale = Vector2( 0.0353927, 0.0328013 )
-texture = ExtResource( 4 )
+texture = ExtResource( 7 )
 
 [node name="Sweat" type="Sprite" parent="."]
 visible = false
 position = Vector2( 0.471095, 1.70505 )
 scale = Vector2( 0.0477882, 0.0477882 )
-texture = ExtResource( 7 )
+texture = ExtResource( 6 )
 
 [node name="Selector" type="Sprite" parent="."]
 visible = false
 position = Vector2( -0.574249, 8.81851 )
 scale = Vector2( 0.259228, 0.259228 )
-texture = ExtResource( 6 )
+texture = ExtResource( 5 )
 
 [node name="Popup" type="TextureRect" parent="."]
 visible = false
@@ -65,7 +72,7 @@ margin_left = -6.0
 margin_top = -38.0
 margin_right = 83.0
 margin_bottom = -1.0
-texture = ExtResource( 6 )
+texture = ExtResource( 5 )
 expand = true
 
 [node name="Label" type="Label" parent="Popup"]

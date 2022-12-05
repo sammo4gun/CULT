@@ -126,7 +126,8 @@ func walkToBuilding(start, target_building, from_building, buildings, roads, roa
 					if  n[1] < cost:
 						pot_start = til
 						cost = n[1]
-			full_path = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads, false, [], from_building.get_location())
+			var fp = walkRoadPath(start, [pot_start], buildings, roads, road_types, must_roads, false, [], from_building.get_location())
+			if fp: full_path = fp
 		
 		needs = true
 		for tile in from_building.entrance_tiles:

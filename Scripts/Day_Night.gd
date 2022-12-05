@@ -27,13 +27,14 @@ func adjust_cycle(fact):
 func pause_cycle():
 	started = false
 
-var clock = {'hour': 0, 'minute': 0}
+var clock = {'hour': 0, 'minute': 0, 'exact': 0.0}
 
 # Returns the time in hours and minutes of the current cycle.
 func get_time():
 	if current_frame != null:
 		clock["hour"] = int(current_frame)
 		clock['minute'] = 10*int(range_lerp(current_frame - int(current_frame), 0, 1.0, 0, 6))
+		clock['exact'] = stepify(current_frame, 0.1)
 	return clock
 
 func _process(delta):

@@ -2,7 +2,7 @@ extends Node
 
 signal chosen_profession
 
-var Person = preload("res://Scenes/Persons/Person.tscn")
+var Person = preload("res://Scenes/Person.tscn")
 
 var pop = []
 var towns = []
@@ -13,9 +13,9 @@ onready var ydrawer = $"../YDrawer"
 onready var ground = $"../YDrawer/Ground"
 onready var world = $".."
 
-func _hour_update(hour):
+func _time_update(time):
 	for person in pop:
-		person._hour_update(hour)
+		person._time_update(time)
 
 func random_person(excluded = [], profs = []):
 	var potpers = []

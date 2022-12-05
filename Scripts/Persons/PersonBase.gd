@@ -6,7 +6,13 @@ signal movement_arrived
 
 onready var selector = $Selector
 onready var bubble = $Thoughts
-onready var feelings = {"happy": $Happy, "surprise": $Surprise, "sweat" : $Sweat}
+onready var feelings = {"happy": $Happy, \
+						"surprise": $Surprise, \
+						"sweat" : $Sweat, \
+						"chat": $Chat}
+
+var emotion_priority = ['happy', 'sweat', 'surprise', 'chat']
+var current_emotion = null
 
 var namegenerator
 var population
@@ -51,11 +57,15 @@ var mouse_on = false
 var open = true
 # variable to force a single check
 var reconsider = false
-var world_time = 0
+var world_time = 0.0
 # night, dawn, day, dusk
 var day_time = "night"
 
 var prev_work_building
+
+var prev_activity
+var conversing = false
+var engaging = false
 
 func _process(delta):
 	if target_step != null and moving_to == null:
@@ -67,7 +77,7 @@ func _process(delta):
 				var target_y = town.rng.randi_range(moving_to.y - 8, moving_to.y + 12)
 				var target_x = town.rng.randi_range(moving_to.x - 10, moving_to.x + 10)
 				moving_to = Vector2(target_x, target_y)
-	
+		
 	if moving_to != null:
 		position = position.move_toward(moving_to, delta * adj_speed * world.speed_factor)
 		if position == moving_to:
@@ -86,14 +96,21 @@ func calculate_speed(loc, target):
 
 # EXECUTION: Displays an emotion for a random period of time
 func display_emotion(feeling):
-	if bubble.visible != true:
+	if ( current_emotion and \
+		 emotion_priority.find(current_emotion) < emotion_priority.find(feeling)) or \
+		 not current_emotion:
 		bubble.visible = true
 		feelings[feeling].visible = true
+		if current_emotion: 
+			feelings[current_emotion].visible = false
+		current_emotion = feeling
 		
 		yield(get_tree().create_timer(timer_length(0.3,0.6)), "timeout")
 		
-		bubble.visible = false
 		feelings[feeling].visible = false
+		if current_emotion == feeling:
+			current_emotion = null
+			bubble.visible = false
 
 # EXECUTION: Enter the building on current square
 func enter_building():
@@ -106,7 +123,7 @@ func enter_building():
 
 # EXECUTION: Leaves the building on current square
 func leave_building():
-	assert(world._mbuildings[location] != 0)
+#	assert(world._mbuildings[location] != 0)
 	if in_building.can_enter:
 		if in_building.lights_on and len(in_building.inside) < 2: 
 			in_building.turn_lights_off()
@@ -114,6 +131,15 @@ func leave_building():
 		visible = true
 	in_building.leave(self)
 	in_building = false
+
+func go_person(person):
+	var path
+	if person.target_step != null:
+		path = pathfinding.walkRoadPath(location, [person.target_step], world._mbuildings, town._mroads, [1,2], false)
+	else: path = pathfinding.walkRoadPath(location, [person.location], world._mbuildings, town._mroads, [1,2], false)
+	yield(follow_path(path), "completed")
+	open = true
+	
 
 func go_building(building):
 	var path = pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false)
@@ -188,18 +214,6 @@ func add_property(building) -> void:
 		owned_properties[type] = [building]
 	building.add_owner(self)
 
-# UTILITY: Update hour times
-func _hour_update(hour):
-	world_time = hour
-	if world_time < 6 or world_time > 21:
-		day_time = "night"
-	elif world_time < 8:
-		day_time = "dawn"
-	elif world_time < 18:
-		day_time = "day"
-	elif world_time < 21:
-		day_time = "dusk"
-
 # UTILITY: Doing a timer from range mini to maxi compensated for speed factor
 func timer_length(mini, maxi) -> float:
 	if maxi:
@@ -224,40 +238,3 @@ func _on_Area2D_mouse_exited():
 	$Popup.visible = false
 	mouse_on = false
 
-# TEMPORARY SOCIALISING FUNCTIONS (WILL HAVE TO BE MOVED TO PROPER PLACE)
-
-func get_random_social(profs = []):
-	assert(in_building) #or on same/adjacent location?
-	var poss_people = []
-	for pers in in_building.inside:
-		if pers != self and pers.profession in profs:
-			poss_people.append(pers)
-	
-	if len(poss_people) > 0:
-		return poss_people[world.rng.randi_range(0,len(poss_people)-1)]
-	return false
-
-var conversing = false
-
-func receive_q(from_person, q):
-	yield(get_tree(), "idle_frame")
-	return true
-
-func engage_conversation(target_person, qs):
-	conversing = target_person
-	target_person.conversing = self
-	for q in qs:
-		# ask that question
-		yield(target_person.receive_q(self, q), "completed")
-
-func req_converse(target_person, qs):
-	if target_person.rec_converse(self, qs):
-		yield(engage_conversation(target_person, qs), "completed")
-		return true
-	else: 
-		return false
-
-func rec_converse(from_person, qs):
-	if not conversing:
-		return true #we always want to talk!
-	else: return false

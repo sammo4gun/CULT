@@ -22,7 +22,7 @@ func _physics_process(delta):
 
 func _unhandled_input(event: InputEvent):
 	if event is InputEventMouseMotion:
-		if event.button_mask == BUTTON_MASK_MIDDLE:
+		if event.button_mask == BUTTON_LEFT:
 			position -= event.relative * zoom
 	
 	if event is InputEventMouseButton:
@@ -35,8 +35,7 @@ func _unhandled_input(event: InputEvent):
 func zoom_in():
 	_target_zoom = max(_target_zoom - ZOOM_INCREMENT, MIN_ZOOM)
 	set_physics_process(true)
-	
+
 func zoom_out():
 	_target_zoom = min(_target_zoom + ZOOM_INCREMENT, MAX_ZOOM)
 	set_physics_process(true)
-	
