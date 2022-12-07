@@ -4,14 +4,14 @@ var started = false
 var original_ticks_per_hour
 var ticks_per_hour
 var factor
-var time_started
 
 var current_time
 var elapsed
 var current_frame
 
+var paused = false
+
 func start_cycle(secs):
-	time_started = OS.get_ticks_msec()
 	elapsed = 0
 	factor = 1
 	started = true
@@ -38,10 +38,18 @@ func get_time():
 	return clock
 
 func _process(delta):
+	if paused: 
+		$AnimationPlayer.seek(current_frame)
+		return
 	if started:
 		elapsed += int(1000 * delta)
 		elapsed = elapsed % int(24.0 * ticks_per_hour)
 		current_frame = range_lerp(elapsed, 0, int(24.0 * ticks_per_hour), 0, 24)
 		$AnimationPlayer.play("Day_night_cycle")
 		$AnimationPlayer.seek(current_frame)
-		
+
+func _unhandled_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_SPACE:
+			if paused: paused = false
+			else: paused = true

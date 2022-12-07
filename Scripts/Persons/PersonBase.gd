@@ -3,6 +3,7 @@ extends Node2D
 export var SPEED = 60
 
 signal movement_arrived
+signal timer_finished
 
 onready var selector = $Selector
 onready var bubble = $Thoughts
@@ -67,8 +68,21 @@ var prev_activity
 var conversing = false
 var engaging = false
 
+var waiting_time = 0.0
+
+func _time_update(_t):
+	if waiting_time > 0.0:
+		waiting_time -= 0.1
+		if waiting_time <= 0.0:
+			emit_signal("timer_finished")
+
 func _process(delta):
+	if world.get_time_paused(): 
+		return
 	if target_step != null and moving_to == null:
+		if in_building:
+			if not world.towns.get_building(target_step):
+				leave_building()
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45
 		adj_speed = calculate_speed(location, target_step)
@@ -81,9 +95,13 @@ func _process(delta):
 	if moving_to != null:
 		position = position.move_toward(moving_to, delta * adj_speed * world.speed_factor)
 		if position == moving_to:
+			var last_loc = location
 			location = target_step
 			target_step = null
 			moving_to = null
+			if world.towns.get_building(location) and last_loc != location:
+				if not in_building or in_building != world.towns.get_building(location):
+					yield(enter_building(), "completed")
 			emit_signal("movement_arrived")
 
 # UTILITY: Calculate speed from the speed factors of two travelling squares
@@ -105,6 +123,7 @@ func display_emotion(feeling):
 			feelings[current_emotion].visible = false
 		current_emotion = feeling
 		
+		# just a straight timer length
 		yield(get_tree().create_timer(timer_length(0.3,0.6)), "timeout")
 		
 		feelings[feeling].visible = false
@@ -120,12 +139,16 @@ func enter_building():
 	if in_building.can_enter:
 		$Area2D/CollisionShape2D.disabled=true
 		visible = false
+		if day_time != 'day':
+			in_building.turn_lights_on()
+		yield(wait_time(10, 20), "completed")
+	yield(get_tree(), "idle_frame")
 
 # EXECUTION: Leaves the building on current square
 func leave_building():
 #	assert(world._mbuildings[location] != 0)
 	if in_building.can_enter:
-		if in_building.lights_on and len(in_building.inside) < 2: 
+		if in_building.lights_on and len(in_building.inside) < 2:
 			in_building.turn_lights_off()
 		$Area2D/CollisionShape2D.disabled=false
 		visible = true
@@ -135,20 +158,20 @@ func leave_building():
 func go_person(person):
 	var path
 	if person.target_step != null:
-		path = pathfinding.walkRoadPath(location, [person.target_step], world._mbuildings, town._mroads, [1,2], false)
-	else: path = pathfinding.walkRoadPath(location, [person.location], world._mbuildings, town._mroads, [1,2], false)
+		path = pathfinding.walkRoadPath(location, [person.target_step], world._mbuildings, town._mroads, [1,2], false, self)
+	else: path = pathfinding.walkRoadPath(location, [person.location], world._mbuildings, town._mroads, [1,2], false, self)
 	yield(follow_path(path), "completed")
 	open = true
 	
 
 func go_building(building):
-	var path = pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false)
+	var path = pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false, self)
 	yield(follow_path(path), "completed")
 	open = true
 
 # BEHAVIOUR: Head to a target after generating a path to that target
 func go(target):
-	var path = pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false)
+	var path = pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false, self)
 	yield(follow_path(path), "completed")
 	open = true
 
@@ -159,28 +182,28 @@ func go_path(path):
 
 # BEHAVIOUR: Take a few seconds to wake up / do other end of night stuff
 func awaken():
-	yield(get_tree().create_timer(timer_length(0.5,3.0)), "timeout")
+	yield(wait_time(10, 30), "completed")
 	# give a certain amount of time to wake up / do other end-of-night stuff
 	open = true
 
 # BEHAVIOUR: Take a few seconds to go to sleep / do other end of evening stuff
 func asleep():
-	yield(get_tree().create_timer(timer_length(1.0,6.0)), "timeout")
+	yield(wait_time(10, 30), "completed")
 	# give a certain amount of time to go to sleep / do other end-of-evening stuff
 	open = true
 
 # BEHAVIOUR: Take a few seconds to leave the house / do other end of morning stuff
 func prepare_to_leave():
-	yield(get_tree().create_timer(timer_length(0.5,3.0)), "timeout")
+	yield(wait_time(10, 30), "completed")
 	# give a certain amount of time to prepare for leaving to the square
 	open = true
 
 # UTILITY: Get a path to a target
 func get_path_to(target):
-	return pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false)
+	return pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false, self)
 
 func get_path_to_building(building):
-	return pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false)
+	return pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false, self)
 
 # UTILITY: Setting the target square to each square following the path.
 func follow_path(path) -> bool:
@@ -198,8 +221,8 @@ func follow_path(path) -> bool:
 			target_step = step
 			yield(self, "movement_arrived")
 	
-	if world.towns.get_building(location):
-		enter_building()
+#	if world.towns.get_building(location):
+#		yield(enter_building(), "completed")
 	
 	yield(get_tree(), "idle_frame")
 	return true
@@ -215,10 +238,21 @@ func add_property(building) -> void:
 	building.add_owner(self)
 
 # UTILITY: Doing a timer from range mini to maxi compensated for speed factor
-func timer_length(mini, maxi) -> float:
+func timer_length(mini, maxi = null) -> float:
 	if maxi:
 		return world.rng.randf_range(mini, maxi)/world.speed_factor
 	return mini/world.speed_factor
+
+func wait_time(mini, maxi = null):
+	# wait time is given in minutes, max an hour
+	if maxi: 
+		waiting_time = stepify(world.rng.randf_range(
+			range_lerp(mini, 0, 60, 0, 1), range_lerp(maxi, 0, 60, 0, 1)
+		), 0.1 )
+	else:
+		waiting_time = stepify(range_lerp(mini, 0, 60, 0, 1), 0.1)
+	yield(self, "timer_finished")
+	return true
 
 func _input(event):
 	if mouse_on:

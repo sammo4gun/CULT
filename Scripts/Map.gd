@@ -198,19 +198,6 @@ func remove_building(tile: Vector2):
 			_layers[0].updateRoad(tile+dif, _roads_dirs[tile+dif], world.is_road_tile(tile+dif))
 		i+=1
 
-func square_tile(tile, type, dict):
-	var i = 0
-	var dirs = [0,0,0,0]
-	for dif in [Vector2(0,-1), Vector2(1,0), Vector2(0,1), Vector2(-1,0)]:
-		if (tile + dif) in _buildings:
-			if _buildings[(tile + dif)] == type:
-				if towns.check_ownership(tile+dif) == towns.check_ownership(tile):
-					dirs[i] = 1
-		i += 1
-	if not dirs in dict:
-		return dict[[1,1,1,1]]
-	return dict[dirs]
-
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.is_pressed():

@@ -85,7 +85,7 @@ func map_set_building_disconnected(loc):
 			town._mbuildings[loc].map_connected = false
 			town._mbuildings[loc].clean_entrance_tiles()
 			return
-			
+
 func get_pos(location):
 	return map.get_pos(location[0])
 

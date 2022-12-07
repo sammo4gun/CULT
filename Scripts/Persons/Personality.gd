@@ -18,6 +18,11 @@ var RESPONSE_DICT = {
 				 false: funcref(self, "n_farmhand")}
 }
 
+var LENGTH_DICT = {
+	"chat": 	[5,10],
+	"farmhand": [10,20]
+}
+
 func day_reset_social():
 	# gets called every day by everyone
 	for person in ppl_known:
@@ -25,7 +30,18 @@ func day_reset_social():
 			topics[person].append('chat')
 
 func engage_conversation(target_person, qs):
-	if not target_person.receive_conversation(self):
+	# IF: We aren't in the same building, or we are already engaged in conversation,
+	# or the other person didn't want to talk... return false, the conversation
+	# failed to happen.
+	if not (not in_building and not target_person.in_building) and \
+	   (not in_building or not target_person.in_building):
+		# Only one of us is in a building
+		return false
+	if in_building != target_person.in_building:
+		# We are both in a building but not the same one.
+		return false
+	if not target_person.receive_conversation(self) or \
+	   conversing:
 		# The person did not want to talk...
 		return false
 	
@@ -54,6 +70,10 @@ func receive_conversation(from_person):
 	if in_building:
 		assert(from_person in in_building.inside)
 	
+	if not from_person in ppl_known:
+		ppl_known.append(from_person)
+		topics[from_person] = ['chat']
+	
 	if not conversing:
 		return true #we always want to talk!
 	return false
@@ -70,6 +90,10 @@ func end_conv(target_person):
 	assert(conversing == target_person)
 	assert(target_person.conversing == self)
 	
+	if target_person.topics[self]:
+		target_person.switch_eng(self)
+		return true
+	
 	conversing = false
 	activity = prev_activity
 	prev_activity = null
@@ -83,15 +107,29 @@ func end_conv(target_person):
 #	print("%s is done talking to %s" % [string_name, target_person.string_name])
 	return true
 
+# we already are in a conversation, but now we switch sides. The other person
+# becomes the engaging one.
+func switch_eng(other_person):
+	activity = "conversing"
+	conversing = other_person
+	engaging = true
+	open = true
+	
+	other_person.activity = "conversing"
+	other_person.conversing = self
+	other_person.engaging = false
+	
+	return true
+
 func present_q(target_person, q):
-	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
+	yield(wait_time(LENGTH_DICT[q][0], LENGTH_DICT[q][1]), "completed")
 	display_emotion("chat")
 	
 	var answers = target_person.receive_q(self, q)
 	var a = answers[0]
 	var leave_flag = answers[1]
 	
-	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
+	yield(wait_time(LENGTH_DICT[q][0], LENGTH_DICT[q][1]), "completed")
 	
 	open = true
 	if not leave_flag:
@@ -99,13 +137,6 @@ func present_q(target_person, q):
 		return true
 
 func receive_q(from_person, q):
-	if conversing != from_person:
-		print(conversing)
-		print(conversing.profession)
-		print(from_person)
-		if from_person: print(from_person.profession)
-		print(self)
-		print(self.profession)
 	assert(conversing == from_person)
 	display_emotion("chat")
 	var answer = ASK_DICT[q].call_func()

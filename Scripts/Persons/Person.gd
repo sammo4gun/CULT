@@ -3,7 +3,6 @@ extends "res://Scripts/Persons/Professions.gd"
 # CREATION: Sets parents, owned house, starting house, and position
 # Also calls make_thoughts() to figure out who this person is.
 func create(wrld, pop, twn, hse) -> void:
-	time_start = OS.get_unix_time()
 	world = wrld
 	population = pop
 	town = twn
@@ -56,6 +55,7 @@ func _time_update(t):
 		set_travel_time()
 		day_reset.call_func()
 		day_reset_social()
+	._time_update(t)
 
 func set_work(prof, bs = null):
 	boss = bs
@@ -85,6 +85,8 @@ func create_name() -> void:
 			break
 
 func _process(delta):
+	if world.get_time_paused(): 
+		return
 	if open:
 		reconsider = false
 		match activity:
@@ -172,9 +174,7 @@ func on_deselected():
 	selected = false
 	selector.visible = false
 
-func _unhandled_input(event):
-	if selected:
-		if event is InputEventKey:
-			if event.pressed and event.scancode == KEY_I:
-				if profession == "farmer":
-					make_farmhand()
+#func _unhandled_input(event):
+#	if event is InputEventKey:
+#		if event.pressed and event.scancode == KEY_X:
+#			if selected: print(in_building)

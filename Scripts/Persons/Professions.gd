@@ -30,6 +30,9 @@ var PROFESSIONS_DICT = {
 					funcref(self, "day_reset_unemp")],
 }
 
+func set_work(_prof):
+	pass
+
 # CHANGING JOBS
 func update_profession():
 	var funcs = PROFESSIONS_DICT[profession]
@@ -60,7 +63,8 @@ func work_unemp():
 	if world_time > square_time:
 		work_done = true
 	
-	yield(get_tree().create_timer(timer_length(1.0,0)), "timeout")
+	# wait 10 minutes for something interesting to happen
+	yield(wait_time(10, 20), "completed")
 	
 	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
 	var step
@@ -73,7 +77,7 @@ func work_unemp():
 	if world.rng.randf_range(0,1) > 0.5:
 		display_emotion("happy")
 	
-	yield(get_tree().create_timer(timer_length(0.5,1.0)), "timeout")
+	yield(wait_time(10, 20), "completed")
 	
 	return true
 
@@ -115,7 +119,8 @@ func work_farmer():
 		if not in_building.is_watered(location):
 			in_building.water(location)
 			display_emotion("sweat")
-			yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
+			
+			yield(wait_time(20, 40), "completed")
 			return true
 		else:
 			var to_water = []
@@ -146,6 +151,7 @@ func work_farmer():
 			reconsider = true
 			return true
 	else: 
+		self.set_work("none")
 		yield(work_unemp(), "completed")
 		return true
 
@@ -163,16 +169,16 @@ func make_farmhand():
 				closest_dist = dist
 				picked_person = person
 		
-		if not conversing:
-			engage_conversation(picked_person, ['farmhand'])
+		if engage_conversation(picked_person, ['farmhand']):
 			checked_workers.append(picked_person)
-	else:
-		if recruited_time_started == null:
-			recruited_time_started = world_time
-		if world_time - recruited_time_started >= 3.0:
-			# give up on finding help for today
-			# maybe eventually start giving up on finding help altogether?
-			need_workers = false
+			if not picked_person in workers:
+				if recruited_time_started == null:
+					recruited_time_started = world_time
+				if world_time - recruited_time_started >= 2.0:
+					# give up on finding help for today after TWO unsuccessful hours
+					# maybe eventually start giving up on finding help altogether?
+					need_workers = false
+			else: recruited_time_started = null
 
 func farm_dry(farm):
 	assert(farm.type == "farm")
@@ -258,7 +264,8 @@ func work_farmhand():
 			if not in_building.is_watered(location):
 				in_building.water(location)
 				display_emotion("sweat")
-				yield(get_tree().create_timer(timer_length(2.0,4.0)), "timeout")
+				
+				yield(wait_time(20, 40), "completed")
 			else:
 				var to_water = []
 				for tile in get_work.call_func().get_location():

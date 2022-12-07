@@ -76,7 +76,7 @@ func start_game():
 	time = get_time()["exact"]
 
 func _process(_delta):
-	if time != null:
+	if time != null and not get_time_paused():
 		new_time = get_time()['exact']
 		if new_time != time:
 			if int(new_time) != int(time):
@@ -180,6 +180,9 @@ func selected_person(person):
 
 func switch_selected_person(person):
 	selector.switchPerson(person)
+
+func get_time_paused():
+	return daynightcycle.paused
 
 func _on_Town_construct_roads(path, buildings, type):
 	var p = {}
