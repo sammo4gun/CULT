@@ -13,7 +13,7 @@ var travel_time
 var work_done = false
 
 var PROFESSIONS_DICT = {
-	"none": [   	funcref(self, "get_work_unemp"), \
+	"mayor": [  	funcref(self, "get_work_unemp"), \
 					funcref(self, "work_unemp"), \
 					funcref(self, "day_reset_unemp")],
 					
@@ -24,8 +24,12 @@ var PROFESSIONS_DICT = {
 	"farmhand":[	funcref(self, "get_work_farmhand"), \
 					funcref(self, "work_farmhand"), \
 					funcref(self, "day_reset_farmhand")],
+				
+	"lumberjack":[  funcref(self, "get_work_lumber"), \
+					funcref(self, "work_lumber"), \
+					funcref(self, "day_reset_lumber")],
 					
-	"mayor": [  	funcref(self, "get_work_unemp"), \
+	"none": [   	funcref(self, "get_work_unemp"), \
 					funcref(self, "work_unemp"), \
 					funcref(self, "day_reset_unemp")],
 }
@@ -41,45 +45,15 @@ func update_profession():
 	day_reset = funcs[2]
 
 func is_at_work():
-	# Update this for ppl who do not work at a building to just include squares
-	if in_building:
-		return in_building == get_work.call_func()
-	else: return false
-
-# UNEMPLOYED
-
-func day_reset_unemp():
-	work_done = false
-
-# UTILITY: Returns the squares associated with "work"
-func get_work_unemp():
-	return town.get_town_square()
-
-# EXECUTION: Enjoy work for a few seconds
-func work_unemp():
-	assert(location in get_work.call_func().get_location())
-	
-	var square_time = 20.0 - travel_time
-	if world_time > square_time:
-		work_done = true
-	
-	# wait 10 minutes for something interesting to happen
-	yield(wait_time(10, 20), "completed")
-	
-	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
-	var step
-	step = choices[world.rng.randi_range(0,4)]
-	if (location + step) in get_work.call_func().get_location():
-		var target = location + step
-		target_step = target
-		yield(self, "movement_arrived")
-	
-	if world.rng.randf_range(0,1) > 0.5:
-		display_emotion("happy")
-	
-	yield(wait_time(10, 20), "completed")
-	
-	return true
+	var wk = get_work.call_func()
+	if typeof(wk) == 17: # its an object, i.e. a building
+		if in_building:
+			return in_building == get_work.call_func()
+		else: return false
+	elif typeof(wk) == 19: # its an array, i.e. a direction (set of) coords
+		if location in wk:
+			return true
+		else: return false
 
 # FARMER
 
@@ -288,3 +262,107 @@ func work_farmhand():
 	else: 
 		yield(work_unemp(), "completed")
 		return true
+
+# LUMBERJACK
+
+func day_reset_lumber():
+	work_done = false
+
+# UTILITY: Returns the squares associated with "work"
+func get_work_lumber():
+	var RANGE = 20
+	var poss_squares = []
+	for dx in range(RANGE):
+		if dx < RANGE/2: dx -= RANGE/2
+		else: dx -= (RANGE/2) - 1
+		for dy in range(RANGE):
+			if dy < RANGE/2: dy -= RANGE/2
+			else: dy -= (RANGE/2) - 1
+			poss_squares.append(location + Vector2(dx,dy))
+	
+	if world.get_tile(location)['name'] == "Trees":
+		if not population.get_working_on(location):
+			return [location]
+		elif population.get_working_on(location) == self:
+			return [location]
+	
+	var min_dist = 999999
+	var chosen_sq
+	for sq in poss_squares:
+		if world.get_tile(sq)['name'] == "Trees" and not population.get_working_on(sq):
+			if location.distance_to(sq) < min_dist:
+				min_dist = location.distance_to(sq)
+				chosen_sq = sq
+			elif location.distance_to(sq) == min_dist:
+				if house.get_location()[0].distance_to(sq) < house.get_location()[0].distance_to(chosen_sq):
+					chosen_sq = sq
+	
+	# the nearest patch of trees within 10 squares.
+	if chosen_sq:
+		return [chosen_sq]
+	
+	return town.get_town_square()
+
+# EXECUTION: Enjoy work for a few seconds
+func work_lumber():
+	var wrk = get_work.call_func()
+	if typeof(wrk) == 17:
+		assert(location in get_work.call_func().get_location())
+		if in_building == town.get_town_square():
+			yield(work_unemp(), 'completed')
+			return true
+	
+	if world_time > 20.0 - travel_time:
+		yield(get_tree(), "idle_frame")
+		population.set_working_on(location, false)
+		work_done = true
+	else:
+		if not population.get_working_on(location):
+			population.set_working_on(location, self)
+		
+		if population.get_working_on(location) == self:
+			yield(wait_time(45, 60), "completed")
+			var chop = [0.0, 0.05, 0.1, 0.2][world.rng.randi_range(0,3)]
+			display_emotion("sweat")
+			world.chop_tree(location, chop)
+			
+			# depending on chop size, get a piece of wood of that quality
+		else:
+			yield(get_tree(), "idle_frame")
+	
+	return true
+
+# UNEMPLOYED
+
+func day_reset_unemp():
+	work_done = false
+
+# UTILITY: Returns the squares associated with "work"
+func get_work_unemp():
+	return town.get_town_square()
+
+# EXECUTION: Enjoy work for a few seconds
+func work_unemp():
+	assert(location in get_work.call_func().get_location())
+	
+	var square_time = 20.0 - travel_time
+	if world_time > square_time:
+		work_done = true
+	
+	# wait 10 minutes for something interesting to happen
+	yield(wait_time(10, 20), "completed")
+	
+	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
+	var step
+	step = choices[world.rng.randi_range(0,4)]
+	if (location + step) in get_work.call_func().get_location():
+		var target = location + step
+		target_step = target
+		yield(self, "movement_arrived")
+	
+	if world.rng.randf_range(0,1) > 0.5:
+		display_emotion("happy")
+	
+	yield(wait_time(10, 20), "completed")
+	
+	return true

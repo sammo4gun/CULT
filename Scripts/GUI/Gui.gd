@@ -53,6 +53,8 @@ func display():
 		
 		var tile_stats = world.get_tile(selected_tile)
 		name_label.text = str(tile_stats["name"])
+		if tile_stats['name'] == "Trees":
+			name_label.text += ': ' + str(world.trees_dict[selected_tile])
 		
 		if building:
 			name_label.text = "Built ground of " + str(building.town_name)

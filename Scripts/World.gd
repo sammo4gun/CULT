@@ -28,6 +28,8 @@ var _mheight = {}
 var _mroads = [] # list of dictionaries of tiles with roads
 var _mbuildings = {}
 
+var trees_dict = {} # how many trees are there in these squares?
+
 var towns_dict = {}
 
 var time = null
@@ -111,14 +113,22 @@ func buildEmpty():
 # Returns what contents are of a tile. Does not work on tiles with
 # a building or road of any kind.
 func get_tile(location):
+	if not location in _mtype:
+		return {"name": null}
 	var nm = "null"
 	match _mtype[location]:
-		0: nm = "Earth"
-		1: nm = "Dirt"
-		2: nm = "Highlight"
-		3: nm = "Water"
-		4: nm = "Grass"
-		5: nm = "Trees"
+		0: 
+			nm = "Earth"
+		1: 
+			nm = "Dirt"
+		2: 
+			nm = "Highlight"
+		3: 
+			nm = "Water"
+		4: 
+			nm = "Grass"
+		5: 
+			nm = "Trees"
 	return {"name": nm}
 
 # Builds an empty map to render
@@ -160,6 +170,11 @@ func terrainMap():
 			if _altitude[coord] > 0.8:
 				_mtype[coord] = 1
 				_mheight[coord] = 2
+			
+			if _mtype[coord] == 5:
+				trees_dict[coord] = rng.randf_range(0.8,1.0)
+				# maybe higher if more trees next to it?
+			else: trees_dict[coord] = 0.0
 
 func is_road_tile(tile):
 	for path in _mroads:
@@ -180,6 +195,14 @@ func selected_person(person):
 
 func switch_selected_person(person):
 	selector.switchPerson(person)
+
+func chop_tree(location, amount):
+	assert(location in trees_dict)
+	# amount is between like 0.05 and 0.2, depending on strength etc.
+	trees_dict[location] = max(trees_dict[location]-amount, 0.0)
+	if trees_dict[location] <= 0.0:
+		_mtype[location] = 0
+		drawer.terrain_update(location)
 
 func get_time_paused():
 	return daynightcycle.paused

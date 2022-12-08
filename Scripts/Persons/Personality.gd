@@ -29,7 +29,7 @@ func day_reset_social():
 		if not 'chat' in topics[person]:
 			topics[person].append('chat')
 
-func engage_conversation(target_person, qs):
+func engage_conversation(target_person, qs = []):
 	# IF: We aren't in the same building, or we are already engaged in conversation,
 	# or the other person didn't want to talk... return false, the conversation
 	# failed to happen.
@@ -45,6 +45,14 @@ func engage_conversation(target_person, qs):
 		# The person did not want to talk...
 		return false
 	
+	if not target_person in ppl_known:
+		ppl_known.append(target_person)
+		topics[target_person] = ['chat']
+	topics[target_person] += qs
+	
+	if not topics[target_person]:
+		return false
+	
 	reconsider = true
 	prev_activity = activity
 	activity = "conversing"
@@ -56,14 +64,7 @@ func engage_conversation(target_person, qs):
 	target_person.activity = "conversing"
 	target_person.conversing = self
 	
-	if not target_person in ppl_known:
-		ppl_known.append(target_person)
-		topics[target_person] = ['chat']
-	
-	for q in qs:
-		topics[target_person].append(q)
-	
-#	print("%s is talking to %s" % [string_name, target_person.string_name])
+#	if selected: print("%s has started talking to %s" % [string_name, target_person.string_name])
 	return true
 
 func receive_conversation(from_person):
@@ -99,12 +100,15 @@ func end_conv(target_person):
 	prev_activity = null
 	engaging = false
 	open = true
+	purs_casual_conv = false
 	
 	target_person.conversing = false
 	target_person.activity = target_person.prev_activity
 	target_person.prev_activity = null
 	target_person.open = true
-#	print("%s is done talking to %s" % [string_name, target_person.string_name])
+	target_person.purs_casual_conv = false
+#	if selected or target_person.selected: 
+#		print("%s and %s are done talking \n" % [string_name, target_person.string_name])
 	return true
 
 # we already are in a conversation, but now we switch sides. The other person
@@ -122,9 +126,10 @@ func switch_eng(other_person):
 	return true
 
 func present_q(target_person, q):
-	yield(wait_time(LENGTH_DICT[q][0], LENGTH_DICT[q][1]), "completed")
+	assert(conversing == target_person)
 	display_emotion("chat")
 	
+#	if selected: print("%s has asked about %s to %s" % [string_name, str(q), target_person.string_name])
 	var answers = target_person.receive_q(self, q)
 	var a = answers[0]
 	var leave_flag = answers[1]
@@ -140,7 +145,7 @@ func receive_q(from_person, q):
 	assert(conversing == from_person)
 	display_emotion("chat")
 	var answer = ASK_DICT[q].call_func()
-#	print("%s has asked about %s to %s" % [from_person.string_name, str(q), string_name])
+#	if selected: print("%s has been asked about %s by %s" % [string_name, str(q), from_person.string_name])
 	
 	return answer
 
@@ -173,3 +178,11 @@ func get_social_options(profs = [], excluded = []):
 			poss_people.append(pers)
 	
 	return poss_people
+
+func _on_WorldCollision_area_entered(area):
+	# a little conversation! If they know each other.
+	var other_person = area.get_parent()
+	if not other_person.purs_casual_conv and not purs_casual_conv:
+		purs_casual_conv = true
+		if not engage_conversation(other_person):
+			purs_casual_conv = false

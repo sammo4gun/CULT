@@ -67,8 +67,19 @@ func set_work(prof, bs = null):
 
 func set_travel_time() -> void:
 	var work = get_work.call_func()
-	if work != prev_work_building:
-		var work_dist = len(pathfinding.walkToBuilding(house.get_location()[0], work, house, world._mbuildings, town._mroads, [1,2], false))
+	
+	var needs_redoing = false
+	if typeof(work) != typeof(prev_work_building):
+		needs_redoing = true
+	elif work != prev_work_building:
+		needs_redoing = true
+	
+	if needs_redoing:
+		var work_dist = 0
+		if typeof(work) == 17:
+			work_dist = len(pathfinding.walkToBuilding(house.get_location()[0], work, house, world._mbuildings, town._mroads, [1,2], false))
+		if typeof(work) == 19:
+			work_dist = len(pathfinding.walkRoadPath(house.get_location()[0], work, world._mbuildings, town._mroads, [1,2], false))
 		travel_time = int(work_dist / 10)
 		prev_work_building = work
 
@@ -178,3 +189,4 @@ func on_deselected():
 #	if event is InputEventKey:
 #		if event.pressed and event.scancode == KEY_X:
 #			if selected: print(in_building)
+

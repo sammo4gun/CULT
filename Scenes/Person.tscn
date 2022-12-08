@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Scripts/Persons/Person.gd" type="Script" id=1]
 [ext_resource path="res://Sprites/person.png" type="Texture" id=2]
@@ -10,20 +10,32 @@
 [ext_resource path="res://Sprites/conversation.png" type="Texture" id=8]
 
 [sub_resource type="CapsuleShape2D" id=1]
-radius = 9.45628
+radius = 9.45866
 height = 7.6211
+
+[sub_resource type="CapsuleShape2D" id=2]
+radius = 6.45866
+height = 6.22
 
 [node name="Person" type="Node2D"]
 visible = false
 script = ExtResource( 1 )
 SPEED = 40
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="MouseCollision" type="Area2D" parent="."]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MouseCollision"]
 position = Vector2( -0.458664, 13.11 )
 shape = SubResource( 1 )
 disabled = true
+
+[node name="WorldCollision" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldCollision"]
+position = Vector2( -0.458664, 13.11 )
+shape = SubResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]
 position = Vector2( 0, 12 )
@@ -83,5 +95,6 @@ margin_bottom = 35.1575
 text = "Jeremy 
 Longstrider"
 
-[connection signal="mouse_entered" from="Area2D" to="." method="_on_Area2D_mouse_entered"]
-[connection signal="mouse_exited" from="Area2D" to="." method="_on_Area2D_mouse_exited"]
+[connection signal="mouse_entered" from="MouseCollision" to="." method="_on_Area2D_mouse_entered"]
+[connection signal="mouse_exited" from="MouseCollision" to="." method="_on_Area2D_mouse_exited"]
+[connection signal="area_entered" from="WorldCollision" to="." method="_on_WorldCollision_area_entered"]

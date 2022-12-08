@@ -68,6 +68,8 @@ var prev_activity
 var conversing = false
 var engaging = false
 
+var purs_casual_conv = false
+
 var waiting_time = 0.0
 
 func _time_update(_t):
@@ -137,7 +139,7 @@ func enter_building():
 	in_building = world.towns.get_building(location)
 	in_building.enter(self)
 	if in_building.can_enter:
-		$Area2D/CollisionShape2D.disabled=true
+		$MouseCollision/CollisionShape2D.disabled=true
 		visible = false
 		if day_time != 'day':
 			in_building.turn_lights_on()
@@ -150,7 +152,7 @@ func leave_building():
 	if in_building.can_enter:
 		if in_building.lights_on and len(in_building.inside) < 2:
 			in_building.turn_lights_off()
-		$Area2D/CollisionShape2D.disabled=false
+		$MouseCollision/CollisionShape2D.disabled=false
 		visible = true
 	in_building.leave(self)
 	in_building = false
@@ -203,6 +205,8 @@ func get_path_to(target):
 	return pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false, self)
 
 func get_path_to_building(building):
+	if typeof(building) == 19: # if its an array, it's actually not a building, do this
+		return get_path_to(building)
 	return pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false, self)
 
 # UTILITY: Setting the target square to each square following the path.
@@ -271,4 +275,3 @@ func _on_Area2D_mouse_exited():
 	population.mouse_on = false
 	$Popup.visible = false
 	mouse_on = false
-
