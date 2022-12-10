@@ -2,13 +2,24 @@ extends Node
 
 signal chosen_profession
 
-var Person = preload("res://Scenes/Person.tscn")
+# 0: light (would fit in bag, can carry 5)
+# 1: medium (would fit in hand, can carry 2)
+# 2: heavy (would fit on back, can carry 1)
+var WEIGHT_DICT = {
+	'log': 2,
+	'bucket_e': 1,
+	'bucket_f': 1,
+	'bread': 0,
+	'salt': 0
+}
 
 var pop = []
 var towns = []
 var mouse_on = false
 
 var working_on_squares = {}
+
+var Person = preload("res://Scenes/Person.tscn")
 
 onready var namegenerator = $"../NameGenerator"
 onready var ydrawer = $"../YDrawer"
@@ -75,7 +86,7 @@ func replace_person(new_person, old_person):
 	
 	pop.append(new_person)
 	ydrawer.add_child(new_person)
-	
+
 func unmake_person(person):
 	assert(person in pop)
 	if person.house:
@@ -91,6 +102,9 @@ func get_working_on(location):
 
 func get_population():
 	return pop
+
+func get_weight(item):
+	return WEIGHT_DICT[item]
 
 func name_exists(nm):
 	for person in pop:

@@ -54,8 +54,16 @@ func get_inside():
 func is_proper():
 	return true
 
+func get_contents():
+	return self.contents
+
 func add_content(item, amount = 1):
 	contents[item] = contents.get(item, 0) + amount
+
+func remove_content(item, amount = 1):
+	contents[item] = max(0, contents.get(item, 0) - amount)
+	if contents[item] == 0:
+		contents.erase(item)
 
 func turn_lights_on():
 	lights_on = true

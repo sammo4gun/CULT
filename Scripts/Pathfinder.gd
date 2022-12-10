@@ -109,13 +109,15 @@ func is_walkable(loc, buildings, roads, must_roads, road_types):
 			return true
 	return false
 
-func is_walkable_house(loc, person):
+func is_walkable_house(loc, person, last_loc):
 	if person:
-		if loc in person.house.location:
-			return true
-		if person.boss:
-			if loc in person.boss.house.location:
+		if loc in person.house.get_location():
+			if last_loc in person.house.entrance_tiles:
 				return true
+		if person.boss:
+			if loc in person.boss.house.get_location():
+				if last_loc in person.boss.house.entrance_tiles:
+					return true
 	return false
 
 func walkToBuilding(start, target_building, from_building, buildings, roads, road_types, must_roads, 
@@ -145,11 +147,16 @@ func walkToBuilding(start, target_building, from_building, buildings, roads, roa
 				full_path.append(tile)
 				needs = false
 	if needs: 
-		if not walkRoadPath(full_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads, person, false, target_building.get_location()):
-			print(target_building.entrance_tiles)
-			print(full_path[-1])
 		full_path += walkRoadPath(full_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads, person, false, target_building.get_location())
+	
+	for i in range(len(full_path)):
+		if full_path[i] in target_building.get_location():
+			full_path.resize(i+1)
+			return full_path
+	
+	if needs:
 		full_path += walkRoadPath(full_path[-1], target_building.get_location(), buildings, roads, road_types, must_roads, person)
+	
 	return full_path
 
 func walkRoadPath(  start, finish, buildings, roads, road_types, must_roads, 
@@ -200,7 +207,7 @@ func walkRoadPath(  start, finish, buildings, roads, road_types, must_roads,
 			if (is_walkable(new_pos, buildings, roads, must_roads, road_types) and \
 			   not new_pos in excluded and \
 			   (len(included) == 0 or new_pos in included)) or \
-			   is_walkable_house(new_pos, person) or \
+			   is_walkable_house(new_pos, person, promising) or \
 			   new_pos in finish:
 				#compute g
 				var tg = g[promising]
@@ -209,7 +216,7 @@ func walkRoadPath(  start, finish, buildings, roads, road_types, must_roads,
 					if promising in roads:
 						if roads[promising] != roads[new_pos]:
 							tg += 20
-				elif is_walkable_house(new_pos, person):
+				elif is_walkable_house(new_pos, person, promising):
 					tg += 10
 				else: 
 					tg += 30

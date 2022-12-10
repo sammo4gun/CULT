@@ -4,7 +4,6 @@ var get_work = funcref(self, "get_work_unemp")
 var do_work = funcref(self, "work_unemp")
 var day_reset = funcref(self, "day_reset_unemp")
 
-var boss
 var workers = []
 var profession
 var work_loc
@@ -145,14 +144,15 @@ func make_farmhand():
 		
 		if engage_conversation(picked_person, ['farmhand']):
 			checked_workers.append(picked_person)
-			if not picked_person in workers:
-				if recruited_time_started == null:
-					recruited_time_started = world_time
-				if world_time - recruited_time_started >= 2.0:
-					# give up on finding help for today after TWO unsuccessful hours
-					# maybe eventually start giving up on finding help altogether?
-					need_workers = false
-			else: recruited_time_started = null
+		
+		if not picked_person in workers:
+			if recruited_time_started == null:
+				recruited_time_started = world_time
+			if world_time - recruited_time_started >= 2.0:
+				# give up on finding help for today after TWO unsuccessful hours
+				# maybe eventually start giving up on finding help altogether?
+				need_workers = false
+		else: recruited_time_started = null
 
 func farm_dry(farm):
 	assert(farm.type == "farm")
@@ -343,7 +343,7 @@ func get_work_unemp():
 
 # EXECUTION: Enjoy work for a few seconds
 func work_unemp():
-	assert(location in get_work.call_func().get_location())
+	assert(location in town.get_town_square().get_location())
 	
 	var square_time = 20.0 - travel_time
 	if world_time > square_time:
@@ -355,7 +355,7 @@ func work_unemp():
 	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
 	var step
 	step = choices[world.rng.randi_range(0,4)]
-	if (location + step) in get_work.call_func().get_location():
+	if (location + step) in town.get_town_square().get_location():
 		var target = location + step
 		target_step = target
 		yield(self, "movement_arrived")

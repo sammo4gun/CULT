@@ -7,14 +7,14 @@ var topics = {} #dictionary of things to discuss with the other ppl
 var ppl_known = []
 
 var ASK_DICT = {
-	"chat":			funcref(self, "asked_chat"),
+	"chat": 		funcref(self, "asked_chat"),
 	"farmhand": 	funcref(self, "asked_farmhand")
 }
 
 var RESPONSE_DICT = {
-	"chat": 	{true:	funcref(self, "y_chat"), \
+	"chat": 	{true:  funcref(self, "y_chat"), \
 				 false: funcref(self, "n_chat")},
-	"farmhand": {true:	funcref(self, "y_farmhand"), \
+	"farmhand": {true:  funcref(self, "y_farmhand"), \
 				 false: funcref(self, "n_farmhand")}
 }
 

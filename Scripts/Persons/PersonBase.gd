@@ -15,6 +15,19 @@ onready var feelings = {"happy": $Happy, \
 var emotion_priority = ['happy', 'sweat', 'surprise', 'chat']
 var current_emotion = null
 
+onready var carrying_sprites = {
+	"log": $Log
+}
+
+# 0 small, 1 med, 2 large
+var carrying_capacity = {
+	0: 5,
+	1: 2,
+	2: 1
+}
+var carrying = {}
+var encumbered = false
+
 var namegenerator
 var population
 var world
@@ -36,7 +49,7 @@ var house
 # Friends
 var owned_properties = {}
 
-# 3. One-time calc variables
+var boss
 
 # DIRECT STATE VARIABLES
 var location
@@ -88,11 +101,16 @@ func _process(delta):
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45
 		adj_speed = calculate_speed(location, target_step)
+		var rand_step = false
 		if world.towns.get_building(target_step):
 			if not world.towns.get_building(target_step).can_enter:
-				var target_y = town.rng.randi_range(moving_to.y - 8, moving_to.y + 12)
-				var target_x = town.rng.randi_range(moving_to.x - 10, moving_to.x + 10)
-				moving_to = Vector2(target_x, target_y)
+				rand_step = true
+		elif not world.is_road_tile(target_step):
+			rand_step = true
+		if rand_step:
+			var target_y = world.rng.randi_range(moving_to.y - 8, moving_to.y + 12)
+			var target_x = world.rng.randi_range(moving_to.x - 10, moving_to.x + 10)
+			moving_to = Vector2(target_x, target_y)
 		
 	if moving_to != null:
 		position = position.move_toward(moving_to, delta * adj_speed * world.speed_factor)
@@ -108,11 +126,14 @@ func _process(delta):
 
 # UTILITY: Calculate speed from the speed factors of two travelling squares
 func calculate_speed(loc, target):
+	var adj = 1.0
+	if encumbered:
+		adj = 0.5
 	if loc in town._mroads:
 		if target in town._mroads:
-			return SPEED
-		return SPEED*0.8/speeds[world._mtype[target]]
-	return SPEED*0.6/speeds[world._mtype[loc]]
+			return SPEED * adj
+		return SPEED*adj*0.8/speeds[world._mtype[target]]
+	return SPEED*adj*0.6/speeds[world._mtype[loc]]
 
 # EXECUTION: Displays an emotion for a random period of time
 func display_emotion(feeling):
@@ -231,15 +252,106 @@ func follow_path(path) -> bool:
 	yield(get_tree(), "idle_frame")
 	return true
 
+func add_inv(item, amount = 1):
+	var item_weight = population.get_weight(item)
+	if can_carry(item_weight, amount):
+		carrying[item] = carrying.get(item, 0) + amount
+		inv_update()
+		return true
+	return false
+
+func remove_inv(item, amount = 1):
+	carrying[item] -= amount
+	if carrying[item] <= 0:
+		carrying.erase[item]
+	inv_update()
+
+func can_carry(weight, amount):
+	var available_capacity = {}
+	for type in carrying_capacity:
+		available_capacity[type] = carrying_capacity[type]
+	for item in carrying:
+		var item_weight = population.get_weight(item)
+		available_capacity[item_weight] -= carrying[item]
+	if available_capacity[weight] - amount >= 0:
+		return true
+	return false
+
+func inv_update():
+	var available_capacity = {}
+	for type in carrying_capacity:
+		available_capacity[type] = carrying_capacity[type]
+	
+	for item in carrying_sprites:
+		carrying_sprites[item].visible = false
+	
+	for item in carrying:
+		var item_weight = population.get_weight(item)
+		available_capacity[item_weight] -= carrying[item]
+		if available_capacity[item_weight] <= 0:
+			encumbered = true
+			break
+		if item in carrying_sprites:
+			carrying_sprites[item].visible = true
+		encumbered = false
+
+# place a given item in a given quantity into a building
+func place_in(building, item, amount = null):
+	assert(in_building==building)
+	if boss:
+		assert(in_building in [house, boss.house])
+	else: 
+		assert(in_building == house)
+	assert(item in carrying)
+	
+	if amount == null:
+		building.add_content(item, carrying[item])
+		remove_inv(item, carrying[item])
+	else:
+		assert(amount <= carrying[item])
+		building.add_content(item, amount)
+		remove_inv(item, amount)
+
+# Take a given item in a given quantity out of a building
+func take_out(building, item, amount = 0):
+	assert(in_building==building)
+	if boss:
+		assert(in_building in [house, boss.house])
+	else: 
+		assert(in_building == house)
+	#assert(item in in_building.get_contents())
+	
+	var quant = min(building.get_contents().get(item, 0), amount)
+	if quant > 0:
+		# add contents to self
+		if add_inv(item, quant):
+			# remove contents from house
+			building.remove_content(item, quant)
+			return true
+	if quant == 0:
+		# add contents to self
+		if add_inv(item, building.get_contents()[item]):
+			# remove contents from house
+			building.remove_content(item, building.get_contents()[item])
+			return true
+	return false
+
 # UTILITY: Adds a piece of property to the player's owned_properties 
 # dictionary.
 func add_property(building) -> void:
 	var type = building.get_type()
 	if type in owned_properties:
 		owned_properties[type].append(building)
-	else: 
+	else:
 		owned_properties[type] = [building]
 	building.add_owner(self)
+
+# BEHAVIOURS
+# DROP_INV go to the house and drop whatever you are holding
+
+# GET_WATER go to the riverside and get some water
+
+# GET_FOOD get food... whatever it takes
 
 # UTILITY: Doing a timer from range mini to maxi compensated for speed factor
 func timer_length(mini, maxi = null) -> float:

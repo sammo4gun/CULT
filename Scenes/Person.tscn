@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Scripts/Persons/Person.gd" type="Script" id=1]
 [ext_resource path="res://Sprites/person.png" type="Texture" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://Sprites/sweat.png" type="Texture" id=6]
 [ext_resource path="res://Sprites/surprise.png" type="Texture" id=7]
 [ext_resource path="res://Sprites/conversation.png" type="Texture" id=8]
+[ext_resource path="res://Sprites/log.png" type="Texture" id=9]
 
 [sub_resource type="CapsuleShape2D" id=1]
 radius = 9.45866
@@ -36,6 +37,12 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldCollision"]
 position = Vector2( -0.458664, 13.11 )
 shape = SubResource( 2 )
+
+[node name="Log" type="Sprite" parent="."]
+visible = false
+position = Vector2( 0, 12 )
+scale = Vector2( 2.0625, 1.875 )
+texture = ExtResource( 9 )
 
 [node name="Sprite" type="Sprite" parent="."]
 position = Vector2( 0, 12 )
