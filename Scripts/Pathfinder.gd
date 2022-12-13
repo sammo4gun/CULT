@@ -105,7 +105,7 @@ func is_walkable(loc, buildings, roads, must_roads, road_types):
 	elif loc in buildings:
 		if buildings[loc] in [1,2,4]:
 			return false
-		if map_types[loc] != 3 and map_heights[loc] == 0:
+		if map_heights[loc] == 0: # and map_types[loc] != 3:
 			return true
 	return false
 
@@ -126,7 +126,6 @@ func walkToBuilding(start, target_building, from_building, buildings, roads, roa
 	var needs = true
 	if start in target_building.get_location():
 		return full_path
-	
 	if from_building:
 		for ent in target_building.entrance_tiles:
 			if ent in from_building.get_location():
@@ -222,8 +221,10 @@ func walkRoadPath(  start, finish, buildings, roads, road_types, must_roads,
 							tg += 20
 				elif is_walkable_house(new_pos, person, promising):
 					tg += 10
-				else: 
+				elif map_types[new_pos] != 3: 
 					tg += 30
+				else:
+					tg += 60 # we really don't like swimming...
 				
 				#compute h
 				var th = new_pos.distance_to(finish[0])

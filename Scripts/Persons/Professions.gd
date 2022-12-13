@@ -131,10 +131,10 @@ func work_farmer():
 
 func make_farmhand():
 	assert(in_building == town.get_town_square())
+	var picked_person = null
 	
 	var persons = get_social_options([], checked_workers)
 	if persons:
-		var picked_person = null
 		var closest_dist = 9999
 		var dist
 		for person in persons:
@@ -146,17 +146,17 @@ func make_farmhand():
 		if engage_conversation(picked_person, ['farmhand']):
 			checked_workers.append(picked_person)
 			recruited_time_started = null
-		
-		if not picked_person in workers:
-			if recruited_time_started == null:
-				recruited_time_started = world_time
-#			elif selected:
-#				print(world_time - recruited_time_started)
-			if world_time - recruited_time_started >= 2.0:
-				# give up on finding help for today after TWO unsuccessful hours
-				# maybe eventually start giving up on finding help altogether?
-				need_workers = false
-		else: recruited_time_started = null
+	
+	if not picked_person in workers:
+		if recruited_time_started == null:
+			recruited_time_started = world_time
+		elif selected:
+			print(world_time - recruited_time_started)
+		if world_time - recruited_time_started >= 2.0:
+			# give up on finding help for today after TWO unsuccessful hours
+			# maybe eventually start giving up on finding help altogether?
+			need_workers = false
+	else: recruited_time_started = null
 
 func farm_dry(farm):
 	assert(farm.type == "farm")
@@ -284,7 +284,7 @@ func get_work_lumber():
 			else: dy -= (RANGE/2) - 1
 			poss_squares.append(location + Vector2(dx,dy))
 	
-	if world.get_tile(location)['name'] == "Trees":
+	if world.get_tile(location)['name'] == "Trees" and get_path_to([location]):
 		if not population.get_working_on(location):
 			return [location]
 		elif population.get_working_on(location) == self:

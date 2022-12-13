@@ -110,27 +110,6 @@ func buildEmpty():
 			map[Vector2(x,y)] = 0
 	return map
 
-# Returns what contents are of a tile. Does not work on tiles with
-# a building or road of any kind.
-func get_tile(location):
-	if not location in _mtype:
-		return {"name": null}
-	var nm = "null"
-	match _mtype[location]:
-		0: 
-			nm = "Earth"
-		1: 
-			nm = "Dirt"
-		2: 
-			nm = "Highlight"
-		3: 
-			nm = "Water"
-		4: 
-			nm = "Grass"
-		5: 
-			nm = "Trees"
-	return {"name": nm}
-
 # Builds an empty map to render
 func buildEnv(per, oct):
 	openSimplexNoise.seed = randi()
@@ -176,11 +155,35 @@ func terrainMap():
 				# maybe higher if more trees next to it?
 			else: trees_dict[coord] = 0.0
 
+# Returns what contents are of a tile. Does not work on tiles with
+# a building or road of any kind.
+func get_tile(location):
+	if not location in _mtype:
+		return {"name": null}
+	var nm = "null"
+	match _mtype[location]:
+		0: 
+			nm = "Earth"
+		1: 
+			nm = "Dirt"
+		2: 
+			nm = "Highlight"
+		3: 
+			nm = "Water"
+		4: 
+			nm = "Grass"
+		5: 
+			nm = "Trees"
+	return {"name": nm}
+
 func is_road_tile(tile):
 	for path in _mroads:
 		if tile in path:
 			return path[tile]
 	return 0
+
+func is_water(tile):
+	return _mtype[tile] == 3
 
 func get_time():
 	return daynightcycle.get_time()

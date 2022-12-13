@@ -185,8 +185,15 @@ func on_deselected():
 	selected = false
 	selector.visible = false
 
-#func _unhandled_input(event):
-#	if event is InputEventKey:
-#		if event.pressed and event.scancode == KEY_X:
-#			if selected: print(in_building)
+func _unhandled_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_X:
+			if selected: 
+				print(string_name)
+				print(activity)
+				print(open)
+				print(conversing)
+				print(in_building)
+				print(get_work.call_func())
+				print()
 

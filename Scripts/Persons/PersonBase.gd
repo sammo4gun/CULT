@@ -34,6 +34,7 @@ var world
 var pathfinding
 var ground
 var speeds
+
 var selected = false
 
 # There are two parts to creating a person: 1. their own stats and 2. the role they fill in the world.
@@ -54,6 +55,7 @@ var boss
 # DIRECT STATE VARIABLES
 var location
 var in_building
+var swimming = false
 
 var activity = "home"
 
@@ -98,9 +100,11 @@ func _process(delta):
 		if in_building:
 			if not world.towns.get_building(target_step):
 				leave_building()
+		
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45
 		adj_speed = calculate_speed(location, target_step)
+		
 		var rand_step = false
 		if world.towns.get_building(target_step):
 			if not world.towns.get_building(target_step).can_enter:
@@ -115,11 +119,11 @@ func _process(delta):
 	if moving_to != null:
 		position = position.move_toward(moving_to, delta * adj_speed * world.speed_factor)
 		if position == moving_to:
-			var last_loc = location
 			location = target_step
 			target_step = null
 			moving_to = null
-			if world.towns.get_building(location) and last_loc != location:
+			swimming = world.is_water(location)
+			if world.towns.get_building(location):
 				if not in_building or in_building != world.towns.get_building(location):
 					yield(enter_building(), "completed")
 			emit_signal("movement_arrived")
@@ -128,7 +132,9 @@ func _process(delta):
 func calculate_speed(loc, target):
 	var adj = 1.0
 	if encumbered:
-		adj = 0.5
+		adj = adj * 0.5
+	if swimming:
+		adj = adj * 0.5
 	if loc in town._mroads:
 		if target in town._mroads:
 			return SPEED * adj

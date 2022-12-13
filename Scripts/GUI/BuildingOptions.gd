@@ -11,6 +11,7 @@ onready var basement_label = $Main/BasementBar/Name/NinePatchRect/Label
 onready var contents_popup = $Main/ResourceBar/Name/NinePatchRect/MenuButton.get_popup()
 
 onready var person_options_gui = $"../CharacterOptions"
+onready var world = $"../.."
 
 var inside_people
 var to_handle_contents
@@ -63,4 +64,5 @@ func _unhandled_key_input(event):
 func _on_name_button_pressed():
 	if building and inside_people:
 		person_options_gui.pressed(inside_people[0])
+		world.selected_person(inside_people[0])
 		reselect(null)
