@@ -124,6 +124,9 @@ func walkToBuilding(start, target_building, from_building, buildings, roads, roa
 					person = null):
 	var full_path = [start]
 	var needs = true
+	if start in target_building.get_location():
+		return full_path
+	
 	if from_building:
 		for ent in target_building.entrance_tiles:
 			if ent in from_building.get_location():
@@ -146,7 +149,8 @@ func walkToBuilding(start, target_building, from_building, buildings, roads, roa
 			if tile in target_building.get_location():
 				full_path.append(tile)
 				needs = false
-	if needs: 
+	
+	if needs:
 		full_path += walkRoadPath(full_path[-1], target_building.entrance_tiles, buildings, roads, road_types, must_roads, person, false, target_building.get_location())
 	
 	for i in range(len(full_path)):

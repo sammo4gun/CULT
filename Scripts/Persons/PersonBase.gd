@@ -262,8 +262,8 @@ func add_inv(item, amount = 1):
 
 func remove_inv(item, amount = 1):
 	carrying[item] -= amount
-	if carrying[item] <= 0:
-		carrying.erase[item]
+	if carrying[item] <= 0: 
+		carrying.erase(item)
 	inv_update()
 
 func can_carry(weight, amount):

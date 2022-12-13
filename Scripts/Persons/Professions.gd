@@ -82,6 +82,7 @@ func get_work_farmer():
 				return house
 		else: return work_farm
 	else:
+		# wherever unemployed ppl are
 		return get_work_unemp()
 
 func work_farmer():
@@ -114,7 +115,7 @@ func work_farmer():
 			
 			return true
 		
-	elif in_building == town.get_town_square() and "farm" in owned_properties:
+	elif in_building == get_work_unemp() and "farm" in owned_properties:
 		if need_workers:
 			make_farmhand()
 			yield(get_tree(), "idle_frame")
@@ -130,7 +131,7 @@ func work_farmer():
 
 func make_farmhand():
 	assert(in_building == town.get_town_square())
-	# maybe split this to have the decision which farmhand not to be fully random?
+	
 	var persons = get_social_options([], checked_workers)
 	if persons:
 		var picked_person = null
@@ -144,10 +145,13 @@ func make_farmhand():
 		
 		if engage_conversation(picked_person, ['farmhand']):
 			checked_workers.append(picked_person)
+			recruited_time_started = null
 		
 		if not picked_person in workers:
 			if recruited_time_started == null:
 				recruited_time_started = world_time
+#			elif selected:
+#				print(world_time - recruited_time_started)
 			if world_time - recruited_time_started >= 2.0:
 				# give up on finding help for today after TWO unsuccessful hours
 				# maybe eventually start giving up on finding help altogether?
