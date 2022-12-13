@@ -3,7 +3,13 @@ extends Node2D
 export var HEIGHT = 60
 export var WIDTH = 40
 export var NUM_TOWNS = 3
-var speed_factor = range_lerp(60, 20, 100, 0.25, 8)
+export var DO_INITIAL_SPEED = true
+
+#var speed_factor = range_lerp(60, 20, 100, 0.25, 8)
+var speed_factor = 30
+var target_speed_factor = range_lerp(60, 20, 100, 0.25, 8)
+var can_adj_speed = false
+var hours_to_go = 120
 
 var CURRENT
 
@@ -11,6 +17,7 @@ var SPEEDS = {
 	0: 1.5,
 	1: 2,
 	2: 1,
+	3: 1,
 	4: 2,
 	5: 2.5
 }
@@ -33,8 +40,10 @@ var trees_dict = {} # how many trees are there in these squares?
 var towns_dict = {}
 
 var time = null
+var hour = null
 var new_time
-var day = 1
+var new_hour
+var day = -5
 
 onready var selector = $Selector
 onready var GUI = $CanvasLayer/GUI
@@ -78,13 +87,26 @@ func start_game():
 	time = get_time()["exact"]
 
 func _process(_delta):
+	if day > 0 and not can_adj_speed:
+		speed_factor = target_speed_factor
+		can_adj_speed = true
 	if time != null and not get_time_paused():
 		new_time = get_time()['exact']
+		new_hour = get_time()['hour']
+		if new_hour != hour:
+			towns._hour_update(new_hour)
+			if not can_adj_speed:
+				speed_factor = range_lerp(hours_to_go, 0, 120, target_speed_factor, 30)
+				hours_to_go -= 1
+				if not DO_INITIAL_SPEED:
+					speed_factor = target_speed_factor
+					can_adj_speed = true
+				daynightcycle.adjust_cycle(1.0/speed_factor)
+			if new_hour == 0:
+				day += 1
+				print(day)
+			hour = new_hour
 		if new_time != time:
-			if int(new_time) != int(time):
-				towns._hour_update(int(new_time))
-				if new_time == 0:
-					day += 1
 			population._time_update(new_time)
 			time = new_time
 
@@ -243,6 +265,7 @@ func _on_Town_destroy_building(building):
 		drawer.terrain_update(loc)
 
 func _on_GUI_time_slider(speed):
-	speed_factor = range_lerp(speed, 20, 100, 0.25, 8)
-#	speed_factor = range_lerp(speed, 20, 100, 0.25, 80)
+	target_speed_factor = range_lerp(speed, 20, 100, 0.25, 8)
+	if can_adj_speed:
+		speed_factor = target_speed_factor
 	daynightcycle.adjust_cycle(1.0/speed_factor)

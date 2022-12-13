@@ -17,6 +17,7 @@ func start_cycle(secs):
 	started = true
 	original_ticks_per_hour = secs * 1000
 	ticks_per_hour = secs * 1000
+	#adjust_cycle(get_parent().speed_factor)
 
 func adjust_cycle(fact):
 	elapsed = elapsed / factor
