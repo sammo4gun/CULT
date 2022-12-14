@@ -191,7 +191,6 @@ func go_person(person):
 	else: path = pathfinding.walkRoadPath(location, [person.location], world._mbuildings, town._mroads, [1,2], false, self)
 	yield(follow_path(path), "completed")
 	open = true
-	
 
 func go_building(building):
 	var path = pathfinding.walkToBuilding(location, building, in_building, world._mbuildings, town._mroads, [1,2], false, self)
@@ -251,7 +250,10 @@ func follow_path(path) -> bool:
 		if location != step:
 			target_step = step
 			yield(self, "movement_arrived")
-	
+		elif world.towns.get_building(location):
+			if not in_building or in_building != world.towns.get_building(location):
+				yield(enter_building(), "completed")
+			
 #	if world.towns.get_building(location):
 #		yield(enter_building(), "completed")
 	

@@ -33,6 +33,9 @@ var PROFESSIONS_DICT = {
 					funcref(self, "day_reset_unemp")],
 }
 
+func make_thoughts():
+	.make_thoughts()
+
 func set_work(_prof):
 	pass
 
@@ -150,8 +153,6 @@ func make_farmhand():
 	if not picked_person in workers:
 		if recruited_time_started == null:
 			recruited_time_started = world_time
-		elif selected:
-			print(world_time - recruited_time_started)
 		if world_time - recruited_time_started >= 2.0:
 			# give up on finding help for today after TWO unsuccessful hours
 			# maybe eventually start giving up on finding help altogether?
@@ -329,7 +330,8 @@ func work_lumber():
 			var chop = [0.0, 0.05, 0.1, 0.2][world.rng.randi_range(0,3)]
 			display_emotion("sweat")
 			world.chop_tree(location, chop)
-			
+			if world.get_tile(location)['name'] != "Trees":
+				population.set_working_on(location, false)
 			# depending on chop size, get a piece of wood of that quality
 		else:
 			yield(get_tree(), "idle_frame")

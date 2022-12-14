@@ -9,6 +9,7 @@ signal selected_person
 
 onready var ground = $"../YDrawer/Ground"
 onready var towns = $"../Towns"
+onready var population = $"../Population"
 
 func getSelected():
 	return selected_tile
@@ -60,3 +61,9 @@ func selectPerson(person):
 	selected_person.on_selected()
 	
 	emit_signal("selected_person", selected_person)
+
+func _unhandled_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_I:
+			if selected_tile:
+				print(population.get_working_on(selected_tile))

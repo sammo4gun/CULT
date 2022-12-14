@@ -22,10 +22,9 @@ var screen_busy = false # is true when there is a "cutscene"
 
 func _ready():
 	#set position to center of map
-	position = ground_layer.map_to_world(Vector2(
-		get_node("/root/World").WIDTH/2,
-		get_node("/root/World").HEIGHT/2))
-	position.y += 32
+#	position_tile(Vector2(
+#		get_node("/root/World").WIDTH/2,
+#		get_node("/root/World").HEIGHT/2))
 	
 	noise.seed = get_parent().rng.randi()
 	noise.period = 2
@@ -44,9 +43,12 @@ func fade_to_tile(_tile):
 	# jump to tile
 	pass
 
-func jump_to_tile(tile):
+func position_tile(tile):
 	position = ground_layer.map_to_world(tile)
 	position.y += 32
+
+func jump_to_tile(tile):
+	position_tile(tile)
 	zoom = 1.5 * Vector2.ONE
 	_target_zoom = 0.7
 	shake_screen()
@@ -71,10 +73,6 @@ func _unhandled_input(event: InputEvent):
 					zoom_in()
 				if event.button_index == BUTTON_WHEEL_DOWN:
 					zoom_out()
-		
-		if event is InputEventKey:
-			if event.pressed and event.scancode == KEY_O:
-				jump_to_tile(Vector2(50,50))
 
 func zoom_in():
 	_target_zoom = max(_target_zoom - ZOOM_INCREMENT, MIN_ZOOM)

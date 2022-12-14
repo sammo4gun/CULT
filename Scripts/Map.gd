@@ -179,7 +179,8 @@ func building_update(tile: Vector2):
 						i += 1
 			
 			# ACTUAL DRAWING
-			if building.is_proper(): 
+			if building.is_proper() and \
+			   (LAYER[1] or LAYER[2]): 
 				building.set_main_dir(d)
 			
 			# Change this to just pass the direction?

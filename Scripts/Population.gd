@@ -35,8 +35,8 @@ func random_person(excluded = [], profs = []):
 	for pers in pop:
 		if not pers in excluded:
 			if len(profs) > 0:
-				if pers.profession in profs:
-					potpers.append(pers)
+				if pers.profession in profs: potpers.append(pers)
+			else: potpers.append(pers)
 	if len(potpers) > 0:
 		return potpers[world.rng.randi_range(0,len(potpers)-1)]
 	return false

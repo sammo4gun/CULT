@@ -9,7 +9,10 @@ export var DO_INITIAL_SPEED = true
 var speed_factor = 30
 var target_speed_factor = range_lerp(60, 20, 100, 0.25, 8)
 var can_adj_speed = false
-var hours_to_go = 120
+var speedy_days = 3
+var hours_to_go = speedy_days * 24
+
+var cave = null
 
 var CURRENT
 
@@ -28,6 +31,7 @@ var _moisture = {}
 var openSimplexNoise = OpenSimplexNoise.new()
 var rng = RandomNumberGenerator.new()
 var Town = preload("res://Scenes/Town.tscn")
+var Cave = preload("res://Scenes/Buildings/Cave.tscn")
 
 # generated map visible features
 var _mtype = {}
@@ -43,9 +47,10 @@ var time = null
 var hour = null
 var new_time
 var new_hour
-var day = -5
+var day = -speedy_days
 
 onready var selector = $Selector
+onready var camera = $Camera2D
 onready var GUI = $CanvasLayer/GUI
 onready var drawer = $Map
 onready var pathfinding = $Pathfinder
@@ -85,6 +90,7 @@ func start_game():
 	daynightcycle.start_cycle(5)
 	GUI.start_time()
 	time = get_time()["exact"]
+	camera.position_tile(towns.get_rand_town_center())
 
 func _process(_delta):
 	if day > 0 and not can_adj_speed:
@@ -96,7 +102,7 @@ func _process(_delta):
 		if new_hour != hour:
 			towns._hour_update(new_hour)
 			if not can_adj_speed:
-				speed_factor = range_lerp(hours_to_go, 0, 120, target_speed_factor, 30)
+				speed_factor = range_lerp(hours_to_go, 0, speedy_days*24, target_speed_factor, 30)
 				hours_to_go -= 1
 				if not DO_INITIAL_SPEED:
 					speed_factor = target_speed_factor
@@ -104,7 +110,6 @@ func _process(_delta):
 				daynightcycle.adjust_cycle(1.0/speed_factor)
 			if new_hour == 0:
 				day += 1
-				print(day)
 			hour = new_hour
 		if new_time != time:
 			population._time_update(new_time)
@@ -167,7 +172,7 @@ func terrainMap():
 				
 			if _altitude[coord] > 0.6:
 				_mtype[coord] = 1
-				_mheight[coord] = 1	
+				_mheight[coord] = 1
 			if _altitude[coord] > 0.8:
 				_mtype[coord] = 1
 				_mheight[coord] = 2
@@ -229,6 +234,50 @@ func chop_tree(location, amount):
 		_mtype[location] = 0
 		drawer.terrain_update(location)
 
+func get_cave_loc(person):
+	var possibles = []
+	for x in range(WIDTH-1):
+		for y in range(HEIGHT-1):
+			if _mheight[Vector2(x,y)] == 1 and \
+			   (_mheight[Vector2(x,y+1)] == 0 or _mheight[Vector2(x+1,y)] == 0):
+				possibles.append(Vector2(x,y))
+	
+	var chosen_square
+	var focused_house = person.house.location[0] #homeless different?
+	var dist_range = [20, 30]
+	while dist_range[0] > 0:
+		# pick all squares that come within dist range to house
+		var in_range_squares = []
+		for square in possibles:
+			var dist = focused_house.distance_to(square)
+			if dist >= dist_range[0] and dist < dist_range[1]:
+				in_range_squares.append(square)
+		
+		while in_range_squares:
+			chosen_square = in_range_squares[rng.randi_range(0, len(in_range_squares)-1)]
+			in_range_squares.erase(chosen_square)
+			
+			# check if the square can walk to the house no problem, if so, return
+			if person.pathfinding.walkRoadPath(focused_house, [chosen_square], _mbuildings, _mroads, [1,2], false, person):
+				var dirs = [] # can be 0 (E) or 1 (S) or both
+				if _mheight[Vector2(chosen_square.x,chosen_square.y+1)] == 0:
+					dirs.append(1)
+				if _mheight[Vector2(chosen_square.x+1,chosen_square.y)] == 0:
+					dirs.append(0)
+				
+				return [chosen_square, dirs]
+		
+		dist_range[0] -= 4
+		dist_range[1] += 4
+	
+	return false
+
+func get_cave(location):
+	if cave:
+		if cave.location[0] == location:
+			return cave
+	return null
+
 func get_time_paused():
 	return daynightcycle.paused
 
@@ -269,3 +318,28 @@ func _on_GUI_time_slider(speed):
 	if can_adj_speed:
 		speed_factor = target_speed_factor
 	daynightcycle.adjust_cycle(1.0/speed_factor)
+
+func _unhandled_input(event: InputEvent):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_O: #and not cave:
+			var acolyte
+			if selector.selected_person:
+				acolyte = selector.selected_person
+			else: 
+				acolyte = population.random_person()
+			var cstats = get_cave_loc(acolyte)
+			if cstats:
+				var cave_loc = cstats[0]
+				var cave_dirs = cstats[1]
+				
+				cave = Cave.instance()
+				
+				drawer.add_child(cave)
+				
+				cave.cave_build(cave_loc, cave_dirs) # need more inputs...
+				
+				drawer.building_update(cave.location[0])
+				
+				camera.jump_to_tile(cave_loc)
+				selected_person(acolyte)
+

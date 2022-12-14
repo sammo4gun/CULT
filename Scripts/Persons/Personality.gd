@@ -23,6 +23,9 @@ var LENGTH_DICT = {
 	"farmhand": [10,20]
 }
 
+func make_thoughts():
+	SPEED += world.rng.randf_range(-10,10)
+
 func day_reset_social():
 	# gets called every day by everyone
 	for person in ppl_known:

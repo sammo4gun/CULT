@@ -19,7 +19,7 @@ func get_building(location):
 	for town in get_children():
 		if town.get_building(location):
 			return(town.get_building(location))
-	return null
+	return get_parent().get_cave(location)
 
 func has_building(location):
 	for town in get_children():
@@ -85,6 +85,11 @@ func map_set_building_disconnected(loc):
 			town._mbuildings[loc].map_connected = false
 			town._mbuildings[loc].clean_entrance_tiles()
 			return
+
+func get_rand_town_center():
+	if get_children():
+		return get_children()[get_parent().rng.randi_range(0,len(get_children())-1)]._center
+	else: return Vector2(get_parent().WIDTH/2, get_parent().LENGTH/2)
 
 func get_pos(location):
 	return map.get_pos(location[0])

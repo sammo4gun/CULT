@@ -92,4 +92,9 @@ FARM
 72 farmNW
 73 farmSE
 74 farmSW
-75 farmSWN
+
+CAVES
+75 caveE
+76 caveS
+77 cavecrackE
+78 cavecrackS

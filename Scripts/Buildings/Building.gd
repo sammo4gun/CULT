@@ -30,7 +30,8 @@ var TYPES = {
 	"center": 2,
 	"square": 3,
 	"store": 4,
-	"farm": 5
+	"farm": 5,
+	"cave": 6
 }
 
 func _ready():
@@ -41,7 +42,8 @@ func _hour_update(_time):
 
 func build(twn, loc, nmg, pos):
 	town = twn
-	town_name = twn.town_name
+	if town:
+		town_name = twn.town_name
 	location = loc
 	name_generator = nmg
 	position = pos
@@ -90,11 +92,12 @@ func add_entrance_tile(tile):
 	clean_entrance_tiles()
 
 func clean_entrance_tiles():
-	for tile in entrance_tiles:
-		if (not town.world.is_road_tile(tile) and \
-			not tile in town.get_town_square_loc()) or \
-		   tile in location:
-			entrance_tiles.erase(tile)
+	if town:
+		for tile in entrance_tiles:
+			if (not town.world.is_road_tile(tile) and \
+				not tile in town.get_town_square_loc()) or \
+			   tile in location:
+				entrance_tiles.erase(tile)
 
 func enter(person):
 	self.inside.append(person)

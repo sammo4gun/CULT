@@ -28,8 +28,6 @@ func destroy() -> void:
 
 # CREATION: Randomly generates what this person's job and personality is like.
 func make_thoughts() -> void:
-	# As the character starts at home, this calculates their path from home to
-	# work to save processing time.
 	var square_locations = town.get_town_square_loc()
 	var square_dist = 0
 	$Popup/Label.text = person_name[0] + '\n' + person_name[1]
@@ -38,6 +36,8 @@ func make_thoughts() -> void:
 		travel_time = stepify(square_dist / 10.0, 0.1)
 	else: 
 		travel_time = 0.5
+	
+	.make_thoughts()
 
 # UTILITY: Update hour times
 func _time_update(t):
@@ -185,15 +185,16 @@ func on_deselected():
 	selected = false
 	selector.visible = false
 
-#func _unhandled_input(event):
-#	if event is InputEventKey:
-#		if event.pressed and event.scancode == KEY_X:
-#			if selected: 
-#				print(string_name)
-#				print(activity)
-#				print(open)
-#				print(conversing)
-#				print(in_building)
-#				print(get_work.call_func())
-#				print()
+func _unhandled_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_I:
+			if selected: 
+				print(string_name)
+				print("activity: " + str(activity))
+				print("open:" + str(open))
+				print("conversing: " + str(conversing))
+				print("in_building: " + str(in_building))
+				print("at work: " + str(is_at_work()))
+				print("get work func: " + str(get_work.call_func()))
+				print()
 
