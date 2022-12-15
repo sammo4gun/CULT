@@ -264,4 +264,6 @@ func road_has_dir(pos, i):
 	return false
 
 func refresh_building(location, building):
-	ground.updateBuilding(location, building)
+	for lay in _layers:
+		if _heights[location] == lay:
+			_layers[lay].updateBuilding(location, building)

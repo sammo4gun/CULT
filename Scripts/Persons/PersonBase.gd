@@ -100,6 +100,8 @@ func _process(delta):
 		if in_building:
 			if not world.towns.get_building(target_step):
 				leave_building()
+			elif not world.towns.get_building(target_step) == in_building:
+				leave_building()
 		
 		moving_to = ground.map_to_world(target_step)
 		moving_to.y += 45

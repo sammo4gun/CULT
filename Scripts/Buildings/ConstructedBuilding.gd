@@ -68,12 +68,12 @@ func remove_content(item, amount = 1):
 func turn_lights_on():
 	lights_on = true
 	lights.visible = true
-	town.update_building(self, location[0])
+	get_parent().refresh_building(location[0], self)
 
 func turn_lights_off():
 	lights_on = false
 	lights.visible = false
-	town.update_building(self, location[0])
+	get_parent().refresh_building(location[0], self)
 
 var LIGHT_MAP = {
 	16: 45,
@@ -93,6 +93,7 @@ func set_main_dir(direct):
 	sprite = directional_sprites[dir]
 	if sprite in LIGHT_MAP:
 		light_sprite = LIGHT_MAP[sprite]
+	else: light_sprite = sprite
 	
 	var difs = [Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]
 	add_entrance_tile(difs[dir] + location[0])

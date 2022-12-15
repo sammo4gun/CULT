@@ -20,7 +20,7 @@ var SPEEDS = {
 	0: 1.5,
 	1: 2,
 	2: 1,
-	3: 1,
+	3: 0.5,
 	4: 2,
 	5: 2.5
 }
@@ -58,6 +58,8 @@ onready var towns = $Towns
 onready var population = $Population
 onready var namegenerator = $NameGenerator
 onready var daynightcycle = $Day_Night
+
+onready var deity = $Deity
 
 func _ready():
 	build_world()
@@ -234,49 +236,8 @@ func chop_tree(location, amount):
 		_mtype[location] = 0
 		drawer.terrain_update(location)
 
-func get_cave_loc(person):
-	var possibles = []
-	for x in range(WIDTH-1):
-		for y in range(HEIGHT-1):
-			if _mheight[Vector2(x,y)] == 1 and \
-			   (_mheight[Vector2(x,y+1)] == 0 or _mheight[Vector2(x+1,y)] == 0):
-				possibles.append(Vector2(x,y))
-	
-	var chosen_square
-	var focused_house = person.house.location[0] #homeless different?
-	var dist_range = [20, 30]
-	while dist_range[0] > 0:
-		# pick all squares that come within dist range to house
-		var in_range_squares = []
-		for square in possibles:
-			var dist = focused_house.distance_to(square)
-			if dist >= dist_range[0] and dist < dist_range[1]:
-				in_range_squares.append(square)
-		
-		while in_range_squares:
-			chosen_square = in_range_squares[rng.randi_range(0, len(in_range_squares)-1)]
-			in_range_squares.erase(chosen_square)
-			
-			# check if the square can walk to the house no problem, if so, return
-			if person.pathfinding.walkRoadPath(focused_house, [chosen_square], _mbuildings, _mroads, [1,2], false, person):
-				var dirs = [] # can be 0 (E) or 1 (S) or both
-				if _mheight[Vector2(chosen_square.x,chosen_square.y+1)] == 0:
-					dirs.append(1)
-				if _mheight[Vector2(chosen_square.x+1,chosen_square.y)] == 0:
-					dirs.append(0)
-				
-				return [chosen_square, dirs]
-		
-		dist_range[0] -= 4
-		dist_range[1] += 4
-	
-	return false
-
 func get_cave(location):
-	if cave:
-		if cave.location[0] == location:
-			return cave
-	return null
+	return deity.get_cave(location)
 
 func get_time_paused():
 	return daynightcycle.paused
@@ -321,25 +282,6 @@ func _on_GUI_time_slider(speed):
 
 func _unhandled_input(event: InputEvent):
 	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_O: #and not cave:
-			var acolyte
-			if selector.selected_person:
-				acolyte = selector.selected_person
-			else: 
-				acolyte = population.random_person()
-			var cstats = get_cave_loc(acolyte)
-			if cstats:
-				var cave_loc = cstats[0]
-				var cave_dirs = cstats[1]
-				
-				cave = Cave.instance()
-				
-				drawer.add_child(cave)
-				
-				cave.cave_build(cave_loc, cave_dirs) # need more inputs...
-				
-				drawer.building_update(cave.location[0])
-				
-				camera.jump_to_tile(cave_loc)
-				selected_person(acolyte)
+		if event.pressed and event.scancode == KEY_O and selector.selected_person:
+			deity.make_cave(selector.selected_person)
 
