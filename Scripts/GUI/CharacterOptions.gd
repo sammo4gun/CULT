@@ -17,7 +17,7 @@ func reselect(person):
 		deselect()
 	elif is_pressed:
 		character = person
-		
+	
 func pressed(person):
 	if not is_pressed and person: 
 		show()
@@ -27,3 +27,11 @@ func pressed(person):
 		hide()
 		character = false
 		is_pressed = false
+
+func _input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode != KEY_SPACE and \
+		   is_pressed:
+			hide()
+			character = false
+			is_pressed = false

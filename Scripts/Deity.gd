@@ -1,11 +1,14 @@
 extends Control
 
+signal make_cave
+
 var cave = null
 var string_name
 
 var acolytes = []
 
 onready var world = get_parent()
+onready var transition = $"../TransitionScreen"
 var Cave = preload("res://Scenes/Buildings/Cave.tscn")
 
 func _ready():
@@ -24,11 +27,10 @@ func make_cave(acolyte):
 		
 		cave.cave_build(cave_loc, cave_dirs, world.drawer.get_pos(cave_loc)) # need more inputs...
 		
-		world.drawer.building_update(cave.location[0])
-		
 		world.camera.jump_to_tile(cave_loc)
 		world.selected_person(acolyte)
 		acolytes.append(acolyte)
+		emit_signal("make_cave", cave)
 
 func get_cave_loc(person):
 	var possibles = []
@@ -75,11 +77,15 @@ func get_cave(location):
 			return cave
 	return null
 
+func first_whispers(person) -> String:
+	return person.string_name + "... You will serve."
+
+func make_first_acolyte(person):
+	var displayed_text = first_whispers(person)
+	world.deity_anim(displayed_text)
+	make_cave(person)
+
 func _unhandled_input(event: InputEvent):
 	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_L and cave:
-			if cave.lights_on: 
-				cave.turn_lights_off()
-			else: 
-				cave.turn_lights_on()
-
+		if event.pressed and event.scancode == KEY_O and world.selector.selected_person:
+			make_first_acolyte(world.selector.selected_person)

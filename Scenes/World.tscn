@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Scenes/Selector.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/GUI/Gui.tscn" type="PackedScene" id=2]
@@ -15,6 +15,7 @@
 [ext_resource path="res://Scenes/Deity.tscn" type="PackedScene" id=13]
 [ext_resource path="res://Scenes/GUI/BuildingOptions.tscn" type="PackedScene" id=14]
 [ext_resource path="res://Scenes/GUI/CharacterOptions.tscn" type="PackedScene" id=15]
+[ext_resource path="res://Scenes/TransitionScreen.tscn" type="PackedScene" id=16]
 
 [sub_resource type="Animation" id=1]
 resource_name = "Day_night_cycle"
@@ -98,6 +99,7 @@ format = 1
 script = ExtResource( 7 )
 
 [node name="Hill" type="TileMap" parent="YDrawer"]
+light_mask = 2
 position = Vector2( 0, -16 )
 mode = 1
 tile_set = ExtResource( 4 )
@@ -138,9 +140,13 @@ visible = false
 [node name="CharacterOptions" parent="CanvasLayer" instance=ExtResource( 15 )]
 visible = false
 
+[node name="TransitionScreen" parent="." instance=ExtResource( 16 )]
+
+[connection signal="make_cave" from="Deity" to="." method="_on_Deity_make_cave"]
 [connection signal="selected_tile" from="Map" to="." method="_on_tile_selected"]
 [connection signal="chosen_profession" from="Population" to="Towns" method="_on_Population_chosen_profession"]
 [connection signal="refresh" from="Towns" to="CanvasLayer/GUI" method="_on_Towns_refresh"]
 [connection signal="selected_person" from="Selector" to="CanvasLayer/GUI" method="_on_Selector_selected_person"]
 [connection signal="selected_tile" from="Selector" to="CanvasLayer/GUI" method="_on_Selector_selected_tile"]
 [connection signal="time_slider" from="CanvasLayer/GUI" to="." method="_on_GUI_time_slider"]
+[connection signal="back_to_game" from="TransitionScreen" to="." method="_on_TransitionScreen_back_to_game"]

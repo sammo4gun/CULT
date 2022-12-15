@@ -13,5 +13,16 @@ func _ready():
 
 func cave_build(location, poss_directions, pos):
 	.build(null, [location], null, pos)
-	set_main_dir(poss_directions[rng.randi_range(0, len(poss_directions)-1)])
+	var dir = poss_directions[rng.randi_range(0, len(poss_directions)-1)]
+	set_main_dir(dir)
+	set_light_dir(dir)
 	turn_lights_on()
+
+func set_light_dir(dir):
+	if dir == 0:
+		lights.rotation_degrees = 330
+		lights.position += Vector2(10,5)
+		pass # set light to face the east
+	if dir == 1:
+		lights.rotation_degrees = 30
+		lights.position += Vector2(-10,5)

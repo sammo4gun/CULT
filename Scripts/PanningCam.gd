@@ -1,6 +1,7 @@
 extends Camera2D
 
 onready var ground_layer = get_node("/root/World/YDrawer/Ground")
+onready var world = get_parent()
 
 const MIN_ZOOM: float = 0.6
 const MAX_ZOOM: float = 5.0
@@ -18,15 +19,10 @@ var noise = OpenSimplexNoise.new()
 var noise_i = 0.0
 var shake_strength = 0.0
 
-var screen_busy = false # is true when there is a "cutscene"
+var to_jump
 
 func _ready():
-	#set position to center of map
-#	position_tile(Vector2(
-#		get_node("/root/World").WIDTH/2,
-#		get_node("/root/World").HEIGHT/2))
-	
-	noise.seed = get_parent().rng.randi()
+	noise.seed = world.rng.randi()
 	noise.period = 2
 
 func _physics_process(delta):
@@ -34,24 +30,26 @@ func _physics_process(delta):
 	
 	shake_strength = lerp(shake_strength, 0, SHAKE_DECAY_RATE * delta)
 	offset = get_noise_offset(delta)
+	
+	if to_jump and not world.in_anim:
+		jump_to_tile(to_jump)
 
 func shake_screen():
 	shake_strength = NOISE_SHAKE_STRENGTH
-
-func fade_to_tile(_tile):
-	# Turn black
-	# jump to tile
-	pass
 
 func position_tile(tile):
 	position = ground_layer.map_to_world(tile)
 	position.y += 32
 
 func jump_to_tile(tile):
-	position_tile(tile)
-	zoom = 1.5 * Vector2.ONE
-	_target_zoom = 0.7
-	shake_screen()
+	if not world.in_anim:
+		position_tile(tile)
+		zoom = 1.5 * Vector2.ONE
+		_target_zoom = 0.7
+		shake_screen()
+		if to_jump: to_jump = null
+	else:
+		to_jump = tile
 
 func get_noise_offset(delta):
 	noise_i += delta * NOISE_SHAKE_SPEED
@@ -62,7 +60,7 @@ func get_noise_offset(delta):
 	)
 
 func _unhandled_input(event: InputEvent):
-	if not screen_busy:
+	if not world.in_anim:
 		if event is InputEventMouseMotion:
 			if event.button_mask in [BUTTON_LEFT, BUTTON_MASK_MIDDLE]:
 				position -= event.relative * zoom

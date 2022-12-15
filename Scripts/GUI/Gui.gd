@@ -50,24 +50,34 @@ func display():
 	if selected_tile != null:
 		location_label.text = str(selected_tile)
 		building = towns.get_building(selected_tile)
+		var road = towns.get_road(selected_tile)
 		
 		var tile_stats = world.get_tile(selected_tile)
+		
 		name_label.text = str(tile_stats["name"])
-		if tile_stats['name'] == "Trees":
-			name_label.text += ': ' + str(world.trees_dict[selected_tile])
+		match tile_stats['name']:
+			"Trees":
+				name_label.text += ': ' + str(world.trees_dict[selected_tile])
+			"Constructed":
+				assert(building or road)
+				if building:
+					name_label.text += " ground of " + str(building.town_name)
+				elif road:
+					name_label.text += " ground of " + str(road)
+			"Desecrated":
+				name_label.text += " Ground"
 		
 		if building:
-			name_label.text = "Built ground of " + str(building.town_name)
 			building_label.text = str(building.house_name)
 			if len(building.inside) > 0:
 				contents_label.text = building.inside[0].string_name
+				if len(building.inside) > 1:
+					contents_label.text += "+%s" % str(len(building.inside)-1)
 			else: contents_label.text = "Empty"
 		else:
 			building_label.text = "None"
 			contents_label.text = "None"
-			var road = towns.get_road(selected_tile)
 			if road:
-				name_label.text = "Built ground of " + str(road)
 				building_label.text = "Road"
 				contents_label.text = "None"
 	elif selected_person != null:

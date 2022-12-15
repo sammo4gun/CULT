@@ -14,6 +14,8 @@ var hours_to_go = speedy_days * 24
 
 var cave = null
 
+var in_anim = false
+
 var CURRENT
 
 var SPEEDS = {
@@ -196,13 +198,15 @@ func get_tile(location):
 		1: 
 			nm = "Dirt"
 		2: 
-			nm = "Highlight"
+			nm = "Constructed"
 		3: 
 			nm = "Water"
 		4: 
 			nm = "Grass"
 		5: 
 			nm = "Trees"
+		6:
+			nm = "Desecrated"
 	return {"name": nm}
 
 func is_road_tile(tile):
@@ -280,8 +284,17 @@ func _on_GUI_time_slider(speed):
 		speed_factor = target_speed_factor
 	daynightcycle.adjust_cycle(1.0/speed_factor)
 
-func _unhandled_input(event: InputEvent):
-	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_O and selector.selected_person:
-			deity.make_cave(selector.selected_person)
+func _on_Deity_make_cave(building):
+	for loc in building.get_location():
+		_mbuildings[loc] = building.get_id()
+		_mtype[loc] = 6 # desecrated
+		drawer.building_update(loc)
 
+func deity_anim(text):
+	in_anim = true
+	daynightcycle.paused = true
+	$TransitionScreen.animation(text)
+
+func _on_TransitionScreen_back_to_game():
+	in_anim = false
+	daynightcycle.paused = false
