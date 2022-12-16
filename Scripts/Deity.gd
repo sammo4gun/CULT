@@ -14,23 +14,23 @@ var Cave = preload("res://Scenes/Buildings/Cave.tscn")
 func _ready():
 	string_name = "Devil"
 
-func make_cave(acolyte):
-	if cave: return false
-	var cstats = get_cave_loc(acolyte)
-	if cstats:
-		var cave_loc = cstats[0]
-		var cave_dirs = cstats[1]
-		
-		cave = Cave.instance()
-		
-		world.drawer.add_child(cave)
-		
-		cave.cave_build(cave_loc, cave_dirs, world.drawer.get_pos(cave_loc)) # need more inputs...
-		
-		world.camera.jump_to_tile(cave_loc)
-		world.selected_person(acolyte)
-		acolytes.append(acolyte)
-		emit_signal("make_cave", cave)
+func make_cave(acolyte, cave_stats):
+	var cave_loc = cave_stats[0]
+	var cave_dirs = cave_stats[1]
+	
+	if world.in_anim:
+		yield(world, "anim_over")
+	
+	cave = Cave.instance()
+	
+	world.drawer.add_child(cave)
+	
+	cave.cave_build(cave_loc, cave_dirs, world.drawer.get_pos(cave_loc)) 
+	
+	world.camera.jump_to_tile(cave_loc)
+	world.selected_person(acolyte)
+	acolytes.append(acolyte)
+	emit_signal("make_cave", cave)
 
 func get_cave_loc(person):
 	var possibles = []
@@ -65,6 +65,7 @@ func get_cave_loc(person):
 					dirs.append(0)
 				
 				return [chosen_square, dirs]
+			else: possibles.erase(chosen_square)
 		
 		dist_range[0] -= 4
 		dist_range[1] += 4
@@ -78,14 +79,16 @@ func get_cave(location):
 	return null
 
 func first_whispers(person) -> String:
-	return person.string_name + "... You will serve."
+	return "I see you, " + person.string_name + "... You shall serve me well."
 
 func make_first_acolyte(person):
-	var displayed_text = first_whispers(person)
-	world.deity_anim(displayed_text)
-	make_cave(person)
+	var cave_stats = get_cave_loc(person)
+	if cave_stats:
+		world.play_ominous_message(first_whispers(person))
+		make_cave(person, cave_stats)
 
 func _unhandled_input(event: InputEvent):
 	if event is InputEventKey:
 		if event.pressed and event.scancode == KEY_O and world.selector.selected_person:
-			make_first_acolyte(world.selector.selected_person)
+			if not cave:
+				make_first_acolyte(world.selector.selected_person)

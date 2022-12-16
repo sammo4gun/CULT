@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Seven-Deadly-Sins-painting-Hieronymus-Bosch.webp-051c801d3876707ee4b17539d9c5b600.stex"
+path="res://.import/Seven-Deadly-Sins-painting-Hieronymus-Bosch.webp-5adff2fb99db75d9f76525ea7e8a2b5c.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://InspirationConcept/Seven-Deadly-Sins-painting-Hieronymus-Bosch.webp"
-dest_files=[ "res://.import/Seven-Deadly-Sins-painting-Hieronymus-Bosch.webp-051c801d3876707ee4b17539d9c5b600.stex" ]
+source_file="res://Seven-Deadly-Sins-painting-Hieronymus-Bosch.webp"
+dest_files=[ "res://.import/Seven-Deadly-Sins-painting-Hieronymus-Bosch.webp-5adff2fb99db75d9f76525ea7e8a2b5c.stex" ]
 
 [params]
 

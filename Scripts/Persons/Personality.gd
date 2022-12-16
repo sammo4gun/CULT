@@ -4,33 +4,45 @@ extends "res://Scripts/Persons/PersonBase.gd"
 # VERY IMPORTANT
 
 var topics = {} #dictionary of things to discuss with the other ppl
-var ppl_known = []
+var ppl_known = {} #dictionary of dictionaries
 
 var ASK_DICT = {
 	"chat": 		funcref(self, "asked_chat"),
-	"farmhand": 	funcref(self, "asked_farmhand")
+	"farmhand": 	funcref(self, "asked_farmhand"),
+	"introduce":	funcref(self, "asked_introduce")
 }
 
 var RESPONSE_DICT = {
 	"chat": 	{true:  funcref(self, "y_chat"), \
 				 false: funcref(self, "n_chat")},
 	"farmhand": {true:  funcref(self, "y_farmhand"), \
-				 false: funcref(self, "n_farmhand")}
+				 false: funcref(self, "n_farmhand")},
+	"introduce": {true:  funcref(self, "y_introduce"), \
+				 false: funcref(self, "n_introduce")}
 }
 
 var LENGTH_DICT = {
 	"chat": 	[5,10],
-	"farmhand": [10,20]
+	"farmhand": [10,20],
+	"introduce":[10,20]
 }
 
 func make_thoughts():
 	SPEED += world.rng.randf_range(-10,10)
+	
+	#PHYSICAL/MENTAL STATS
+	
+	#PERSONALITY STATS
 
 func day_reset_social():
 	# gets called every day by everyone
 	for person in ppl_known:
-		if not 'chat' in topics[person]:
-			topics[person].append('chat')
+		if "Name" in ppl_known[person]:
+			if not 'chat' in topics[person]:
+				topics[person].append('chat')
+		else:
+			mod_op(person, -0.5) # dislike people who I've met but I don't even 
+								 # know their name
 
 func engage_conversation(target_person, qs = []):
 	# IF: We aren't in the same building, or we are already engaged in conversation,
@@ -49,8 +61,8 @@ func engage_conversation(target_person, qs = []):
 		return false
 	
 	if not target_person in ppl_known:
-		ppl_known.append(target_person)
-		topics[target_person] = ['chat']
+		first_time_see(target_person)
+	
 	topics[target_person] += qs
 	
 	if not topics[target_person]:
@@ -67,25 +79,29 @@ func engage_conversation(target_person, qs = []):
 	target_person.activity = "conversing"
 	target_person.conversing = self
 	
-#	if selected: print("%s has started talking to %s" % [string_name, target_person.string_name])
+	if selected and world.SOCIAL_DEBUG_MODE: 
+		print("%s has started talking to %s" % [string_name, target_person.string_name])
 	return true
 
 func receive_conversation(from_person):
 	if in_building:
 		assert(from_person in in_building.inside)
 	
-	if not from_person in ppl_known:
-		ppl_known.append(from_person)
-		topics[from_person] = ['chat']
-	
 	if not conversing:
+		if not from_person in ppl_known:
+			first_time_see(from_person)
 		return true #we always want to talk!
+	
 	return false
 
 func pick_topic(target_person):
 	assert(target_person in topics)
 	if topics[target_person]:
-		var picked_topic = topics[target_person][world.rng.randi_range(0,len(topics[target_person])-1)]
+		var picked_topic
+		if "introduce" in topics[target_person]:
+			picked_topic = "introduce"
+		else:
+			picked_topic = topics[target_person][world.rng.randi_range(0,len(topics[target_person])-1)]
 		topics[target_person].erase(picked_topic)
 		return picked_topic
 	return false
@@ -110,8 +126,8 @@ func end_conv(target_person):
 	target_person.prev_activity = null
 	target_person.open = true
 	target_person.purs_casual_conv = false
-#	if selected or target_person.selected: 
-#		print("%s and %s are done talking \n" % [string_name, target_person.string_name])
+	if (selected or target_person.selected) and world.SOCIAL_DEBUG_MODE: 
+		print("%s and %s are done talking \n" % [string_name, target_person.string_name])
 	return true
 
 # we already are in a conversation, but now we switch sides. The other person
@@ -132,7 +148,8 @@ func present_q(target_person, q):
 	assert(conversing == target_person)
 	display_emotion("chat")
 	
-#	if selected: print("%s has asked about %s to %s" % [string_name, str(q), target_person.string_name])
+	if selected and world.SOCIAL_DEBUG_MODE: 
+		print("%s has asked about %s to %s" % [string_name, str(q), target_person.string_name])
 	var answers = target_person.receive_q(self, q)
 	var a = answers[0]
 	var leave_flag = answers[1]
@@ -148,24 +165,65 @@ func receive_q(from_person, q):
 	assert(conversing == from_person)
 	display_emotion("chat")
 	var answer = ASK_DICT[q].call_func()
-#	if selected: print("%s has been asked about %s by %s" % [string_name, str(q), from_person.string_name])
+	if selected and world.SOCIAL_DEBUG_MODE:
+		print("%s has been asked about %s by %s" % [string_name, str(q), from_person.string_name])
 	
 	return answer
 
 # TOPICS OF CONVERSATION
 
+# INTRODUCE
+
+func asked_introduce() -> Array:
+	# Engaged party reacts to an asked question
+	assert(conversing in ppl_known)
+	ppl_known[conversing]['Name'] = conversing.string_name
+	ppl_known[conversing]['Prof'] = conversing.profession
+	if conversing.profession == "mayor":
+		ppl_known[conversing]['Relation'] = "authority"
+	else: ppl_known[conversing]['Relation'] = "townsmate"
+	
+	# IF WE DIDN'T LIKE THE LOOK, REPLY N TO NOT INTRODUCE SELF
+	var intr_back = true
+	mod_op(conversing, 2.0)
+	
+	if intr_back:
+		if "introduce" in topics[conversing]:
+			topics[conversing].erase("introduce")
+	return [intr_back, false] # [y/n reply, end conversation flag]
+
+func y_introduce():
+	# Engaging party reacts to negative reply
+	assert(conversing in ppl_known)
+	ppl_known[conversing]['Name'] = conversing.string_name
+	ppl_known[conversing]['Prof'] = conversing.profession
+	if conversing.profession == "mayor":
+		ppl_known[conversing]['Relation'] = "authority"
+	else: ppl_known[conversing]['Relation'] = "townsmate"
+	mod_op(conversing, 2.0)
+	
+	if "introduce" in topics[conversing]:
+		topics[conversing].erase("introduce")
+
+func n_introduce():
+	# Engaging party reacts to negative reply
+	assert(conversing in ppl_known)
+	mod_op(conversing, -10.0)
+
 # CHAT
 
 func asked_chat() -> Array:
-	# What happens in this chat... need more social functions!
-	return [true, false]
+	# Engaged party is asked a chat, gives a positive or negative reply
+	mod_op(conversing, 0.5)
+	return [true, false] # [y/n reply, end conversation flag]
 
 func y_chat():
-	# Positive replies
+	mod_op(conversing, 0.5)
+	# Engaging party reacts to positive reply
 	pass
 
 func n_chat():
-	# Negative replies
+	# Engaging party reacts to negative reply
 	pass
 
 # TEMPORARY SOCIALISING FUNCTIONS (WILL HAVE TO BE MOVED TO PROPER PLACE)
@@ -189,3 +247,15 @@ func _on_WorldCollision_area_entered(area):
 		purs_casual_conv = true
 		if not engage_conversation(other_person):
 			purs_casual_conv = false
+
+# OPINIONS
+
+func get_op(person):
+	return ppl_known[person]['op']
+
+func mod_op(person, amount):
+	ppl_known[person]['op'] += amount
+
+func first_time_see(person):
+	ppl_known[person] = {'op': 0.0}
+	topics[person] = ['introduce']

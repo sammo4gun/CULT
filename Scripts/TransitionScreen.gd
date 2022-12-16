@@ -4,26 +4,29 @@ signal back_to_game
 
 var to_display_text = null
 
-func animation(text):
+func play_ominous_message(text, start_game):
 	assert(to_display_text == null)
 	to_display_text = text
-	$AnimationPlayer.play("fade_to_black")
+	$AnimationPlayer.play("ominous_message")
+	if start_game:
+		$ColorRect.color.a = 255
+		$AnimationPlayer.seek(1)
 
-func animate_words(text):
-	for character in text:
-		yield(get_tree().create_timer(.3), "timeout")
-		$RichTextLabel.text += character
+func animate_words():
+	assert(to_display_text != null)
+	$AnimationPlayer.stop(false)
 	
-	yield(get_tree(), "idle_frame")
+	for character in to_display_text:
+		yield(get_tree().create_timer(.1), "timeout")
+		$RichTextLabel.text += character
 	yield(get_tree().create_timer(1.0), "timeout")
 	$RichTextLabel.text = ''
-	$AnimationPlayer.play("fade_to_normal")
+	
+	$AnimationPlayer.play()
 	return true
 
 func _on_AnimationPlayer_animation_finished(anim_name):
-	if anim_name == "fade_to_black":
-		animate_words(to_display_text)
-	if anim_name == "fade_to_normal":
+	if anim_name == "ominous_message":
 		to_display_text = null
 		emit_signal("back_to_game")
 

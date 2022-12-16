@@ -54,7 +54,7 @@ func make_person(town, house):
 	
 	if house.type == "center":
 		pers.set_work("mayor")
-	elif t and world.rng.randf_range(0,1) > 0.3:
+	elif t and world.rng.randf_range(0,1) > 0.8: # 0.3
 		pers.set_work("farmer")
 	elif world.rng.randf_range(0,1) > 0.7:
 		pers.set_work("lumberjack")

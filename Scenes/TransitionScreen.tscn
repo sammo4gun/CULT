@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scripts/TransitionScreen.gd" type="Script" id=1]
 
@@ -47,6 +47,36 @@ tracks/0/keys = {
 "values": [ Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 0 ) ]
 }
 
+[sub_resource type="Animation" id=4]
+resource_name = "ominous_message"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1, 1.001, 2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.407843, 0, 0, 0 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 0 ) ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 1 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "animate_words"
+} ]
+}
+
 [node name="TransitionScreen" type="CanvasLayer"]
 script = ExtResource( 1 )
 
@@ -72,5 +102,6 @@ fit_content_height = true
 anims/RESET = SubResource( 1 )
 anims/fade_to_black = SubResource( 2 )
 anims/fade_to_normal = SubResource( 3 )
+anims/ominous_message = SubResource( 4 )
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]

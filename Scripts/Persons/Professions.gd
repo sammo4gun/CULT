@@ -209,16 +209,23 @@ func get_required_help(farms) -> int:
 
 # FARMER RECRUIT
 
-func asked_farmhand() -> Array: # sure I'll be your farmhand!
+func asked_farmhand() -> Array: 
+	# Engaged party reacts to asked question
 	assert(conversing.profession == "farmer")
 	if profession == 'none':
+		ppl_known[conversing]['Relation'] = 'boss'
 		return [true, false]
 	return [false, false]
 
-func y_farmhand(): # whoever I am talking to has said yes to the recruit
+func y_farmhand(): 
+	# Engaging party reacts to a positive reply
 	workers.append(conversing)
 	workers_farms[conversing] = null
 	conversing.set_work("farmhand", self)
+	
+	ppl_known[conversing]['Relation'] = 'employee'
+	mod_op(conversing, 2.0)
+	
 	if 1 + len(workers) >= get_required_help(owned_properties['farm']):
 		need_workers = false
 

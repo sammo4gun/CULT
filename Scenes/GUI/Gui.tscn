@@ -190,17 +190,16 @@ tracks/0/keys = {
 [node name="GUI" type="MarginContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = -50.0
 mouse_filter = 2
 script = ExtResource( 3 )
 
 [node name="Main" type="VBoxContainer" parent="."]
-margin_right = 974.0
+margin_right = 1024.0
 margin_bottom = 600.0
 mouse_filter = 2
 
 [node name="StatusBar" type="HBoxContainer" parent="Main"]
-margin_right = 974.0
+margin_right = 1024.0
 margin_bottom = 60.0
 
 [node name="Background" type="Sprite" parent="Main/StatusBar"]
@@ -210,12 +209,12 @@ scale = Vector2( 5, 3.053 )
 texture = ExtResource( 5 )
 
 [node name="Bars" type="VBoxContainer" parent="Main/StatusBar"]
-margin_right = 826.0
+margin_right = 876.0
 margin_bottom = 60.0
 size_flags_horizontal = 3
 
 [node name="Bar1" type="HBoxContainer" parent="Main/StatusBar/Bars"]
-margin_right = 826.0
+margin_right = 876.0
 margin_bottom = 24.0
 
 [node name="Name" type="MarginContainer" parent="Main/StatusBar/Bars/Bar1"]
@@ -285,7 +284,7 @@ valign = 1
 
 [node name="Bar2" type="HBoxContainer" parent="Main/StatusBar/Bars"]
 margin_top = 28.0
-margin_right = 826.0
+margin_right = 876.0
 margin_bottom = 52.0
 
 [node name="Building" type="MarginContainer" parent="Main/StatusBar/Bars/Bar2"]
@@ -356,8 +355,8 @@ align = 2
 valign = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Main/StatusBar"]
-margin_left = 830.0
-margin_right = 930.0
+margin_left = 880.0
+margin_right = 980.0
 margin_bottom = 60.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Main/StatusBar/VBoxContainer"]
@@ -411,8 +410,8 @@ align = 1
 valign = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="Main/StatusBar"]
-margin_left = 934.0
-margin_right = 974.0
+margin_left = 984.0
+margin_right = 1024.0
 margin_bottom = 60.0
 
 [node name="Clock" type="NinePatchRect" parent="Main/StatusBar/MarginContainer"]
@@ -437,7 +436,7 @@ expand = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Main"]
 margin_top = 64.0
-margin_right = 974.0
+margin_right = 1024.0
 margin_bottom = 546.0
 mouse_filter = 2
 size_flags_vertical = 3
@@ -544,19 +543,19 @@ anims/flare_red = SubResource( 6 )
 
 [node name="BottomBar" type="HBoxContainer" parent="Main"]
 margin_top = 550.0
-margin_right = 974.0
+margin_right = 1024.0
 margin_bottom = 600.0
 mouse_filter = 2
 
 [node name="MarginContainer2" type="MarginContainer" parent="Main/BottomBar"]
-margin_right = 930.0
+margin_right = 980.0
 margin_bottom = 50.0
 mouse_filter = 2
 size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="Main/BottomBar"]
-margin_left = 934.0
-margin_right = 974.0
+margin_left = 984.0
+margin_right = 1024.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 30, 0 )
 mouse_filter = 2

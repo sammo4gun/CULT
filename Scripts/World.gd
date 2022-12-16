@@ -1,9 +1,13 @@
 extends Node2D
 
+signal anim_over
+
 export var HEIGHT = 60
 export var WIDTH = 40
 export var NUM_TOWNS = 3
 export var DO_INITIAL_SPEED = true
+export var DO_INITIAL_MESSAGE = true
+export var SOCIAL_DEBUG_MODE = false
 
 #var speed_factor = range_lerp(60, 20, 100, 0.25, 8)
 var speed_factor = 30
@@ -95,6 +99,12 @@ func start_game():
 	GUI.start_time()
 	time = get_time()["exact"]
 	camera.position_tile(towns.get_rand_town_center())
+	
+	if DO_INITIAL_MESSAGE:
+		play_ominous_message(
+			"I see. %s... you shall know what it means to sin." % towns.get_rand_town_name(),
+			true
+		)
 
 func _process(_delta):
 	if day > 0 and not can_adj_speed:
@@ -290,11 +300,18 @@ func _on_Deity_make_cave(building):
 		_mtype[loc] = 6 # desecrated
 		drawer.building_update(loc)
 
-func deity_anim(text):
+func play_ominous_message(text, start_game = false):
 	in_anim = true
-	daynightcycle.paused = true
-	$TransitionScreen.animation(text)
+	daynightcycle.set_paused(true)
+	$TransitionScreen.play_ominous_message(text, start_game)
 
 func _on_TransitionScreen_back_to_game():
 	in_anim = false
-	daynightcycle.paused = false
+	daynightcycle.set_paused(false)
+	emit_signal("anim_over")
+
+func _unhandled_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_P:
+			daynightcycle.set_paused(true)
+			$CanvasLayer/SocialGraph.toggle_display()

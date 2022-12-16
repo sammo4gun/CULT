@@ -187,14 +187,23 @@ func on_deselected():
 
 func _unhandled_input(event):
 	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_I:
-			if selected: 
-				print(string_name)
-				print("activity: " + str(activity))
-				print("open:" + str(open))
-				print("conversing: " + str(conversing))
-				print("in_building: " + str(in_building))
-				print("at work: " + str(is_at_work()))
-				print("get work func: " + str(get_work.call_func()))
-				print()
+		if selected and event.pressed:
+			match event.scancode:
+				KEY_I:
+					print(string_name)
+					print("activity: " + str(activity))
+					print("open:" + str(open))
+					print("conversing: " + str(conversing))
+					print("in_building: " + str(in_building))
+					print("at work: " + str(is_at_work()))
+					print("get work func: " + str(get_work.call_func()))
+					print()
+				KEY_S:
+					print(string_name + " Social network:")
+					for person in ppl_known:
+						print("__" + str(person) + ": what do i know:")
+						for trait in ppl_known[person]:
+							print("__%s: %s" % [trait, str(ppl_known[person][trait])])
+						print("__")
+					print()
 

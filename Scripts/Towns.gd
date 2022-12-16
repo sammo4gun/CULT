@@ -91,6 +91,11 @@ func get_rand_town_center():
 		return get_children()[get_parent().rng.randi_range(0,len(get_children())-1)]._center
 	else: return Vector2(get_parent().WIDTH/2, get_parent().LENGTH/2)
 
+func get_rand_town_name():
+	if get_children():
+		return get_children()[get_parent().rng.randi_range(0,len(get_children())-1)].town_name
+	else: return "the wilderness"
+
 func get_pos(location):
 	return map.get_pos(location[0])
 

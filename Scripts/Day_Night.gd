@@ -38,13 +38,18 @@ func get_time():
 		clock['exact'] = stepify(current_frame, 0.1)
 	return clock
 
+func set_paused(p = true):
+	paused = p
+
+func toggle_pause():
+	if paused: paused = false
+	else: paused = true
+
 func _process(delta):
-	if paused: 
-		$AnimationPlayer.seek(current_frame)
-		return
 	if started:
-		elapsed += int(1000 * delta)
-		elapsed = elapsed % int(24.0 * ticks_per_hour)
+		if not paused: 
+			elapsed += int(1000 * delta)
+			elapsed = elapsed % int(24.0 * ticks_per_hour)
 		current_frame = range_lerp(elapsed, 0, int(24.0 * ticks_per_hour), 0, 24)
 		$AnimationPlayer.play("Day_night_cycle")
 		$AnimationPlayer.seek(current_frame)
@@ -52,5 +57,4 @@ func _process(delta):
 func _unhandled_input(event):
 	if event is InputEventKey:
 		if event.pressed and event.scancode == KEY_SPACE:
-			if paused: paused = false
-			else: paused = true
+			toggle_pause()
