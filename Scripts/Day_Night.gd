@@ -53,8 +53,3 @@ func _process(delta):
 		current_frame = range_lerp(elapsed, 0, int(24.0 * ticks_per_hour), 0, 24)
 		$AnimationPlayer.play("Day_night_cycle")
 		$AnimationPlayer.seek(current_frame)
-
-func _unhandled_input(event):
-	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_SPACE:
-			toggle_pause()

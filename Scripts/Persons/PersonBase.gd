@@ -4,6 +4,7 @@ export var SPEED = 60
 
 signal movement_arrived
 signal timer_finished
+signal night_reset
 
 onready var selector = $Selector
 onready var bubble = $Thoughts
@@ -41,6 +42,7 @@ var selected = false
 # 1.
 var person_name = []
 var string_name = ""
+var gender = ''
 # Characteristics
 # Appearance
 

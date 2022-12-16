@@ -52,6 +52,7 @@ func _time_update(t):
 		day_time = "dusk"
 	
 	if world_time == 2.0:
+		emit_signal("night_reset")
 		set_travel_time()
 		day_reset.call_func()
 		day_reset_social()

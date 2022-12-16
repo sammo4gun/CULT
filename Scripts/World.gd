@@ -301,9 +301,10 @@ func _on_Deity_make_cave(building):
 		drawer.building_update(loc)
 
 func play_ominous_message(text, start_game = false):
-	in_anim = true
-	daynightcycle.set_paused(true)
-	$TransitionScreen.play_ominous_message(text, start_game)
+	if not in_anim:
+		in_anim = true
+		daynightcycle.set_paused(true)
+		$TransitionScreen.play_ominous_message(text, start_game)
 
 func _on_TransitionScreen_back_to_game():
 	in_anim = false
@@ -312,6 +313,8 @@ func _on_TransitionScreen_back_to_game():
 
 func _unhandled_input(event):
 	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_P:
+		if event.pressed and event.scancode == KEY_P and not in_anim:
 			daynightcycle.set_paused(true)
 			$CanvasLayer/SocialGraph.toggle_display()
+		if event.pressed and event.scancode == KEY_SPACE and not in_anim:
+			daynightcycle.toggle_pause()

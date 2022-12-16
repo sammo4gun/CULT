@@ -60,7 +60,7 @@ func get_noise_offset(delta):
 	)
 
 func _unhandled_input(event: InputEvent):
-	if not world.in_anim:
+	if not world.in_anim and shake_strength < 1.0:
 		if event is InputEventMouseMotion:
 			if event.button_mask in [BUTTON_LEFT, BUTTON_MASK_MIDDLE]:
 				position -= event.relative * zoom
