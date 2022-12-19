@@ -1,5 +1,7 @@
 extends "res://Scripts/Persons/Professions.gd"
 
+signal night_reset
+
 # CREATION: Sets parents, owned house, starting house, and position
 # Also calls make_thoughts() to figure out who this person is.
 func create(wrld, pop, twn, hse) -> void:

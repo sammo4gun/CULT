@@ -146,6 +146,7 @@ func switch_eng(other_person):
 
 func present_q(target_person, q):
 	assert(conversing == target_person)
+	assert(target_person.conversing == self)
 	display_emotion("chat")
 	
 	if selected and world.SOCIAL_DEBUG_MODE: 
@@ -156,9 +157,9 @@ func present_q(target_person, q):
 	
 	yield(wait_time(LENGTH_DICT[q][0], LENGTH_DICT[q][1]), "completed")
 	
-	open = true
 	if not leave_flag:
-		RESPONSE_DICT[q][a].call_func()
+		yield(RESPONSE_DICT[q][a].call_func(), "completed")
+		open = true
 		return true
 
 func receive_q(from_person, q):
@@ -204,11 +205,17 @@ func y_introduce():
 	
 	if "introduce" in topics[conversing]:
 		topics[conversing].erase("introduce")
+	
+	yield(get_tree(), "idle_frame")
+	return
 
 func n_introduce():
 	# Engaging party reacts to negative reply
 	assert(conversing in ppl_known)
 	mod_op(conversing, -10.0)
+	
+	yield(get_tree(), "idle_frame")
+	return
 
 # CHAT
 
@@ -219,12 +226,14 @@ func asked_chat() -> Array:
 
 func y_chat():
 	mod_op(conversing, 0.5)
+	yield(get_tree(), "idle_frame")
+	return
 	# Engaging party reacts to positive reply
-	pass
 
 func n_chat():
+	yield(get_tree(), "idle_frame")
+	return
 	# Engaging party reacts to negative reply
-	pass
 
 # TEMPORARY SOCIALISING FUNCTIONS (WILL HAVE TO BE MOVED TO PROPER PLACE)
 

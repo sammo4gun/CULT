@@ -16,7 +16,7 @@
 [ext_resource path="res://Scenes/GUI/BuildingOptions.tscn" type="PackedScene" id=14]
 [ext_resource path="res://Scenes/GUI/CharacterOptions.tscn" type="PackedScene" id=15]
 [ext_resource path="res://Scenes/TransitionScreen.tscn" type="PackedScene" id=16]
-[ext_resource path="res://Scenes/GUI/SocialGraph.tscn" type="PackedScene" id=17]
+[ext_resource path="res://Scenes/GUI/SocialGraph/SocialGraph.tscn" type="PackedScene" id=17]
 
 [sub_resource type="Animation" id=1]
 resource_name = "Day_night_cycle"
@@ -55,9 +55,7 @@ script = ExtResource( 8 )
 HEIGHT = 100
 WIDTH = 100
 NUM_TOWNS = 1
-DO_INITIAL_SPEED = false
 DO_INITIAL_MESSAGE = false
-SOCIAL_DEBUG_MODE = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2( 500, 300 )

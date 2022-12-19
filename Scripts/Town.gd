@@ -473,10 +473,15 @@ func construct_multi_building(center, \
 		
 		#check if at least one is pathable
 		var path = false
-		var tar
-		var tpath
 		if cb:
+			var edge_locs = []
 			for loc in locs:
+				if loc.x == x or loc.x == x+x_sz-1 or \
+				   loc.y == y or loc.y == y+y_sz-1:
+					edge_locs.append(loc)
+			var tar
+			var tpath
+			for loc in edge_locs:
 				tar = get_nearest(loc, paths_to)
 				if not path: path = canpath_to(loc, tar, road_type)
 				else:

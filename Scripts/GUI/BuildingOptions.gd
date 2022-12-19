@@ -56,11 +56,6 @@ func pressed(build):
 		building = false
 		is_pressed = false
 
-func _unhandled_key_input(event):
-	if event is InputEventKey:
-		if event.pressed and event.scancode == KEY_F:
-			building.add_content("johnsons", 1)
-
 func _on_name_button_pressed():
 	if building and inside_people:
 		person_options_gui.pressed(inside_people[0])

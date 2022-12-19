@@ -64,6 +64,7 @@ onready var towns = $Towns
 onready var population = $Population
 onready var namegenerator = $NameGenerator
 onready var daynightcycle = $Day_Night
+onready var socialgraph = $CanvasLayer/SocialGraph
 
 onready var deity = $Deity
 
@@ -99,6 +100,7 @@ func start_game():
 	GUI.start_time()
 	time = get_time()["exact"]
 	camera.position_tile(towns.get_rand_town_center())
+	socialgraph.generate_social_graph()
 	
 	if DO_INITIAL_MESSAGE:
 		play_ominous_message(
@@ -315,6 +317,6 @@ func _unhandled_input(event):
 	if event is InputEventKey:
 		if event.pressed and event.scancode == KEY_P and not in_anim:
 			daynightcycle.set_paused(true)
-			$CanvasLayer/SocialGraph.toggle_display()
+			socialgraph.toggle_display()
 		if event.pressed and event.scancode == KEY_SPACE and not in_anim:
 			daynightcycle.toggle_pause()

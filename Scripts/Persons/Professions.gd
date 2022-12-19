@@ -228,10 +228,15 @@ func y_farmhand():
 	
 	if 1 + len(workers) >= get_required_help(owned_properties['farm']):
 		need_workers = false
+	
+	yield(get_tree(), "idle_frame")
+	return
 
 func n_farmhand():
 	# be sad, dislike this person
-	pass
+	
+	yield(get_tree(), "idle_frame")
+	return
 
 # FARMHAND
 
