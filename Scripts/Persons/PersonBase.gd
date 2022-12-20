@@ -229,6 +229,32 @@ func prepare_to_leave():
 	# give a certain amount of time to prepare for leaving to the square
 	open = true
 
+func get_random_loc(dist, cent=location):
+	var poss_loc = []
+	for dx in range(dist):
+		dx += 1
+		for dy in range(dist):
+			dy += 1
+			poss_loc.append(Vector2(cent.x+dx, cent.y+dy))
+			poss_loc.append(Vector2(cent.x-dx, cent.y-dy))
+			poss_loc.append(Vector2(cent.x-dx, cent.y+dy))
+			poss_loc.append(Vector2(cent.x+dx, cent.y-dy))
+	
+	var chosen_loc
+	while true:
+		if not poss_loc:
+			return false
+		chosen_loc = poss_loc[world.rng.randi_range(0, len(poss_loc)-1)]
+		poss_loc.erase(chosen_loc)
+		if chosen_loc.x >= 0 and chosen_loc.x < world.WIDTH \
+		   and chosen_loc.y >= 0 and chosen_loc.y < world.HEIGHT:
+			if not world._mbuildings.get(chosen_loc, 0) and not world.is_road_tile(chosen_loc):
+				if not world._mtype[chosen_loc] in [3]:
+					if pathfinding.walkRoadPath(cent, [chosen_loc], world._mbuildings, world._mroads, [1,2], false, self):
+						break
+	
+	return chosen_loc
+
 # UTILITY: Get a path to a target
 func get_path_to(target):
 	return pathfinding.walkRoadPath(location, target, world._mbuildings, town._mroads, [1,2], false, self)

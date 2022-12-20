@@ -43,6 +43,8 @@ func make_thoughts() -> void:
 
 # UTILITY: Update hour times
 func _time_update(t):
+	if int(t) != int(world_time):
+		reconsider = true
 	world_time = t
 	if world_time < 6.0 or world_time > 21.0:
 		day_time = "night"
@@ -125,7 +127,7 @@ func _process(delta):
 					open = false
 					go_building(house)
 			"sleep":
-				if in_building.lights_on: 
+				if in_building.lights_on:
 					in_building.turn_lights_off()
 				if day_time in ['day', 'dawn']:
 					open = false
@@ -139,7 +141,7 @@ func _process(delta):
 			"work":
 				# At home and preparing to go to the square
 				if work_done:
-					activity = "home"
+					activity = "recreation"
 				elif is_at_work():
 					open = false
 					work_activity()
@@ -160,7 +162,10 @@ func _process(delta):
 					go_person(conversing)
 				else: 
 					open = false
-	
+			"recreation":
+				open = false
+				if not recreation_activity():
+					activity = "home"
 	._process(delta)
 
 # BEHAVIOUR: Do whatever activity you consider "work"

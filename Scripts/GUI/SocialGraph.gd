@@ -30,17 +30,16 @@ func update_all_social():
 		node = nodes[pers]
 		node.text.text = "knows: " + str(len(pers.ppl_known))
 
-func get_social_colour(op):
-	return Color(op, op, op)
-	pass #opinion ranges from negative to positive, map it to a colours
+func op_to_colour(op):
+	return Color(1-op, op, 0)
 
 func add_social(pers):
 	var node = nodes[pers]
 	var i = 0
-	var ops = []
+	var cols = []
 	for known in pers.ppl_known:
-		ops.append(pers.ppl_known[known]["op"])
-	node.add_num_outputs(ops)
+		cols.append(op_to_colour(pers.ppl_known[known]["op"]))
+	node.add_num_outputs(cols)
 	for known in pers.ppl_known:
 		var _t = connect_node(str(node), i, str(nodes[known]), 0)
 		i += 1

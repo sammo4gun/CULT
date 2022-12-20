@@ -6,6 +6,10 @@ extends "res://Scripts/Persons/PersonBase.gd"
 var topics = {} #dictionary of things to discuss with the other ppl
 var ppl_known = {} #dictionary of dictionaries
 
+var profession
+
+var rec_time = 0
+
 var ASK_DICT = {
 	"chat": 		funcref(self, "asked_chat"),
 	"farmhand": 	funcref(self, "asked_farmhand"),
@@ -35,6 +39,13 @@ func make_thoughts():
 	#PERSONALITY STATS
 
 func day_reset_social():
+	# determine how much recreation to do today
+	# based on mood & personality type
+	rec_time = stepify(world.rng.randf_range(1, 4), 0.1)
+	if profession == "none":
+		rec_time += stepify(world.rng.randf_range(1, 4), 0.1)
+	rec_types = ["exercise"]
+	
 	# gets called every day by everyone
 	for person in ppl_known:
 		if "Name" in ppl_known[person]:
@@ -43,6 +54,100 @@ func day_reset_social():
 		else:
 			mod_op(person, -0.5) # dislike people who I've met but I don't even 
 								 # know their name
+
+func get_end_work_time():
+	pass
+
+func get_home_time():
+	pass
+
+# RECREATION
+
+var rec_types
+var rec_act
+var rec_locs
+
+func recreation_activity():
+	if not rec_act:
+		rec_locs = null
+		if world_time < 6.0 or world_time > get_home_time():
+			if selected: print("i'm done with being entertained, my name is %s" % string_name)
+			open = true
+			return false
+		
+		if rec_types:
+			rec_act = rec_types[world.rng.randi_range(0, len(rec_types)-1)]
+			rec_types.erase(rec_act)
+		else:
+			if world.rng.randf_range(0,1) > 0.5:
+				rec_act = "square"
+			else:
+				open = true
+				return false # go home fuck this
+		# go to square
+		# talk to a friend
+		# go for exercise
+		# go for a walk
+	
+	if selected: print("i'm gonna have some fun doing %s my name is %s" % [rec_act, string_name])
+	
+	match rec_act:
+		"square":
+			if not rec_locs:
+				rec_locs = town.get_town_square().get_location()
+			if location in rec_locs:
+				yield(rec_on_square(), "completed")
+				open = true
+				rec_act = null # every few seconds check if we still want to be on square - square
+				# is considered "default activity"
+				return true
+			else:
+				go_path(get_path_to_building(town.get_town_square()))
+				return true
+		"exercise":
+			if not rec_locs:
+				rec_locs = [get_random_loc(3, house.location[0])]
+			if location in rec_locs:
+				yield(rec_exercise(), "completed")
+				open = true
+				rec_act = null
+				return false
+			else:
+				go_path(get_path_to(rec_locs))
+				return true
+
+func rec_exercise():
+	var t = world.rng.randi_range(1, 5)
+	while t:
+		target_step = location
+		yield(self, "movement_arrived")
+		display_emotion("sweat")
+		yield(wait_time(15), "completed")
+		t-=1
+	return true
+
+func rec_on_square():
+	assert(location in town.get_town_square().get_location())
+	
+	# wait 10 minutes for something interesting to happen
+	yield(wait_time(10, 20), "completed")
+	
+	var choices = [Vector2(-1,0), Vector2(0,1), Vector2(1,0), Vector2(0,-1), Vector2(0,0)]
+	var step
+	step = choices[world.rng.randi_range(0,4)]
+	if (location + step) in town.get_town_square().get_location():
+		var target = location + step
+		target_step = target
+		yield(self, "movement_arrived")
+	
+	if world.rng.randf_range(0,1) > 0.5:
+		display_emotion("happy")
+	
+	yield(wait_time(10, 20), "completed")
+	
+	return true
+
+# CONVERSATION
 
 func engage_conversation(target_person, qs = []):
 	# IF: We aren't in the same building, or we are already engaged in conversation,

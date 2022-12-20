@@ -7,27 +7,22 @@ var outputs = []
 func _ready():
 	set_slot(0, true, 0, Color(1, 1, 1, 1), false, 0, Color(1,0,0,1)) #input slot
 
-func op_to_colour(op):
-	return Color(1-op, op, 0)
-
-func add_num_outputs(ops):
-	if not ops:
+func add_num_outputs(cols):
+	if not cols:
 		return
 	var size_y = 1
 	var i = 1
-	for op in ops:
+	for col in cols:
 		var cont = Control.new()
 		cont.rect_min_size.y = float(size_y)
-		# set color based on opinion
-		set_slot(i, false, 0, Color(0, 0, 0, 0), true, 0, op_to_colour(op))
+		# set color from list of colors given
+		set_slot(i, false, 0, Color(0, 0, 0, 0), true, 0, col)
 		add_child(cont)
-		#move_child(cont, 0)
 		outputs.append(cont)
 		i+= 1
 
 func remove_outputs():
 	for child in outputs:
-		remove_child(child)
 		child.queue_free()
 	outputs = []
 

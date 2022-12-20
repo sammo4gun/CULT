@@ -5,7 +5,6 @@ var do_work = funcref(self, "work_unemp")
 var day_reset = funcref(self, "day_reset_unemp")
 
 var workers = []
-var profession
 var work_loc
 var travel_time
 
@@ -38,6 +37,12 @@ func make_thoughts():
 
 func set_work(_prof):
 	pass
+
+func get_end_work_time():
+	return 20.0 - travel_time - rec_time
+
+func get_home_time():
+	return 22.0 - travel_time
 
 # CHANGING JOBS
 func update_profession():
@@ -89,8 +94,7 @@ func get_work_farmer():
 		return get_work_unemp()
 
 func work_farmer():
-	var square_time = 20.0 - travel_time
-	if world_time > square_time:
+	if world_time > get_end_work_time():
 		work_done = true
 	if "farm" in owned_properties and in_building in owned_properties['farm']:
 		if not in_building.is_watered(location):
@@ -247,8 +251,7 @@ func get_work_farmhand():
 	return boss.give_work_farmhand(self)
 
 func work_farmhand():
-	var done_time = 20.0 - travel_time
-	if world_time > done_time:
+	if world_time > get_end_work_time():
 		work_done = true
 	if "farm" in boss.owned_properties:
 		if in_building in boss.owned_properties['farm'] and location in in_building.get_location():
@@ -329,7 +332,7 @@ func work_lumber():
 			yield(work_unemp(), 'completed')
 			return true
 	
-	if world_time > 20.0 - travel_time:
+	if world_time > get_end_work_time():
 		yield(get_tree(), "idle_frame")
 		population.set_working_on(location, false)
 		work_done = true
@@ -363,8 +366,7 @@ func get_work_unemp():
 func work_unemp():
 	assert(location in town.get_town_square().get_location())
 	
-	var square_time = 20.0 - travel_time
-	if world_time > square_time:
+	if world_time > get_end_work_time():
 		work_done = true
 	
 	# wait 10 minutes for something interesting to happen
