@@ -55,6 +55,7 @@ script = ExtResource( 8 )
 HEIGHT = 100
 WIDTH = 100
 NUM_TOWNS = 1
+DO_INITIAL_SPEED = false
 DO_INITIAL_MESSAGE = false
 
 [node name="Camera2D" type="Camera2D" parent="."]

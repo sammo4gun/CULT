@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/CULT_soundtrack_demo.mp3-ae35005d3fa00301541e2d25963ed287.mp3str"
+
+[deps]
+
+source_file="res://CULT_soundtrack_demo.mp3"
+dest_files=[ "res://.import/CULT_soundtrack_demo.mp3-ae35005d3fa00301541e2d25963ed287.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

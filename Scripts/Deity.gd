@@ -90,14 +90,14 @@ var DEVIL_PROPHETIC_DREAMS = {
 }
 
 func first_whispers(person) -> String:
-#	return "I see you, {n}. You shall serve me well.".format({"n": person.string_name})
+	return "I see you, {n}. You shall serve me well.".format({"n": person.string_name})
 	
-	var chosen_sin = ["envy", "sloth", "greed", "wrath", "gluttony", "lust", "pride"][world.rng.randi_range(0, 6)]
-
-	return DEVIL_PROPHETIC_DREAMS[chosen_sin].format({"n": person.string_name, \
-													  "f": person.person_name[0], \
-													  "l": person.person_name[1], \
-													  "t": person.town.town_name})
+#	var chosen_sin = ["envy", "sloth", "greed", "wrath", "gluttony", "lust", "pride"][world.rng.randi_range(0, 6)]
+#
+#	return DEVIL_PROPHETIC_DREAMS[chosen_sin].format({"n": person.string_name, \
+#													  "f": person.person_name[0], \
+#													  "l": person.person_name[1], \
+#													  "t": person.town.town_name})
 
 func make_first_acolyte(person):
 	first = true

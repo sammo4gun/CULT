@@ -1,0 +1,19 @@
+CULT - PEOPLE OF THE LAND
+
+What are the core design principles that should be adhered to in regard to the behaviour of the people of the village, so as to best contribute to the gameplay and the atmosphere?
+
+General - what should be core design tenets for the NPCs?
+- Realistic  - people should act and react appropriately to a majority/all situations they are presented with
+- Immersive  - people's behaviour should come across as that of a real person
+- Dynamic    - people's behaviour should be varied depending on the input of that person, and from person to person
+- Personal   - people's behaviour should be retraceable to their personality or traits
+- Driven     - people's actions should be striving towards one or multiple goals
+- Reflective - Inputs from the world change their future actions in some way
+- Sociable   - People should be greatly dependent on the people around them for their behaviour
+- Emotional  - People should be able to display a wide range of emotions
+
+Can be grouped into:
+- Mindspace Mapping (People should have a dynamic mind that juggles external and internal factors to produce needs)
+- Behavioural Motivation (People's behaviour should reflect their internal mindspace)
+
+So, maybe we start with coding the mindspace? Determine some basic tenets for a realistic mind, then determine some factors that may influence a person's mood, then determine behaviours from these different emotions?

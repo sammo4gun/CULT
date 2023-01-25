@@ -75,15 +75,16 @@ func recreation_activity():
 			open = true
 			return false
 		
-		if rec_types:
-			rec_act = rec_types[world.rng.randi_range(0, len(rec_types)-1)]
-			rec_types.erase(rec_act)
-		else:
-			if world.rng.randf_range(0,1) > 0.5:
-				rec_act = "square"
-			else:
-				open = true
-				return false # go home fuck this
+		rec_act = "square"
+#		if rec_types:
+#			rec_act = rec_types[world.rng.randi_range(0, len(rec_types)-1)]
+#			rec_types.erase(rec_act)
+#		else:
+#			if world.rng.randf_range(0,1) > 0.5:
+#				rec_act = "square"
+#			else:
+#				open = true
+#				return false # go home fuck this
 		# go to square
 		# talk to a friend
 		# go for exercise
@@ -252,6 +253,7 @@ func switch_eng(other_person):
 func present_q(target_person, q):
 	assert(conversing == target_person)
 	assert(target_person.conversing == self)
+	assert(not target_person.engaging)
 	display_emotion("chat")
 	
 	if selected and world.SOCIAL_DEBUG_MODE: 

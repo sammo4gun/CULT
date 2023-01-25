@@ -111,7 +111,7 @@ func _process(delta):
 				if is_at_home():
 					if not in_building.lights_on and day_time != "day":
 						in_building.turn_lights_on()
-					if in_building.lights_on and day_time == 'day':
+					elif in_building.lights_on and day_time == 'day':
 						in_building.turn_lights_off()
 					if day_time == "night":
 						open = false
@@ -133,24 +133,24 @@ func _process(delta):
 					open = false
 					awaken()
 					activity = "home"
-				if world_time > max(2.0, 7.0 - travel_time) and \
-				   world_time <= 20.0 - travel_time:
+				elif world_time > max(2.0, 7.0 - travel_time) and \
+					 world_time <= 20.0 - travel_time:
 					open = false
 					awaken()
 					activity = "home"
 			"work":
 				# At home and preparing to go to the square
+				open = false
 				if work_done:
+					open = true
 					activity = "recreation"
 				elif is_at_work():
-					open = false
 					work_activity()
 				else:
-					open = false
 					go_path(get_path_to_building(get_work.call_func()))
 			"conversing":
+				open = false
 				if engaging and share_square(conversing):
-					open = false
 					var t = pick_topic(conversing)
 					if t:
 						if not present_q(conversing, t):
@@ -158,15 +158,15 @@ func _process(delta):
 					else:
 						end_conv(conversing) # no topic to talk about
 				elif engaging:
-					open = false
 					go_person(conversing)
-				else: 
-					open = false
 			"recreation":
 				open = false
 				if not recreation_activity():
 					activity = "home"
 	._process(delta)
+
+func get_next_act(_current_act) -> String:
+	return "home"
 
 # BEHAVIOUR: Do whatever activity you consider "work"
 func work_activity():
