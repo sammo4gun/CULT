@@ -99,7 +99,7 @@ func start_game():
 	daynightcycle.start_cycle(5)
 	GUI.start_time()
 	time = get_time()["exact"]
-	camera.position_tile(towns.get_rand_town_center())
+	#camera.position_tile(towns.get_rand_town_center())
 	socialgraph.generate_social_graph()
 	
 	if DO_INITIAL_MESSAGE:
@@ -107,6 +107,10 @@ func start_game():
 			"I see. %s... you shall know what it means to sin." % towns.get_rand_town_name(),
 			true
 		)
+	
+	# SELECT PERSON FOR MIND MAPPING EXPERIMENTATION
+	
+	jump_random_person()
 
 func _process(_delta):
 	if day > 0 and not can_adj_speed:
@@ -237,7 +241,12 @@ func _on_tile_selected(tile):
 	if tile:
 		selector.setSelected(tile)
 	else: selector.deSelect()
-	
+
+func jump_random_person():
+	var pers = population.random_person()
+	selected_person(pers)
+	camera.jump_to_tile(pers.location)
+
 func selected_person(person):
 	selector.selectPerson(person)
 
@@ -315,6 +324,8 @@ func _on_TransitionScreen_back_to_game():
 
 func _unhandled_input(event):
 	if event is InputEventKey:
+		if event.pressed and event.scancode == KEY_X and not in_anim:
+			GUI.add_event('hola')
 		if event.pressed and event.scancode == KEY_P and not in_anim:
 			daynightcycle.set_paused(true)
 			socialgraph.toggle_display()

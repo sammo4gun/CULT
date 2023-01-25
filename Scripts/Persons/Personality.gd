@@ -71,7 +71,6 @@ func recreation_activity():
 	if not rec_act:
 		rec_locs = null
 		if world_time < 6.0 or world_time > get_home_time():
-			if selected: print("i'm done with being entertained, my name is %s" % string_name)
 			open = true
 			return false
 		
@@ -89,8 +88,6 @@ func recreation_activity():
 		# talk to a friend
 		# go for exercise
 		# go for a walk
-	
-	if selected: print("i'm gonna have some fun doing %s my name is %s" % [rec_act, string_name])
 	
 	match rec_act:
 		"square":

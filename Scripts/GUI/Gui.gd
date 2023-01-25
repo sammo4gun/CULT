@@ -46,6 +46,13 @@ func set_time(time):
 	if len(minute_label.text) < 2:
 		minute_label.text = '0' + minute_label.text
 
+func get_time() -> String:
+	# get time in string format
+	return hour_label.text + ":" + minute_label.text
+
+func add_event(ev):
+	$Main/BottomBar/PersonInspector.add_event(ev)
+
 func display():
 	if selected_tile != null:
 		location_label.text = str(selected_tile)
