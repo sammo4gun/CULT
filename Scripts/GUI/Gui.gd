@@ -17,6 +17,8 @@ onready var tile_anim = $Main/HBoxContainer/GUI_Selector/MarginContainer/Tile/Bu
 onready var build_button = $Main/HBoxContainer/GUI_Selector/MarginContainer3/Building/Button
 onready var build_anim = $Main/HBoxContainer/GUI_Selector/MarginContainer3/Building/Button/AnimationPlayer
 
+onready var person_inspector = $Main/BottomBar/PersonInspector
+
 onready var towns = $"../../Towns"
 onready var world = get_tree().root.get_child(0)
 
@@ -51,7 +53,7 @@ func get_time() -> String:
 	return hour_label.text + ":" + minute_label.text
 
 func add_event(ev):
-	$Main/BottomBar/PersonInspector.add_event(ev)
+	person_inspector.add_event(ev)
 
 func display():
 	if selected_tile != null:

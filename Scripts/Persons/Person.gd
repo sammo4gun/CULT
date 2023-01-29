@@ -100,6 +100,11 @@ func create_name() -> void:
 			string_name = string_name.trim_suffix(" ")
 			break
 
+func set_activity(new_act):
+	if activity != new_act:
+		_log("%s - %s" % [string_name, new_act])
+		activity = new_act
+
 func _process(delta):
 	if world.get_time_paused(): 
 		return
@@ -116,13 +121,13 @@ func _process(delta):
 					if day_time == "night":
 						open = false
 						asleep()
-						activity = "sleep"
+						set_activity("sleep")
 					if world_time >= max(2.0, 7.0 - travel_time) and \
 					   world_time <= 20.0 - travel_time and \
 					   not work_done:
 						open = false
 						prepare_to_leave()
-						activity = "work"
+						set_activity("work")
 				else: 
 					open = false
 					go_building(house)
@@ -132,18 +137,18 @@ func _process(delta):
 				if day_time in ['day', 'dawn']:
 					open = false
 					awaken()
-					activity = "home"
+					set_activity("home")
 				elif world_time > max(2.0, 7.0 - travel_time) and \
 					 world_time <= 20.0 - travel_time:
 					open = false
 					awaken()
-					activity = "home"
+					set_activity("home")
 			"work":
 				# At home and preparing to go to the square
 				open = false
 				if work_done:
 					open = true
-					activity = "recreation"
+					set_activity("recreation")
 				elif is_at_work():
 					work_activity()
 				else:
@@ -162,7 +167,7 @@ func _process(delta):
 			"recreation":
 				open = false
 				if not recreation_activity():
-					activity = "home"
+					set_activity("home")
 	._process(delta)
 
 func get_next_act(_current_act) -> String:
@@ -187,6 +192,7 @@ func on_selected():
 	display_emotion("surprise")
 	selected = true
 	selector.visible = true
+	_log("SELECTED - " + string_name.to_upper())
 
 # UTILITY: Not selected
 func on_deselected():

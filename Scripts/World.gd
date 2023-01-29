@@ -261,6 +261,9 @@ func chop_tree(location, amount):
 		_mtype[location] = 0
 		drawer.terrain_update(location)
 
+func get_gui():
+	return GUI
+
 func get_cave(location):
 	return deity.get_cave(location)
 

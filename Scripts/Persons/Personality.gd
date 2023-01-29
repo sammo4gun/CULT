@@ -36,6 +36,14 @@ func make_thoughts():
 	
 	#PHYSICAL/MENTAL STATS
 	
+	
+	c_traits = {
+		"intellect": world.rng.randi_range(0,10),
+		"charm": world.rng.randi_range(0,10),
+		"wisdom": world.rng.randi_range(0,10),
+		"health": world.rng.randi_range(0,10),
+	}
+	
 	#PERSONALITY STATS
 
 func day_reset_social():

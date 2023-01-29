@@ -563,7 +563,6 @@ rect_min_size = Vector2( 200, 50 )
 texture = ExtResource( 5 )
 
 [node name="Label" type="Label" parent="Main/BottomBar/PersonInspector/NinePatchRect"]
-modulate = Color( 0, 0, 0, 1 )
 margin_top = 18.0
 margin_bottom = 32.0
 grow_vertical = 0

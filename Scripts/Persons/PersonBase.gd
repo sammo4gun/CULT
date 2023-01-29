@@ -43,6 +43,7 @@ var person_name = []
 var string_name = ""
 var gender = ''
 # Characteristics
+var c_traits
 # Appearance
 
 # 2.
@@ -413,6 +414,11 @@ func _input(event):
 			if event.button_index == BUTTON_LEFT and event.pressed:
 				world.selected_person(self)
 				get_tree().set_input_as_handled()
+
+func _log(event):
+	if not selected:
+		return
+	world.get_gui().add_event(event)
 
 func _on_Area2D_mouse_entered():
 	if not population.mouse_on:
